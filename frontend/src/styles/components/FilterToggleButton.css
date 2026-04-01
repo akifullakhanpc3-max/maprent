@@ -1,0 +1,91 @@
+/* src/styles/components/FilterToggleButton.css */
+
+.filter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--trans-fast);
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.filter-toggle-btn:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-soft);
+}
+
+.filter-toggle-btn.is-active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.toggle-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: all var(--trans-fast);
+}
+
+.is-active .toggle-icon-wrap {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.toggle-label-stack {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.toggle-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-light);
+  line-height: 1;
+}
+
+.is-active .toggle-tag {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.toggle-main {
+  font-size: var(--ts-sm);
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1;
+}
+
+.toggle-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--bg-soft);
+  color: var(--text-main);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.is-active .toggle-badge {
+  background: white;
+  color: var(--primary-color);
+}

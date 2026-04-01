@@ -1,0 +1,21 @@
+MapRent Development Summary
+
+# Application Built:
+Full-stack Map-First Rental web application designed to connect tenants and landlords seamlessly utilizing location-based map searching.
+
+# Technologies Installed:
+- Frontend: React + Vite + Tailwind CSS v3 + Zustand + React-Leaflet
+- Backend: Node.js + Express + Multer (Image Uploads) + JWT Auth
+- Database: MongoDB via Mongoose (with 2dsphere GeoJSON index)
+
+# Features Implemented:
+1. Public User Map View: Full-screen interactive map interface using Leaflet. Bounds and filters (Rent slider & BHK dropdown) automatically trigger a sync updating all active listings visible in the side panel. 
+2. Owner Authenticated Dashboard: Full JWT login system where landlords can add new listings.
+3. Geo-Pinning Map Forms: Owners select precise GPS pin drops leveraging the interactive map within the 'Add Property' form instead of manually guessing/typing longitude and latitude.
+4. Smooth glassmorphic aesthetics utilizing Tailwind CSS.
+
+# Bugs Fixed During Deployment:
+1. ReferenceError ('Search' is not defined): Repaired the missing lucide-react icon import within the empty 'No properties' state handler.
+2. MongoDB Node 18+ Localhost Resolution (ECONNREFUSED): Altered the backend to use '127.0.0.1:27017' instead of 'localhost' preventing cross protocols timeout failures on new Windows node distributions.
+3. Express Port 5000 Collision (404 Error): Successfully shifted the Express API default port to 5050 and synced Axios inside React. This neutralized a phantom Windows bug where port 5000 intercepting requests to the incorrect running service.
+4. Maximum update depth exceeded (Infinite Rendering Loop): Discovered and eliminated an obscure ResizeObserver flaw directly caused by disappearing scrollbars altering viewport widths on loading skeletons. We stabilized Leaflet's 'moveend' pipeline via deep-equality map bounds checking natively in Zustand and overriding container layout configurations to enforce consistent 'overflow-y-scroll'.

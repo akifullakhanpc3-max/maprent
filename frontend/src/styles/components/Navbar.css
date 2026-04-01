@@ -1,0 +1,209 @@
+/* src/styles/components/Navbar.css */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  z-index: 6000; /* ABOVE Map (1000) and Sidebar (5000) */
+  transition: all var(--trans-base);
+  background: rgba(255, 255, 255, 0.7); /* Base transparency for glass look */
+  backdrop-filter: blur(12px); /* Constant high-end blur */
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid transparent;
+}
+
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--s-4); /* Reduced for better mobile usage */
+}
+
+@media (min-width: 1024px) {
+  .navbar-container {
+    padding: 0 var(--s-8);
+  }
+}
+
+/* Brand Section */
+.brand-link {
+  display: flex;
+  align-items: center;
+  transition: transform var(--trans-fast);
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.brand-icon-box {
+  width: 32px;
+  height: 32px;
+  background: var(--slate-900);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--slate-900);
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 375px) {
+  .brand-name {
+    font-size: 18px;
+  }
+}
+
+.brand-accent {
+  color: var(--accent-blue);
+}
+
+/* Center: Search Integration */
+.nav-center-search {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 var(--s-8);
+}
+
+/* Right: Enhanced Density Actions */
+.nav-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-shrink: 0;
+}
+
+/* Mobile Toggle */
+.mobile-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-main);
+  transition: all var(--trans-fast);
+}
+
+.mobile-menu-toggle:hover {
+  border-color: var(--accent-blue);
+  background: var(--bg-surface);
+}
+
+/* Mobile Overlay Redesign */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 5000; /* Higher than map controls */
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--trans-base);
+  pointer-events: none;
+}
+
+.mobile-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-menu-pane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 300px; /* Slimmer for better accessibility */
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-surface);
+  padding: 100px var(--s-6) var(--s-6);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--trans-base);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+@media (max-width: 480px) {
+  .mobile-menu-pane {
+    max-width: 100%; /* Full screen on very small devices */
+  }
+}
+
+.mobile-overlay.visible .mobile-menu-pane {
+  transform: translateX(0);
+}
+
+.mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4);
+  border-radius: 14px;
+  transition: all var(--trans-fast);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.mobile-nav-item:hover, .mobile-nav-item.active {
+  background: var(--bg-soft);
+  color: var(--accent-blue);
+}
+
+.mobile-menu-footer {
+  margin-top: auto;
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 1023px) {
+  .nav-center-search { display: none; }
+  .hidden-mobile { display: none !important; }
+}
+
+@media (min-width: 1024px) {
+  .visible-mobile { display: none !important; }
+}
+
+.mobile-nav-icon {
+  color: var(--text-muted);
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  color: var(--accent-blue);
+}

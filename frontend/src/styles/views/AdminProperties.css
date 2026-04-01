@@ -1,0 +1,203 @@
+/* d:\akif\ashish\frontend\src\styles\views\AdminProperties.css */
+
+.admin-header-premium {
+  display: flex;
+  flex-wrap: wrap;      /* Allow wrapping for long titles/buttons */
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s-4) var(--s-6);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--s-8);
+  gap: var(--s-4);
+}
+
+.admin-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Stack by default on mobile */
+  gap: var(--s-4);
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .admin-controls-grid {
+    grid-template-columns: 1fr auto; /* Side-by-side on desktop */
+  }
+}
+
+.admin-search-group {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  background: var(--bg-card);
+  padding: 0 var(--s-4);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  height: 48px;
+  width: 100%;          /* FLUID */
+  max-width: 480px;     /* Cap on larger screens */
+  transition: all var(--trans-fast);
+}
+
+.admin-search-group:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px rgba(30, 77, 183, 0.08);
+}
+
+.admin-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-main);
+  outline: none;
+}
+
+/* Master Table Styling */
+.master-table-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;     /* CRITICAL: Allow horizontal scroll */
+  box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.master-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.master-table th {
+  background: var(--bg-surface);
+  padding: var(--s-4) var(--s-6);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-low);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.master-table td {
+  padding: var(--s-6);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.master-table tr:last-child td {
+  border-bottom: none;
+}
+
+.master-table tr:hover td {
+  background: var(--bg-hover-light);
+}
+
+/* Property Identity */
+.identity-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.identity-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.identity-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.identity-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.identity-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-low);
+}
+
+/* Owner Info */
+.owner-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.owner-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.owner-email {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Action Controls */
+.moderation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+}
+
+.mod-btn-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans-fast);
+}
+
+.mod-btn-circle:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.mod-btn-circle.approve:hover {
+  background: #ECFDF5;
+  color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.mod-btn-circle.reject:hover {
+  background: #FEF2F2;
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+.mod-btn-circle.star.active {
+  background: #FFFBEB;
+  color: #F59E0B;
+  border-color: #F59E0B;
+}

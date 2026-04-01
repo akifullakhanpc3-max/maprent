@@ -1,0 +1,249 @@
+/* src/styles/components/FilterPanel.css */
+
+.discovery-filter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4050;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
+  /* Prevent translate-X from causing horizontal scroll */
+  transition: visibility var(--trans-base);
+}
+
+.discovery-filter-overlay.active {
+  visibility: visible;
+}
+
+.discovery-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 4040;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity var(--trans-base);
+}
+
+.discovery-filter-overlay.active .discovery-backdrop {
+  opacity: 1;
+}
+
+.discovery-filter-pane {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  height: 100dvh;
+  /* Modern dynamic viewport height */
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -20px 0 50px rgba(15, 23, 42, 0.1);
+  pointer-events: auto;
+  border-left: 1px solid var(--border-subtle);
+  transform: translateX(100%);
+  transition: transform var(--trans-base);
+  z-index: 4060;
+}
+
+.discovery-filter-overlay.active .discovery-filter-pane {
+  transform: translateX(0);
+}
+
+/* Header Section */
+.discovery-header {
+  padding: var(--s-10) var(--s-8) var(--s-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.discovery-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.discovery-icon-box {
+  width: 40px;
+  height: 40px;
+  background: var(--slate-900);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.discovery-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--slate-900);
+  letter-spacing: -0.02em;
+}
+
+.discovery-subtitle {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-low);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 2px;
+}
+
+/* Scroll Content */
+.discovery-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-10);
+}
+
+.discovery-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  width: 100%;
+  min-width: 0;
+  /* 🔥 CRITICAL: Allow children to scroll */
+}
+
+.discovery-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  width: 100%;
+  min-width: 0;
+  /* 🔥 CRITICAL FIX */
+  overflow: hidden;
+  /* prevents overflow */
+}
+
+.discovery-section-header label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--slate-900);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  /* 🔥 ADDED */
+}
+
+.discovery-val-pill {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  background: var(--bg-card);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  /* 🔥 ADDED */
+}
+
+/* Range Slider Premium */
+.discovery-slider {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--slate-900);
+  -webkit-appearance: none;
+}
+
+.discovery-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--border-subtle);
+  border-radius: 10px;
+}
+
+.discovery-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  background: var(--slate-900);
+  border-radius: 50%;
+  margin-top: -7px;
+  border: 4px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Choice Chips */
+.discovery-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.discovery-chip-btn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all var(--trans-fast);
+}
+
+.discovery-chip-btn:hover {
+  border-color: var(--slate-900);
+  transform: translateY(-1px);
+}
+
+.discovery-chip-btn.active {
+  background: var(--slate-900);
+  border-color: var(--slate-900);
+  color: white;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+/* Legacy Grid - Removed in favor of Unified Tab Scroller */
+.discovery-section-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  background: var(--accent-blue);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Footer Section */
+.discovery-footer {
+  padding: var(--s-8);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.discovery-reset-btn {
+  flex: 1;
+  height: 48px;
+}
+
+.discovery-apply-btn {
+  flex: 2;
+  height: 48px;
+  background: var(--slate-900);
+  color: white;
+  font-weight: 800;
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .discovery-filter-pane {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,234 @@
+/* src/styles/pages/Auth.css */
+
+.auth-page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+  min-width: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 768px) {
+  .auth-container {
+    gap: var(--s-8);
+  }
+}
+
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  text-align: center;
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  background: var(--bg-surface);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  transition: all var(--trans-fast);
+}
+
+.auth-brand-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.auth-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.03em;
+}
+
+.auth-subtitle {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.auth-card {
+  background: var(--bg-surface);
+  padding: var(--s-10) var(--s-8);
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: var(--s-8) var(--s-5);
+    border-radius: 12px;
+  }
+  .auth-title {
+    font-size: 26px;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.auth-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+  padding: var(--s-4);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.form-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.link-muted {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--s-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-low);
+  pointer-events: none;
+}
+
+.auth-input {
+  padding-left: 44px !important;
+}
+
+.auth-footer {
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.auth-footer-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.auth-link {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* Role Selector (Register Page) */
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr; /* Stack by default on small screens */
+  gap: var(--s-4);
+  margin-bottom: var(--s-2);
+}
+
+@media (min-width: 400px) {
+  .role-selector {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.role-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6) var(--s-4);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  transition: all var(--trans-fast);
+  cursor: pointer;
+}
+
+.role-btn:hover {
+  border-color: var(--border-medium);
+  background: var(--bg-hover);
+}
+
+.role-btn.active {
+  border-color: var(--primary-color);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.role-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--trans-fast);
+}
+
+.role-btn.active .role-icon-box {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.role-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-low);
+}
+
+.role-btn.active .role-title {
+  color: var(--primary-color);
+}
