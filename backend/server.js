@@ -9,6 +9,9 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Trust Render's proxy for Rate Limiting
+app.set('trust proxy', 1);
+
 // Startup Check: Essential Environment Configuration
 const essentialConfigs = ['JWT_SECRET', 'MONGODB_URI'];
 essentialConfigs.forEach(conf => {
