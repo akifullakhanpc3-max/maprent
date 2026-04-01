@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
@@ -59,22 +59,61 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+// Memoized Property Marker to prevent un-necessary map re-renders
+const PropertyMarker = React.memo(({ property, onClick, onShowRoute }) => {
+  return (
+    <Marker 
+      position={[property.location.coordinates[1], property.location.coordinates[0]]}
+      eventHandlers={{ click: onClick }}
+    >
+      <Popup keepInView={true} minWidth={240}>
+        <div className="flex-col gap-3">
+          <h4 className="popup-title">{property.title}</h4>
+          <div className="popup-price-row">
+            <p className="popup-price">₹{property.rent.toLocaleString()}</p>
+            <span className="badge !bg-surface !border-subtle !text-[9px]">{property.bhkType}</span>
+          </div>
+          <button 
+            onClick={() => onShowRoute(property)}
+            className="btn btn-primary !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
+          >
+            <Navigation2 size={12} className="mr-2" />
+            Get Directions
+          </button>
+        </div>
+      </Popup>
+    </Marker>
+  );
+}, (prev, next) => prev.property._id === next.property._id);
+
 // Component to handle map move/zoom/click events
 function MapEventsHandler({ onMapClick }) {
   const { setFilter, filters } = usePropertyStore();
+  const moveEndTimeout = useRef(null);
+
   const map = useMapEvents({
     moveend() {
-      const bounds = map.getBounds();
-      const stringBounds = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
-      // Prevent redundant updates if bounds haven't changed
-      if (filters.bounds !== stringBounds) {
-        setFilter('bounds', stringBounds);
-      }
+      if (moveEndTimeout.current) clearTimeout(moveEndTimeout.current);
+      
+      moveEndTimeout.current = setTimeout(() => {
+        const bounds = map.getBounds();
+        const stringBounds = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+        if (filters.bounds !== stringBounds) {
+          setFilter('bounds', stringBounds);
+        }
+      }, 400); // 400ms debounce for panning
     },
     click(e) {
       if (onMapClick) onMapClick([e.latlng.lat, e.latlng.lng]);
     }
   });
+
+  useEffect(() => {
+    return () => {
+      if (moveEndTimeout.current) clearTimeout(moveEndTimeout.current);
+    };
+  }, []);
+
   return null;
 }
 
@@ -90,22 +129,6 @@ export default function MapView() {
   const lastScrollTop = useRef(0);
 
   const [searchAnchor, setSearchAnchor] = useState(null); 
-  const [showMap, setShowMap] = useState(true);
-
-  const handlePaneScroll = useCallback((scrollTop) => {
-    if (window.innerWidth > 768) return; 
-
-    // Scrolled down past threshold -> hide map (focus on listings)
-    if (scrollTop > 100 && properties.length > 0) {
-      setShowMap(false);
-    } 
-    // RESTORE Map when back at the very top (intentional)
-    else if (scrollTop <= 10) {
-      setShowMap(true);
-    }
-
-    lastScrollTop.current = scrollTop;
-  }, [properties.length]);
 
   const handleLocationSelect = useCallback((coords, name) => {
     if (mapRef.current && Array.isArray(coords) && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
@@ -208,16 +231,18 @@ export default function MapView() {
 
   const activeFiltersCount = Object.keys(filters).filter(k => filters[k] !== 'All' && filters[k] !== null && k !== 'bounds').length;
 
-  useEffect(() => {
-    if (showMap && mapRef.current) {
-      mapRef.current.invalidateSize();
-    }
-  }, [showMap]);
+  const circleOptions = useMemo(() => ({ 
+    color: 'var(--accent-blue)', 
+    fillColor: 'var(--accent-blue)', 
+    fillOpacity: 0.1,
+    weight: 3,
+    dashArray: '5, 10'
+  }), []);
 
   return (
     <div className="map-view-container animate-fade-in">
-      {/* Map Segment */}
-      <div className={`map-content-wrapper ${!showMap ? 'hidden' : ''}`}>
+      {/* Natural Scroll Layout - Map Top, List Below */}
+      <div className="map-content-wrapper">
         <MapContainer 
           center={[12.9716, 77.5946]} 
           zoom={12} 
@@ -229,7 +254,6 @@ export default function MapView() {
             attribution='&copy; OpenStreetMap'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MapFixer showMap={showMap} />
           <MapEventsHandler onMapClick={handleMapClick} />
 
           {searchAnchor && !selectedProperty && (
@@ -260,13 +284,7 @@ export default function MapView() {
               <Circle 
                 center={[filters.lat, filters.lng]} 
                 radius={filters.radius * 1000} 
-                pathOptions={{ 
-                  color: 'var(--accent-blue)', 
-                  fillColor: 'var(--accent-blue)', 
-                  fillOpacity: 0.1,
-                  weight: 3,
-                  dashArray: '5, 10'
-                }} 
+                pathOptions={circleOptions} 
               />
               <AutoFitCircle lat={filters.lat} lng={filters.lng} radius={filters.radius} />
             </>
@@ -281,32 +299,14 @@ export default function MapView() {
             />
           )}
 
-          {properties.map(property => (
-            <Marker 
+          {useMemo(() => properties.map(property => (
+            <PropertyMarker 
               key={property._id} 
-              position={[property.location.coordinates[1], property.location.coordinates[0]]}
-              eventHandlers={{
-                click: () => setSelectedProperty(property)
-              }}
-            >
-              <Popup keepInView={true} minWidth={240}>
-                <div className="flex-col gap-3">
-                  <h4 className="popup-title">{property.title}</h4>
-                  <div className="popup-price-row">
-                    <p className="popup-price">₹{property.rent.toLocaleString()}</p>
-                    <span className="badge !bg-surface !border-subtle !text-[9px]">{property.bhkType}</span>
-                  </div>
-                  <button 
-                    onClick={() => handleShowRoute(property)}
-                    className="btn btn-primary !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
-                  >
-                    <Navigation2 size={12} className="mr-2" />
-                    Get Directions
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+              property={property} 
+              onClick={() => setSelectedProperty(property)}
+              onShowRoute={handleShowRoute}
+            />
+          )), [properties, setSelectedProperty, handleShowRoute])}
         </MapContainer>
 
         {/* Map Header Overlay */}
@@ -375,7 +375,7 @@ export default function MapView() {
               selectedProperty={selectedProperty} 
               setSelectedProperty={setSelectedProperty} 
               onShowRoute={handleShowRoute}
-              onScroll={handlePaneScroll}
+              isFluid={true}
             />
          )}
       </div>

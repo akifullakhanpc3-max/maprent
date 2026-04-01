@@ -2,121 +2,34 @@
 
 .map-view-container {
   display: flex;
-  flex-direction: column; /* Map top (first in DOM), List bottom (second in DOM) */
+  flex-direction: column;
   width: 100%;
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  min-height: 100dvh;
   background-color: var(--bg-main);
-  overflow: hidden;
   padding-top: env(safe-area-inset-top);
+  overflow-y: auto; /* Natural Scroller */
 }
 
-@media (min-width: 768px) {
-  .map-view-container {
-    flex-direction: row-reverse; /* List left (second in DOM), Map right (first in DOM) */
-  }
-}
-
-/* Discovery Pane (LEFT on Desktop) */
+/* Discovery Pane - Flow layout */
 .discovery-pane-wrapper {
   width: 100%;
-  height: 50%;
   background: var(--bg-surface);
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
   position: relative;
-  border-top: 1px solid var(--border-subtle);
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 200;
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
-  .discovery-pane-wrapper {
-     transition-duration: 200ms; /* Snappier on tablets */
-  }
-}
-
-@media (max-width: 1024px) {
-  .dashboard-sidebar { 
-    transform: translateX(-101%); 
-    box-shadow: 20px 0 50px rgba(0,0,0,0.1);
-  }
-  .dashboard-sidebar.open { 
-    transform: translateX(0); 
-  }
-  .main-content { 
-    margin-left: 0 !important; 
-    padding: var(--s-4) !important; 
-    width: 100%;
-  }
-  .dashboard-header {
-    padding: 0 var(--s-4);
-  }
-}
-
-@media (max-width: 640px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  .page-title {
-    font-size: 24px;
-  }
-}
-
-@media (min-width: 768px) {
-  .discovery-pane-wrapper {
-    width: 30%;            /* Fluid width on tablet */
-    min-width: 340px;      /* Prevent it from being too thin */
-    max-width: 440px;      /* Prevent it from being too wide */
-    height: 100%;
-    border-top: none;
-    border-right: 1px solid var(--border-subtle);
-  }
-}
-
-/* Map Segment (RIGHT on Desktop) */
+/* Map Segment - Static Height, Part of Scroll */
 .map-content-wrapper {
-  flex: 1;
   width: 100%;
-  height: 50%;
-  position: relative; /* CRITICAL: Context for absolute search bar */
-  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-  overflow: hidden; /* CRITICAL: Prevent Leaflet spill */
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .map-content-wrapper {
-     transition-duration: 200ms;
-  }
+  height: 60dvh; 
+  min-height: 480px;
+  position: relative;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .map-content-wrapper {
-    height: 100%;
-  }
-}
-
-/* Scroll-based Collapse (Mobile Only) */
-@media (max-width: 767px) {
-  .discovery-pane-wrapper {
-    height: 50dvh; /* Consistent with map height */
-  }
-
-  .map-content-wrapper.hidden {
-    height: 0 !important;
-    min-height: 0 !important;
-    flex: none !important;
-    pointer-events: none;
-    opacity: 0;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
-  .map-content-wrapper.hidden ~ .discovery-pane-wrapper {
-    flex: 1 !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
+    height: 70dvh;
   }
 }
 

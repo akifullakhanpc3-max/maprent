@@ -7,7 +7,7 @@ import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import '../styles/components/PropertyListPane.css';
 
-export default function PropertyListPane({ selectedProperty, setSelectedProperty, onShowRoute, onScroll }) {
+export default function PropertyListPane({ selectedProperty, setSelectedProperty, onShowRoute, onScroll, isFluid }) {
   const { properties, filters, setFilter, loading } = usePropertyStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -16,7 +16,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el || !onScroll || window.innerWidth > 768) return;
+    if (!el || !onScroll || isFluid || window.innerWidth > 768) return;
 
     const handleScroll = (e) => {
       onScroll(e.target.scrollTop);
@@ -24,7 +24,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
     el.addEventListener('scroll', handleScroll, { passive: true });
     return () => el.removeEventListener('scroll', handleScroll);
-  }, [onScroll]);
+  }, [onScroll, isFluid]);
 
   if (selectedProperty) {
     return (
@@ -51,7 +51,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
           </div>
         </div>
 
-        <div className="pane-scroll-content custom-scrollbar" ref={scrollRef}>
+        <div className={`pane-scroll-content custom-scrollbar ${isFluid ? 'fluid-view' : ''}`} ref={isFluid ? null : scrollRef}>
           <div className="property-hero-wrapper">
             {selectedProperty.images && selectedProperty.images.length > 0 ? (
               <ImageWithSkeleton 
@@ -155,53 +155,54 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
   return (
     <div className="property-list-pane">
-      <div className="pane-sticky-header flex-col !items-stretch !h-auto gap-4 py-4">
-        <div className="flex-between">
-          <div className="results-info">
-             <h2 className="results-count">{properties.length} Listings</h2>
-             <p className="results-context">Operational Area Discovery</p>
+      <div className={`pane-scroll-content list-view custom-scrollbar ${isFluid ? 'fluid-view' : ''}`} ref={isFluid ? null : scrollRef}>
+        {/* Unified Header Content - Now Scrolls with List */}
+        <div className="flex-col gap-4 mb-6">
+          <div className="flex-between">
+            <div className="results-info">
+               <h2 className="results-count">{properties.length} Listings</h2>
+               <p className="results-context">Operational Area Discovery</p>
+            </div>
+            <div className="discovery-status-pill">
+               <div className="status-dot" />
+               <span>Integrity Live</span>
+            </div>
           </div>
-          <div className="discovery-status-pill">
-             <div className="status-dot" />
-             <span>Integrity Live</span>
+
+          {/* Compact Radius Filter */}
+          <div className="radius-selector-section !p-0 !gap-2 flex-wrap">
+            <div className="radius-bar-label min-w-fit flex items-center gap-1 text-[8px] font-bold text-low uppercase tracking-[0.1em]">
+               <Navigation size={8} />
+               <span>Radius</span>
+            </div>
+            <div className="tab-group-container wrap !gap-1 flex-1">
+               {filters.lat && filters.lng && (
+                 <button 
+                   onClick={() => {
+                     setFilter('lat', null);
+                     setFilter('lng', null);
+                   }}
+                   className="tab-chip-item !h-6 !px-2 !text-[9px] !bg-red-50 !text-red-500 !border-red-200 font-bold"
+                 >
+                   Clear Selection
+                 </button>
+               )}
+               {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
+                 <button
+                   key={val}
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setFilter('radius', val);
+                   }}
+                   className={`tab-chip-item !h-6 !px-2 !text-[9px] ${filters.radius === val ? 'active' : ''}`}
+                 >
+                   {val < 1 ? `${val * 1000}m` : `${val}km`}
+                 </button>
+               ))}
+            </div>
           </div>
         </div>
 
-        {/* Compact Radius Filter */}
-        <div className="radius-selector-section !p-0 !gap-2 flex-wrap">
-          <div className="radius-bar-label min-w-fit flex items-center gap-1 text-[8px] font-bold text-low uppercase tracking-[0.1em]">
-             <Navigation size={8} />
-             <span>Radius</span>
-          </div>
-          <div className="tab-group-container wrap !gap-1 flex-1">
-             {filters.lat && filters.lng && (
-               <button 
-                 onClick={() => {
-                   setFilter('lat', null);
-                   setFilter('lng', null);
-                 }}
-                 className="tab-chip-item !h-6 !px-2 !text-[9px] !bg-red-50 !text-red-500 !border-red-200 font-bold"
-               >
-                 Clear Selection
-               </button>
-             )}
-             {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
-               <button
-                 key={val}
-                 onClick={(e) => {
-                   e.stopPropagation();
-                   setFilter('radius', val);
-                 }}
-                 className={`tab-chip-item !h-6 !px-2 !text-[9px] ${filters.radius === val ? 'active' : ''}`}
-               >
-                 {val < 1 ? `${val * 1000}m` : `${val}km`}
-               </button>
-             ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="pane-scroll-content list-view custom-scrollbar" ref={scrollRef}>
         {loading ? (
            <div className="flex-center flex-col gap-6 py-24">
               <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>

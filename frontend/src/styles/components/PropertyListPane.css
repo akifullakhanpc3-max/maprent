@@ -9,6 +9,11 @@
   overflow: hidden;
 }
 
+.property-list-pane.fluid-view {
+  height: auto !important;
+  overflow: visible !important;
+}
+
 /* Header Section */
 .pane-sticky-header {
   padding: var(--s-4) var(--s-6);
@@ -98,8 +103,17 @@
 }
 
 .pane-scroll-content.list-view {
-  padding: var(--s-6);
+  padding: var(--s-4) var(--s-6);
   background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-scroll-content.fluid-view {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  flex: none !important;
 }
 
 /* Property Detail Styles */

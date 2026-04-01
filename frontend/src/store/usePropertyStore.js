@@ -19,6 +19,9 @@ export const usePropertyStore = create((set, get) => ({
   },
 
   setFilter: (key, value) => {
+    const currentFilters = get().filters;
+    if (currentFilters[key] === value) return; // Skip redundant updates
+    
     set((state) => ({
       filters: { ...state.filters, [key]: value }
     }));
@@ -30,6 +33,10 @@ export const usePropertyStore = create((set, get) => ({
   },
 
   setFilters: (newFilters) => {
+    const currentFilters = get().filters;
+    const hasChange = Object.keys(newFilters).some(k => currentFilters[k] !== newFilters[k]);
+    if (!hasChange) return;
+
     set((state) => ({
       filters: { ...state.filters, ...newFilters }
     }));
