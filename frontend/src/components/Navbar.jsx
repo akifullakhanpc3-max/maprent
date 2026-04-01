@@ -95,6 +95,9 @@ export default function Navbar() {
         <div className="mobile-menu-pane">
           <div className="mobile-menu-header">
              <span className="mobile-menu-title">Explore</span>
+             <button onClick={closeMenu} className="btn btn-ghost !p-2 !h-9 !w-9" aria-label="Close Menu">
+               <X size={20} />
+             </button>
           </div>
 
           <div className="mobile-nav-list">
