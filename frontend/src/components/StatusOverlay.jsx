@@ -29,7 +29,7 @@ export default function StatusOverlay() {
 
   return (
     <div className="status-overlay-portal">
-      <div className={`glass-backdrop active`} onClick={clearProcessing} />
+      <div className="mobile-overlay visible" style={{ zIndex: -1 }} onClick={clearProcessing} />
       
       <div 
         className={`status-modal animate-fade-in animate-scale-in ${error ? 'is-error' : success ? 'is-success' : 'is-loading'}`}

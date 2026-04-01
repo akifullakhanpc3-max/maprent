@@ -8,9 +8,12 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
 
   return (
     <div className="modal-overlay">
-      <div className="discovery-backdrop" onClick={onClose} />
+      <div className="mobile-overlay visible" onClick={onClose} />
       
-      <div className="modal-container animate-fade-in animate-scale-in !max-w-sm">
+      <div 
+        className="modal-container animate-fade-in animate-scale-in !max-w-sm"
+        style={{ position: 'relative', zIndex: 5000 }}
+      >
         <div className="modal-header">
           <div className="modal-title-stack">
             <h3 className="modal-title">{title}</h3>

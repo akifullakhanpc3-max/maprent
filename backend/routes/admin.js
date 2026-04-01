@@ -206,7 +206,8 @@ router.get('/properties', adminAuth, async (req, res) => {
 // @access  Private (Admin)
 router.put('/properties/:id/approve', adminAuth, async (req, res) => {
   try {
-    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
+    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true })
+      .populate('ownerId', 'name email isBlocked');
     if (!property) return res.status(404).json({ msg: 'Property not found' });
     res.json(property);
   } catch (err) {
@@ -220,7 +221,8 @@ router.put('/properties/:id/approve', adminAuth, async (req, res) => {
 // @access  Private (Admin)
 router.put('/properties/:id/reject', adminAuth, async (req, res) => {
   try {
-    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
+    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true })
+      .populate('ownerId', 'name email isBlocked');
     if (!property) return res.status(404).json({ msg: 'Property not found' });
     res.json(property);
   } catch (err) {
@@ -234,7 +236,8 @@ router.put('/properties/:id/reject', adminAuth, async (req, res) => {
 // @access  Private (Admin)
 router.put('/properties/:id/pending', adminAuth, async (req, res) => {
   try {
-    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'pending' }, { new: true });
+    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'pending' }, { new: true })
+      .populate('ownerId', 'name email isBlocked');
     if (!property) return res.status(404).json({ msg: 'Property not found' });
     res.json(property);
   } catch (err) {

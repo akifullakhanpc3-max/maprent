@@ -3,16 +3,16 @@
 .status-overlay-portal {
   position: fixed;
   inset: 0;
-  z-index: 5000;
+  z-index: 9000; /* Extremely high z-index to be above EVERYTHING */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--s-6);
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(2px);
+  pointer-events: none; /* Allow events through to the backdrop child */
 }
 
 .status-modal {
+  pointer-events: auto; /* CRITICAL: Allow interaction with the modal itself */
   width: 100%;
   max-width: 400px;
   background: var(--bg-surface);
