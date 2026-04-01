@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useBookingStore } from '../../store/useBookingStore';
 import { Calendar, CheckCircle2, XCircle, Clock, Search, ShieldCheck, Mail, Phone, MessageSquare, Home, User } from 'lucide-react';
+import { BASE_URL } from '../../api/axios';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import '../../styles/views/Dashboards.css';
@@ -88,7 +89,7 @@ export default function ManageBookings() {
                  <div className="relative h-40 md:h-32 rounded-xl overflow-hidden bg-slate-50 border border-slate-100">
                     {booking.propertyId?.images?.length > 0 ? (
                       <ImageWithSkeleton 
-                        src={booking.propertyId.images[0].startsWith('http') ? booking.propertyId.images[0] : `http://localhost:5050${booking.propertyId.images[0]}`}
+                        src={booking.propertyId.images[0].startsWith('http') ? booking.propertyId.images[0] : `${BASE_URL}${booking.propertyId.images[0]}`}
                         alt={booking.propertyId.title}
                         className="w-full h-full object-cover"
                       />

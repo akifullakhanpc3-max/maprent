@@ -9,6 +9,15 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Startup Check: Essential Environment Configuration
+const essentialConfigs = ['JWT_SECRET', 'MONGODB_URI'];
+essentialConfigs.forEach(conf => {
+  if (!process.env[conf]) {
+    console.error(`\x1b[41m CRITICAL CONFIG ERROR: \x1b[0m Missing ${conf} environment variable!`);
+    console.error('SERVER WILL LIKELY FAIL IN PRODUCTION MODES.');
+  }
+});
+
 // Essential Middleware (MUST BE FIRST)
 app.use(cors());
 app.use(express.json());
@@ -44,10 +53,18 @@ const PORT = process.env.PORT || 5050;
 
 // Global Error Handler for Express
 app.use((err, req, res, next) => {
-  console.error('[SERVER ERROR]', err.stack);
+  const isDev = process.env.NODE_ENV === 'development';
+  console.error('[SERVER EXCEPTION]', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method
+  });
+
   res.status(500).json({ 
     msg: 'An internal server error occurred', 
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    error: isDev ? err.message : 'System fault detected',
+    id: Date.now().toString().slice(-6) // Correlation ID for logs
   });
 });
 

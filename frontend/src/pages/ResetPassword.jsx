@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { KeyRound, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -27,7 +27,7 @@ export default function ResetPassword() {
     setError(null);
     
     try {
-      await axios.put(`http://localhost:5050/api/auth/reset-password/${token}`, { password });
+      await api.put(`/auth/reset-password/${token}`, { password });
       setMessage('Password updated. Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {

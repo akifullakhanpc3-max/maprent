@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Home, Trash2, CheckCircle, XCircle, Star, StarOff, Pencil, RotateCcw, User, Search, MapPin, AlertCircle, Building2, ExternalLink } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
+import { BASE_URL } from '../../api/axios';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import '../../styles/views/Dashboards.css';
@@ -138,7 +139,7 @@ export default function AdminProperties() {
                         <div className="identity-thumb group-hover:scale-105 transition-transform">
                           {p.images && p.images[0] ? (
                              <img 
-                               src={p.images[0].startsWith('http') ? p.images[0] : `http://localhost:5050${p.images[0]}`} 
+                               src={p.images[0].startsWith('http') ? p.images[0] : `${BASE_URL}${p.images[0]}`} 
                                className="w-full h-full object-cover"
                                alt={p.title}
                              />

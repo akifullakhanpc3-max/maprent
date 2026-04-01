@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+export const BASE_URL = 'https://maprent-1.onrender.com';
+
 const api = axios.create({
-  baseURL: 'https://maprent-1.onrender.com/api',
+  baseURL: `${BASE_URL}/api`,
 });
 
 // Add a request interceptor to add the JWT token to requests if available

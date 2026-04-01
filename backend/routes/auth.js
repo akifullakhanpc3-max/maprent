@@ -14,13 +14,9 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, password, role = 'user', tenantId = null } = req.body;
     
-    // DEBUG: Log incoming role payload
-    console.log('Incoming Register Role:', role);
-
     if (!['user', 'owner'].includes(role)) {
-      console.error(`ERROR: Registration rejected. Received invalid role: "${role}"`);
       return res.status(400).json({ 
-        msg: `Invalid account type selected. Received: "${role}". Must be 'user' or 'owner'.` 
+        msg: `Invalid account type selected. Must be 'user' or 'owner'.` 
       });
     }
 
@@ -35,7 +31,7 @@ router.post('/register', async (req, res) => {
       email,
       passwordHash: password,
       role,
-      tenantId // Can be null if registering for a new tenant
+      tenantId
     });
 
     const salt = await bcrypt.genSalt(10);
@@ -51,6 +47,10 @@ router.post('/register', async (req, res) => {
       }
     };
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not defined.');
+    }
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
@@ -61,8 +61,12 @@ router.post('/register', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('[AUTH_REG_CRITICAL_FAIL]', err);
+    res.status(500).json({ 
+      msg: 'Server error during registration.', 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+    });
   }
 });
 
@@ -72,9 +76,6 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   
-  // DEBUG: Diagnose 400 Bad Request
-  console.log('[DEBUG] Incoming Login Payload:', { email: !!email, password: !!password, body: req.body });
-
   if (!email || !password) {
     return res.status(400).json({ msg: 'Email and password are required for authentication.' });
   }
@@ -108,6 +109,10 @@ router.post('/login', async (req, res) => {
       }
     };
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not defined.');
+    }
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
@@ -118,8 +123,12 @@ router.post('/login', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('[AUTH_LOGIN_CRITICAL_FAIL]', err);
+    res.status(500).json({ 
+      msg: 'Server error during login authentication node.', 
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 });
 
@@ -201,8 +210,8 @@ router.post('/forgot-password', async (req, res) => {
       debug_token: token // Only for dev testing
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error during password reset request' });
+    console.error('[AUTH_FORGOT_PW_ERROR]', err);
+    res.status(500).json({ msg: 'Server error during password reset request.', error: err.message });
   }
 });
 
@@ -234,8 +243,8 @@ router.put('/reset-password/:token', async (req, res) => {
     await user.save();
     res.json({ msg: 'Password has been reset successfully' });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('[AUTH_RESET_PW_ERROR]', err);
+    res.status(500).json({ msg: 'Server error during password reset.', error: err.message });
   }
 });
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { KeyRound, Mail, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -19,7 +19,7 @@ export default function ForgotPassword() {
     setMessage(null);
     
     try {
-      const res = await axios.post('http://localhost:5050/api/auth/forgot-password', { email });
+      const res = await api.post('/auth/forgot-password', { email });
       setMessage('Recovery link sent to your email.');
       
       if (res.data.debug_token) {

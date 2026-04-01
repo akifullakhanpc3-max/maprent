@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePropertyStore } from '../store/usePropertyStore';
+import { BASE_URL } from '../api/axios';
 import { 
   ArrowLeft, MapPin, Grid, CheckCircle2, Share2, Heart, 
   ShieldCheck, Zap, Info, Clock, Navigation2 
@@ -100,7 +101,7 @@ export default function PropertyDetails() {
                <div className="property-hero-preview">
                   {property.images && property.images.length > 0 ? (
                     <ImageWithSkeleton 
-                      src={property.images[0].startsWith('http') ? property.images[0] : `http://localhost:5050${property.images[0]}`} 
+                      src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`} 
                       alt={property.title}
                       className="hero-img-obj"
                     />

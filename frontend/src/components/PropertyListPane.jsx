@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation } from 'lucide-react';
+import { BASE_URL } from '../api/axios';
 import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import '../styles/components/PropertyListPane.css';
@@ -54,7 +55,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
           <div className="property-hero-wrapper">
             {selectedProperty.images && selectedProperty.images.length > 0 ? (
               <ImageWithSkeleton 
-                src={selectedProperty.images[0].startsWith('http') ? selectedProperty.images[0] : `http://localhost:5050${selectedProperty.images[0]}`} 
+                src={selectedProperty.images[0].startsWith('http') ? selectedProperty.images[0] : `${BASE_URL}${selectedProperty.images[0]}`} 
                 alt={selectedProperty.title}
                 className="hero-image-obj"
               />
@@ -214,7 +215,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                 <div className="card-thumb-wrap">
                   {property.images && property.images.length > 0 ? (
                      <ImageWithSkeleton 
-                       src={property.images[0].startsWith('http') ? property.images[0] : `http://localhost:5050${property.images[0]}`} 
+                       src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`} 
                        alt={property.title}
                        className="thumb-image" 
                      />

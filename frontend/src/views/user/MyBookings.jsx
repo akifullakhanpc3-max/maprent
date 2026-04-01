@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useBookingStore } from '../../store/useBookingStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { BASE_URL } from '../../api/axios';
 import { MapPin, Calendar, CheckCircle2, XCircle, Clock, Search, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
@@ -64,7 +65,7 @@ export default function MyBookings() {
               <div className="w-full md:w-48 h-40 md:h-32 bg-slate-50 rounded-xl overflow-hidden shrink-0 border border-slate-100">
                 {booking.propertyId?.images?.length > 0 ? (
                   <ImageWithSkeleton
-                    src={booking.propertyId.images[0].startsWith('http') ? booking.propertyId.images[0] : `http://localhost:5050${booking.propertyId.images[0]}`}
+                    src={booking.propertyId.images[0].startsWith('http') ? booking.propertyId.images[0] : `${BASE_URL}${booking.propertyId.images[0]}`}
                     alt={booking.propertyId.title}
                     className="w-full h-full object-cover"
                   />

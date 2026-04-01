@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../../api/axios';
+import api, { BASE_URL } from '../../api/axios';
 import PropertyFormModal from '../../components/PropertyFormModal';
 import { Plus, Trash2, Edit2, MapPin, Search, Building2, LayoutGrid, AlertCircle, TrendingUp } from 'lucide-react';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
@@ -130,7 +130,7 @@ export default function ManageProperties() {
                   </div>
                   {property.images && property.images.length > 0 ? (
                      <ImageWithSkeleton 
-                       src={property.images[0].startsWith('http') ? property.images[0] : `http://localhost:5050${property.images[0]}`} 
+                       src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`} 
                        className="h-full w-full object-cover" 
                        alt={property.title} 
                      />
