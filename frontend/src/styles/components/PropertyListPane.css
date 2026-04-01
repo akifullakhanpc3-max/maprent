@@ -273,6 +273,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-6);
+  min-height: 60vh; /* Ensure enough scrollable height for 1-2 items */
+  padding-bottom: 120px; /* Spacer to prevent edge-snapping */
 }
 
 .premium-property-card {
@@ -421,6 +423,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--s-24) var(--s-8);
+  min-height: 60vh;
   text-align: center;
 }
 

@@ -79,7 +79,7 @@
   width: 100%;
   height: 50%;
   position: relative; /* CRITICAL: Context for absolute search bar */
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
   overflow: hidden; /* CRITICAL: Prevent Leaflet spill */
 }
 
@@ -97,6 +97,10 @@
 
 /* Scroll-based Collapse (Mobile Only) */
 @media (max-width: 767px) {
+  .discovery-pane-wrapper {
+    height: 50dvh; /* Consistent with map height */
+  }
+
   .map-content-wrapper.hidden {
     height: 0 !important;
     min-height: 0 !important;
@@ -109,7 +113,8 @@
   
   .map-content-wrapper.hidden ~ .discovery-pane-wrapper {
     flex: 1 !important;
-    height: auto !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
     max-height: 100dvh !important;
   }
 }
@@ -239,6 +244,7 @@
   z-index: 5000;
   display: flex;
   align-items: center;
+  gap: 12px; /* Added gap for layout spacing */
   padding: 4px 6px 4px 12px;
   border-radius: var(--radius-full);
   width: 92%;
@@ -313,6 +319,41 @@
     border-radius: var(--radius-lg);
     top: 20px; /* Consistently match consolidated logic */
   }
+}
+
+@keyframes bannerSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cancel Radius Map Overlay Button */
+.map-cancel-radius-btn {
+  position: relative;
+  z-index: 5000;
+  animation: bannerSlideIn 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important; /* Make it a circular "X" button */
+  background: var(--bg-surface);
+  border: 1px solid rgba(239, 68, 68, 0.2); /* Soft Red Border */
+  color: #ef4444; /* Red-500 */
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.map-cancel-radius-btn:hover {
+  background: #fef2f2; /* Red-50 */
+  color: #dc2626; /* Red-600 */
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: scale(1.05);
 }
 
 /* Marker Styling Overrides */

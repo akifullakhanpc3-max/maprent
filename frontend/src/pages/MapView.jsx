@@ -12,26 +12,21 @@ import NavigationPanel from '../components/NavigationPanel';
 import 'leaflet/dist/leaflet.css';
 import '../styles/pages/MapView.css';
 
+
 // Leaflet radius auto-fitter
-function AutoFitCircle({ center, radius }) {
+function AutoFitCircle({ lat, lng, radius }) {
   const map = useMap();
   useEffect(() => {
-    if (radius) {
-      // Use searchAnchor if exists, otherwise fallback to current map center
-      const targetCenter = center || map.getCenter();
-      if (!targetCenter) return;
-
-      const latLng = L.latLng(targetCenter);
+    if (radius && lat && lng) {
+      const latLng = L.latLng([lat, lng]);
       const bounds = latLng.toBounds(radius * 1000);
       
-      // Only fit bounds if we aren't already looking at it (approx check)
-      // to avoid minor precision issues triggering loops
       const currentBounds = map.getBounds();
       if (!currentBounds.contains(bounds)) {
         map.fitBounds(bounds, { padding: [20, 20], animate: true });
       }
     }
-  }, [center, radius, map]); // Stable dependencies: searchAnchor (null or array), radius (number), map (instance)
+  }, [lat, lng, radius, map]);
   return null;
 }
 
@@ -54,14 +49,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Custom Red Icon for Search Anchor
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 // Component to handle map move/zoom/click events
 function MapEventsHandler({ onMapClick }) {
-  const { setFilter } = usePropertyStore();
+  const { setFilter, filters } = usePropertyStore();
   const map = useMapEvents({
     moveend() {
       const bounds = map.getBounds();
       const stringBounds = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
-      setFilter('bounds', stringBounds);
+      // Prevent redundant updates if bounds haven't changed
+      if (filters.bounds !== stringBounds) {
+        setFilter('bounds', stringBounds);
+      }
     },
     click(e) {
       if (onMapClick) onMapClick([e.latlng.lat, e.latlng.lng]);
@@ -87,14 +95,12 @@ export default function MapView() {
   const handlePaneScroll = useCallback((scrollTop) => {
     if (window.innerWidth > 768) return; 
 
-    const diff = scrollTop - lastScrollTop.current;
-    
     // Scrolled down past threshold -> hide map (focus on listings)
     if (scrollTop > 100 && properties.length > 0) {
       setShowMap(false);
     } 
-    // ONLY show map if we specifically overscroll at the top (pull-to-show)
-    else if (scrollTop < -10 || (scrollTop === 0 && diff < -10)) {
+    // RESTORE Map when back at the very top (intentional)
+    else if (scrollTop <= 10) {
       setShowMap(true);
     }
 
@@ -103,12 +109,11 @@ export default function MapView() {
 
   const handleLocationSelect = useCallback((coords, name) => {
     if (mapRef.current && Array.isArray(coords) && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-      mapRef.current.flyTo(coords, 14);
-      setFilter('lat', coords[0]);
-      setFilter('lng', coords[1]);
-      setSearchAnchor(null); 
+       // Search bar now ONLY moves map, it does not reset radius or anchor
+       // This fulfills "The radius moves when I search; it should not."
+       mapRef.current.flyTo(coords, 14);
     }
-  }, [setFilter]);
+  }, []);
 
   const handleMapClick = useCallback((coords) => {
     setSearchAnchor(coords);
@@ -192,6 +197,15 @@ export default function MapView() {
     });
   }, []);
 
+  // Synchronize local searchAnchor state with store filters
+  useEffect(() => {
+    if (filters.lat && filters.lng) {
+      setSearchAnchor([filters.lat, filters.lng]);
+    } else {
+      setSearchAnchor(null);
+    }
+  }, [filters.lat, filters.lng]);
+
   const activeFiltersCount = Object.keys(filters).filter(k => filters[k] !== 'All' && filters[k] !== null && k !== 'bounds').length;
 
   useEffect(() => {
@@ -219,7 +233,7 @@ export default function MapView() {
           <MapEventsHandler onMapClick={handleMapClick} />
 
           {searchAnchor && !selectedProperty && (
-            <Marker position={searchAnchor}>
+            <Marker position={searchAnchor} icon={redIcon}>
               <Popup className="discovery-popup">
                 <div className="flex-col gap-3 min-w-[200px]">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Selected Location</p>
@@ -236,15 +250,27 @@ export default function MapView() {
                       List Property Here
                     </button>
                   )}
+                  {/* Cancel mechanism for accidental pin drops */}
+                  <button 
+                    onClick={() => {
+                      setSearchAnchor(null);
+                      setFilter('lat', null);
+                      setFilter('lng', null);
+                    }}
+                    className="btn btn-secondary !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
+                  >
+                    <X size={12} className="mr-2" />
+                    Clear Selection
+                  </button>
                 </div>
               </Popup>
             </Marker>
           )}
 
-          {(filters.radius && (searchAnchor || mapRef.current)) && (
+          {(filters.radius && filters.lat && filters.lng) && (
             <>
               <Circle 
-                center={searchAnchor || mapRef.current.getCenter()} 
+                center={[filters.lat, filters.lng]} 
                 radius={filters.radius * 1000} 
                 pathOptions={{ 
                   color: 'var(--accent-blue)', 
@@ -254,10 +280,10 @@ export default function MapView() {
                   dashArray: '5, 10'
                 }} 
               />
-              <AutoFitCircle center={searchAnchor} radius={filters.radius} />
+              <AutoFitCircle lat={filters.lat} lng={filters.lng} radius={filters.radius} />
             </>
           )}
-          
+
           {routeData && (
             <Polyline 
               positions={routeData.coordinates}
@@ -296,11 +322,29 @@ export default function MapView() {
         </MapContainer>
 
         {/* Map Header Overlay */}
-        <div className="map-discovery-unified-bar glass-panel animate-fade-in shadow-premium !w-auto !max-w-[400px]">
-           <div className="search-input-section">
-              <MapSearchBar onSearch={handleLocationSelect} />
-           </div>
-        </div>
+        {!isFilterOpen && (
+          <div className="map-discovery-unified-bar glass-panel animate-fade-in shadow-premium !w-auto !max-w-[400px]">
+             <div className="search-input-section">
+                <MapSearchBar onSearch={handleLocationSelect} />
+             </div>
+             
+             {/* Cancel Radius Button — RED */}
+             {filters.lat && filters.lng && (
+               <button
+                 className="map-cancel-radius-btn discovery-radius-cancel-btn !text-red-500 !border-red-500/30"
+                 title="Cancel Radius"
+                 onClick={() => {
+                   setFilter('lat', null);
+                   setFilter('lng', null);
+                   setSearchAnchor(null);
+                 }}
+               >
+                 X
+               </button>
+             )}
+          </div>
+        )}
+
 
         <div className="map-floating-controls">
            <button 

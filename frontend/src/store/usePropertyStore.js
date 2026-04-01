@@ -42,8 +42,7 @@ export const usePropertyStore = create((set, get) => ({
   fetchProperties: async () => {
     const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities } = get().filters;
     
-    // We need either bounds OR (lat/lng/radius) to fetch. 
-    // This allows discovery mode (bounds) and intent mode (radius around pin)
+    // We need either bounds OR (lat/lng/radius) to fetch.
     if (!bounds && !(lat && lng)) {
       set({ properties: [] }); 
       return;
