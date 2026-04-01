@@ -176,14 +176,17 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                <span>Radius</span>
             </div>
             <div className="tab-group-container wrap !gap-1 flex-1">
-               {filters.lat && filters.lng && (
-                 <button 
-                   onClick={() => setFilters({ lat: null, lng: null })}
-                   className="tab-chip-item !h-6 !px-2 !text-[9px] !bg-red-50 !text-red-500 !border-red-200 font-bold"
-                 >
-                   Clear Selection
-                 </button>
-               )}
+                {filters.lat && filters.lng && (
+                  <button 
+                    onClick={() => {
+                      setFilters({ lat: null, lng: null });
+                      setSelectedProperty(null);
+                    }}
+                    className="tab-chip-item !h-6 !px-2 !text-[9px] !bg-red-50 !text-red-500 !border-red-200 font-bold"
+                  >
+                    Clear Selection
+                  </button>
+                )}
                {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
                  <button
                    key={val}

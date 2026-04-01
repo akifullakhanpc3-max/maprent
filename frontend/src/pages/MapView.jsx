@@ -150,10 +150,15 @@ export default function MapView() {
   }, []);
 
   const handleMapClick = useCallback((coords) => {
+    // Switch focus back to Listings View by closing index panel and navigation
+    setSelectedProperty(null);
+    setIsNavigating(false);
+    setRouteData(null);
+
+    // Update Proximity Search with atomic filters
     setSearchAnchor(coords);
-    setFilter('lat', coords[0]);
-    setFilter('lng', coords[1]);
-  }, [setFilter]);
+    setFilters({ lat: coords[0], lng: coords[1] });
+  }, [setSelectedProperty, setIsNavigating, setRouteData, setFilters]);
 
   const handleShowRoute = useCallback(async (property) => {
     if (!mapRef.current) return;
