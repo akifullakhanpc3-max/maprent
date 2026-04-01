@@ -55,13 +55,13 @@ export default function FilterPanel({ isOpen, onClose }) {
         {/* Header Section */}
         <div className="discovery-header">
           <div className="discovery-title-group">
-             <div className="discovery-icon-box">
-                <SlidersHorizontal size={16} />
-             </div>
-             <div>
-                <h2 className="discovery-title">Search Filters</h2>
-                <p className="discovery-subtitle">Refine Results</p>
-             </div>
+            <div className="discovery-icon-box">
+               <SlidersHorizontal size={16} />
+            </div>
+            <div>
+               <h2 className="discovery-title">Search Filters</h2>
+               <p className="discovery-subtitle">Refine Results</p>
+            </div>
           </div>
           <button onClick={onClose} className="btn btn-ghost !p-2">
             <X size={18} />
@@ -98,10 +98,7 @@ export default function FilterPanel({ isOpen, onClose }) {
                  <div className="flex items-center gap-2">
                     <span className="discovery-val-pill">{filters.radius}km</span>
                     <button 
-                      onClick={() => {
-                        setFilter('lat', null);
-                        setFilter('lng', null);
-                      }}
+                      onClick={() => setFilters({ lat: null, lng: null })}
                       className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors"
                     >
                       Clear

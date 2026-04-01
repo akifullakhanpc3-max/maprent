@@ -247,13 +247,13 @@
   animation: bannerSlideIn 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
-  min-width: 32px;
+  min-width: 64px;
   height: 32px;
-  padding: 0 !important;
+  padding: 0 16px !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50% !important; /* Make it a circular "X" button */
+  border-radius: var(--radius-full) !important; /* Pill shape */
   background: var(--bg-surface);
   border: 1px solid rgba(239, 68, 68, 0.2); /* Soft Red Border */
   color: #ef4444; /* Red-500 */

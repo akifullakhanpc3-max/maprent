@@ -20,7 +20,7 @@ function AutoFitCircle({ lat, lng, radius }) {
     if (radius && lat && lng) {
       const latLng = L.latLng([lat, lng]);
       const bounds = latLng.toBounds(radius * 1000);
-      
+
       const currentBounds = map.getBounds();
       if (!currentBounds.contains(bounds)) {
         map.fitBounds(bounds, { padding: [20, 20], animate: true });
@@ -61,8 +61,10 @@ const redIcon = new L.Icon({
 
 // Memoized Property Marker to prevent un-necessary map re-renders
 const PropertyMarker = React.memo(({ property, onClick, onShowRoute }) => {
+  const map = useMap();
+
   return (
-    <Marker 
+    <Marker
       position={[property.location.coordinates[1], property.location.coordinates[0]]}
       eventHandlers={{ click: onClick }}
     >
@@ -73,13 +75,22 @@ const PropertyMarker = React.memo(({ property, onClick, onShowRoute }) => {
             <p className="popup-price">₹{property.rent.toLocaleString()}</p>
             <span className="badge !bg-surface !border-subtle !text-[9px]">{property.bhkType}</span>
           </div>
-          <button 
-            onClick={() => onShowRoute(property)}
-            className="btn btn-primary !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
-          >
-            <Navigation2 size={12} className="mr-2" />
-            Get Directions
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onShowRoute(property)}
+              className="btn btn-primary flex-1 !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
+            >
+              <Navigation2 size={12} className="mr-2" />
+              Directions
+            </button>
+            <button
+              onClick={() => map.closePopup()}
+              className="btn btn-ghost !border !border-slate-200 !px-4 !text-[10px] uppercase font-bold tracking-tight"
+              title="Close Popup"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -94,7 +105,7 @@ function MapEventsHandler({ onMapClick }) {
   const map = useMapEvents({
     moveend() {
       if (moveEndTimeout.current) clearTimeout(moveEndTimeout.current);
-      
+
       moveEndTimeout.current = setTimeout(() => {
         const bounds = map.getBounds();
         const stringBounds = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
@@ -123,18 +134,18 @@ export default function MapView() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isPropertyModalOpen, setIsPropertyModalOpen] = useState(false);
-  const { properties, filters, loading, setFilter } = usePropertyStore();
+  const { properties, filters, loading, setFilter, setFilters } = usePropertyStore();
   const { user } = useAuthStore();
   const mapRef = useRef(null);
   const lastScrollTop = useRef(0);
 
-  const [searchAnchor, setSearchAnchor] = useState(null); 
+  const [searchAnchor, setSearchAnchor] = useState(null);
 
   const handleLocationSelect = useCallback((coords, name) => {
     if (mapRef.current && Array.isArray(coords) && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-       // Search bar now ONLY moves map, it does not reset radius or anchor
-       // This fulfills "The radius moves when I search; it should not."
-       mapRef.current.flyTo(coords, 14);
+      // Search bar now ONLY moves map, it does not reset radius or anchor
+      // This fulfills "The radius moves when I search; it should not."
+      mapRef.current.flyTo(coords, 14);
     }
   }, []);
 
@@ -231,9 +242,9 @@ export default function MapView() {
 
   const activeFiltersCount = Object.keys(filters).filter(k => filters[k] !== 'All' && filters[k] !== null && k !== 'bounds').length;
 
-  const circleOptions = useMemo(() => ({ 
-    color: 'var(--accent-blue)', 
-    fillColor: 'var(--accent-blue)', 
+  const circleOptions = useMemo(() => ({
+    color: 'var(--accent-blue)',
+    fillColor: 'var(--accent-blue)',
     fillOpacity: 0.1,
     weight: 3,
     dashArray: '5, 10'
@@ -243,9 +254,9 @@ export default function MapView() {
     <div className="map-view-container animate-fade-in">
       {/* Natural Scroll Layout - Map Top, List Below */}
       <div className="map-content-wrapper">
-        <MapContainer 
-          center={[12.9716, 77.5946]} 
-          zoom={12} 
+        <MapContainer
+          center={[12.9716, 77.5946]}
+          zoom={12}
           className="leaflet-container-override"
           ref={mapRef}
           zoomControl={false}
@@ -262,18 +273,30 @@ export default function MapView() {
                 <div className="flex-col gap-3 min-w-[200px]">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Selected Location</p>
                   <div className="flex-row gap-2 py-2 border-y border-slate-100">
-                     <LocateFixed size={14} className="text-accent-blue" />
-                     <span className="text-xs font-bold text-slate-700">Ready for Search or Listing</span>
+                    <LocateFixed size={14} className="text-accent-blue" />
+                    <span className="text-xs font-bold text-slate-700">Ready for Search or Listing</span>
                   </div>
-                  {user && (user.role === 'owner' || user.role === 'admin') && (
-                    <button 
-                      onClick={() => setIsPropertyModalOpen(true)}
-                      className="btn btn-cta !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
+                  <div className="flex gap-2 w-full">
+                    {user && (user.role === 'owner' || user.role === 'admin') && (
+                      <button
+                        onClick={() => setIsPropertyModalOpen(true)}
+                        className="btn btn-cta flex-1 !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
+                      >
+                        <MapPin size={12} className="mr-2" />
+                        List Property
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        setFilters({ lat: null, lng: null });
+                        mapRef.current?.closePopup();
+                      }}
+                      className="btn btn-ghost !border !border-slate-200 !px-4 !text-[10px] uppercase font-bold tracking-tight"
+                      title="Clear Search Radius"
                     >
-                      <MapPin size={12} className="mr-2" />
-                      List Property Here
+                      Clear Section
                     </button>
-                  )}
+                  </div>
                 </div>
               </Popup>
             </Marker>
@@ -281,17 +304,17 @@ export default function MapView() {
 
           {(filters.radius && filters.lat && filters.lng) && (
             <>
-              <Circle 
-                center={[filters.lat, filters.lng]} 
-                radius={filters.radius * 1000} 
-                pathOptions={circleOptions} 
+              <Circle
+                center={[filters.lat, filters.lng]}
+                radius={filters.radius * 1000}
+                pathOptions={circleOptions}
               />
               <AutoFitCircle lat={filters.lat} lng={filters.lng} radius={filters.radius} />
             </>
           )}
 
           {routeData && (
-            <Polyline 
+            <Polyline
               positions={routeData.coordinates}
               color="var(--primary-color)"
               weight={4}
@@ -300,9 +323,9 @@ export default function MapView() {
           )}
 
           {useMemo(() => properties.map(property => (
-            <PropertyMarker 
-              key={property._id} 
-              property={property} 
+            <PropertyMarker
+              key={property._id}
+              property={property}
               onClick={() => setSelectedProperty(property)}
               onShowRoute={handleShowRoute}
             />
@@ -312,81 +335,80 @@ export default function MapView() {
         {/* Map Header Overlay */}
         {!isFilterOpen && (
           <div className="map-discovery-unified-bar glass-panel animate-fade-in shadow-premium !w-auto !max-w-[400px]">
-             <div className="search-input-section">
-                <MapSearchBar onSearch={handleLocationSelect} />
-             </div>
-             
-             {/* Cancel Radius Button — RED */}
-             {filters.lat && filters.lng && (
-               <button
-                 className="map-cancel-radius-btn discovery-radius-cancel-btn !text-red-500 !border-red-500/30"
-                 title="Cancel Radius"
-                 onClick={() => {
-                   setFilter('lat', null);
-                   setFilter('lng', null);
-                   setSearchAnchor(null);
-                 }}
-               >
-                 X
-               </button>
-             )}
+            <div className="search-input-section">
+              <MapSearchBar onSearch={handleLocationSelect} />
+            </div>
+
+            {/* Cancel Radius Button — RED */}
+            {filters.lat && filters.lng && (
+              <button
+                className="map-cancel-radius-btn discovery-radius-cancel-btn !text-red-500 !border-red-500/30"
+                title="Cancel Radius"
+                onClick={() => {
+                  setFilters({ lat: null, lng: null });
+                  setSearchAnchor(null);
+                }}
+              >
+                Close
+              </button>
+            )}
           </div>
         )}
 
 
         <div className="map-floating-controls">
-           <button 
-             onClick={() => setIsFilterOpen(true)}
-             className="map-control-btn"
-             title="Adjust Search Parameters"
-           >
-             <Filter size={20} />
-             {activeFiltersCount > 0 && <span className="control-badge">{activeFiltersCount}</span>}
-           </button>
-           <button 
-             onClick={() => {
-                if (navigator.geolocation && mapRef.current) {
-                  navigator.geolocation.getCurrentPosition(pos => {
-                    mapRef.current.flyTo([pos.coords.latitude, pos.coords.longitude], 14);
-                  });
-                }
-             }}
-             className="map-control-btn"
-             title="Current Location"
-           >
-             <LocateFixed size={20} />
-           </button>
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="map-control-btn"
+            title="Adjust Search Parameters"
+          >
+            <Filter size={20} />
+            {activeFiltersCount > 0 && <span className="control-badge">{activeFiltersCount}</span>}
+          </button>
+          <button
+            onClick={() => {
+              if (navigator.geolocation && mapRef.current) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                  mapRef.current.flyTo([pos.coords.latitude, pos.coords.longitude], 14);
+                });
+              }
+            }}
+            className="map-control-btn"
+            title="Current Location"
+          >
+            <LocateFixed size={20} />
+          </button>
         </div>
       </div>
 
       <div className="discovery-pane-wrapper">
-         {isNavigating ? (
-            <NavigationPanel 
-              routeData={routeData} 
-              onClear={() => { setIsNavigating(false); setRouteData(null); }} 
-              propertyTitle={routeData.propertyTitle}
-              onSearchRoute={handleSearchRoute}
-              selectedProperty={selectedProperty}
-              onLocate={handleLocate}
-              isRouting={false}
-            />
-         ) : (
-            <PropertyListPane 
-              selectedProperty={selectedProperty} 
-              setSelectedProperty={setSelectedProperty} 
-              onShowRoute={handleShowRoute}
-              isFluid={true}
-            />
-         )}
+        {isNavigating ? (
+          <NavigationPanel
+            routeData={routeData}
+            onClear={() => { setIsNavigating(false); setRouteData(null); }}
+            propertyTitle={routeData.propertyTitle}
+            onSearchRoute={handleSearchRoute}
+            selectedProperty={selectedProperty}
+            onLocate={handleLocate}
+            isRouting={false}
+          />
+        ) : (
+          <PropertyListPane
+            selectedProperty={selectedProperty}
+            setSelectedProperty={setSelectedProperty}
+            onShowRoute={handleShowRoute}
+            isFluid={true}
+          />
+        )}
       </div>
 
       <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
-      
-      <PropertyFormModal 
-         isOpen={isPropertyModalOpen} 
-         onClose={() => setIsPropertyModalOpen(false)} 
-         refresh={() => setFilter('bounds', `${mapRef.current.getBounds().getWest()},${mapRef.current.getBounds().getSouth()},${mapRef.current.getBounds().getEast()},${mapRef.current.getBounds().getNorth()}`)}
-         initialCoords={searchAnchor}
+
+      <PropertyFormModal
+        isOpen={isPropertyModalOpen}
+        onClose={() => setIsPropertyModalOpen(false)}
+        refresh={() => setFilter('bounds', `${mapRef.current.getBounds().getWest()},${mapRef.current.getBounds().getSouth()},${mapRef.current.getBounds().getEast()},${mapRef.current.getBounds().getNorth()}`)}
+        initialCoords={searchAnchor}
       />
     </div>
   );

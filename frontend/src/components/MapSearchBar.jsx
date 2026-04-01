@@ -24,7 +24,7 @@ export default function MapSearchBar({ onSearch }) {
   const handleInputChange = async (e) => {
     const value = e.target.value;
     setQuery(value);
-    
+
     if (value.length > 2) {
       setIsLoading(true);
       setShowPortal(true);
@@ -61,8 +61,8 @@ export default function MapSearchBar({ onSearch }) {
         <div className="search-icon-prefix">
           {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
         </div>
-        
-        <input 
+
+        <input
           type="text"
           value={query}
           onChange={handleInputChange}
@@ -73,7 +73,7 @@ export default function MapSearchBar({ onSearch }) {
 
         <div className="search-actions-suffix">
           {query && (
-            <button 
+            <button
               onClick={() => { setQuery(''); setShowPortal(false); }}
               className="search-clear-btn-premium"
             >
@@ -88,7 +88,7 @@ export default function MapSearchBar({ onSearch }) {
           <div className="suggestions-header-label">Top Results</div>
           <div className="suggestions-scrollable custom-scrollbar">
             {suggestions.map((s) => (
-              <button 
+              <button
                 key={s.id}
                 onClick={() => selectSuggestion(s)}
                 className="suggestion-btn-item"

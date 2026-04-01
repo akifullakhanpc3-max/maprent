@@ -8,7 +8,7 @@ import ImageWithSkeleton from './ImageWithSkeleton';
 import '../styles/components/PropertyListPane.css';
 
 export default function PropertyListPane({ selectedProperty, setSelectedProperty, onShowRoute, onScroll, isFluid }) {
-  const { properties, filters, setFilter, loading } = usePropertyStore();
+  const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   
@@ -178,10 +178,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
             <div className="tab-group-container wrap !gap-1 flex-1">
                {filters.lat && filters.lng && (
                  <button 
-                   onClick={() => {
-                     setFilter('lat', null);
-                     setFilter('lng', null);
-                   }}
+                   onClick={() => setFilters({ lat: null, lng: null })}
                    className="tab-chip-item !h-6 !px-2 !text-[9px] !bg-red-50 !text-red-500 !border-red-200 font-bold"
                  >
                    Clear Selection
