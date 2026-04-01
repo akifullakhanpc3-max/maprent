@@ -229,6 +229,20 @@ router.put('/properties/:id/reject', adminAuth, async (req, res) => {
   }
 });
 
+// @route   PUT /api/admin/properties/:id/pending
+// @desc    Set property status to pending
+// @access  Private (Admin)
+router.put('/properties/:id/pending', adminAuth, async (req, res) => {
+  try {
+    const property = await Property.findByIdAndUpdate(req.params.id, { status: 'pending' }, { new: true });
+    if (!property) return res.status(404).json({ msg: 'Property not found' });
+    res.json(property);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route   PUT /api/admin/properties/:id/feature
 // @desc    Toggle isFeatured status
 // @access  Private (Admin)

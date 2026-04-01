@@ -190,8 +190,8 @@ export default function AdminProperties() {
                       )}
                     </td>
                     <td>
-                       <div className="moderation-actions">
-                          {p.status === 'pending' ? (
+                        <div className="moderation-actions">
+                          {p.status === 'pending' && (
                             <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
                                <button 
                                  onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'approved', title: p.title }) }}
@@ -206,14 +206,42 @@ export default function AdminProperties() {
                                  <XCircle size={18} />
                                </button>
                             </div>
-                          ) : (
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'pending', title: p.title }) }}
-                              className="w-10 h-10 flex-center text-low hover:text-accent-blue transition-all"
-                              title="Reset to Pending"
-                            >
-                              <RotateCcw size={16} />
-                            </button>
+                          )}
+                          
+                          {p.status === 'approved' && (
+                            <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'rejected', title: p.title }) }}
+                                 className="mod-btn-circle reject" title="Reject/Block Entry"
+                               >
+                                 <XCircle size={18} />
+                               </button>
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'pending', title: p.title }) }}
+                                 className="w-10 h-10 flex-center text-low hover:text-accent-blue transition-all"
+                                 title="Reset to Pending"
+                               >
+                                 <RotateCcw size={16} />
+                               </button>
+                            </div>
+                          )}
+
+                          {p.status === 'rejected' && (
+                            <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'approved', title: p.title }) }}
+                                 className="mod-btn-circle approve" title="Approve Entry"
+                                >
+                                 <CheckCircle size={18} />
+                               </button>
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'pending', title: p.title }) }}
+                                 className="w-10 h-10 flex-center text-low hover:text-accent-blue transition-all"
+                                 title="Reset to Pending"
+                               >
+                                 <RotateCcw size={16} />
+                               </button>
+                            </div>
                           )}
                           
                           <div className="flex items-center gap-1">

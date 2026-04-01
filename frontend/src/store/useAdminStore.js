@@ -79,7 +79,9 @@ export const useAdminStore = create((set, get) => ({
 
   updatePropertyStatus: async (propertyId, status) => {
     try {
-      const res = await api.put(`/admin/properties/${propertyId}/${status}`); // 'approve' or 'reject'
+      // Map frontend status to backend endpoint name
+      const endpoint = status === 'approved' ? 'approve' : status === 'rejected' ? 'reject' : status;
+      const res = await api.put(`/admin/properties/${propertyId}/${endpoint}`);
       set((state) => ({
         properties: state.properties.map((p) =>
           p._id === propertyId ? res.data : p
