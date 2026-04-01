@@ -96,6 +96,7 @@ html, body {
   max-width: 100%;
   overflow-x: hidden; /* CRITICAL: Absolute safeguard against horizontal scroll */
   height: 100%;
+  min-height: 100dvh; /* Modern viewport support */
 }
 
 /* Global Responsive Media Reset - EXCLUDING Map Tiles */
@@ -385,10 +386,12 @@ button {
 
 .h-screen {
   height: 100vh;
+  height: 100dvh;
 }
 
 .min-h-screen {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .mx-auto {
@@ -740,12 +743,14 @@ button {
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+  max-height: 90dvh;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-premium);
   border: 1px solid var(--border-subtle);
   animation: slideUp var(--trans-base) ease-out;
   overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .modal-body {

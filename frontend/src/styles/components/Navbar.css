@@ -143,7 +143,7 @@
   height: 100vh;
   height: 100dvh;
   background: var(--bg-surface);
-  padding: 100px var(--s-6) var(--s-6);
+  padding: calc(80px + env(safe-area-inset-top)) var(--s-6) calc(var(--s-6) + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   transform: translateX(100%);

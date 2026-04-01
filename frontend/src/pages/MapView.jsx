@@ -250,18 +250,6 @@ export default function MapView() {
                       List Property Here
                     </button>
                   )}
-                  {/* Cancel mechanism for accidental pin drops */}
-                  <button 
-                    onClick={() => {
-                      setSearchAnchor(null);
-                      setFilter('lat', null);
-                      setFilter('lng', null);
-                    }}
-                    className="btn btn-secondary !w-full !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
-                  >
-                    <X size={12} className="mr-2" />
-                    Clear Selection
-                  </button>
                 </div>
               </Popup>
             </Marker>

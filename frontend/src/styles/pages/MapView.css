@@ -4,10 +4,11 @@
   display: flex;
   flex-direction: column; /* Map top (first in DOM), List bottom (second in DOM) */
   width: 100%;
-  height: 100%;
+  height: 100vh;
   height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background-color: var(--bg-main);
   overflow: hidden;
+  padding-top: env(safe-area-inset-top);
 }
 
 @media (min-width: 768px) {
@@ -142,7 +143,7 @@
 /* Floating Controls Layer */
 .map-floating-controls {
   position: absolute;
-  bottom: var(--s-6);
+  bottom: calc(var(--s-6) + env(safe-area-inset-bottom));
   right: var(--s-6);
   z-index: 1000;
   display: flex;
@@ -238,7 +239,7 @@
 /* Unified Discovery Overlay (Top Center) */
 .map-discovery-unified-bar {
   position: absolute;
-  top: 20px; /* INCREASED: Ensure clearance from navbar */
+  top: max(20px, env(safe-area-inset-top)); /* Ensure notch clearance */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5000;

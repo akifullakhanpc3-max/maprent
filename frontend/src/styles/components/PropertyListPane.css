@@ -273,8 +273,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-6);
-  min-height: 60vh; /* Ensure enough scrollable height for 1-2 items */
-  padding-bottom: 120px; /* Spacer to prevent edge-snapping */
+  min-height: 30dvh; /* Adaptive instead of static 60vh */
+  padding-bottom: calc(120px + env(safe-area-inset-bottom)); /* Add notch clearance */
 }
 
 .premium-property-card {
@@ -398,7 +398,7 @@
 
 /* Footer Section */
 .pane-footer-actions {
-  padding: var(--s-4) var(--s-6);
+  padding: var(--s-4) var(--s-6) calc(var(--s-4) + env(safe-area-inset-bottom));
   display: flex;
   gap: var(--s-3);
   background: var(--bg-surface);
@@ -615,4 +615,21 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 2px;
+}
+/* --- Mobile Optimization for Short Screens --- */
+@media (max-height: 600px) {
+  .pane-sticky-header {
+    min-height: 60px;
+    padding: var(--s-2) var(--s-4);
+  }
+  .property-main-info {
+    padding: var(--s-4) var(--s-4);
+    gap: var(--s-4);
+  }
+  .main-property-title {
+    font-size: 20px;
+  }
+  .pane-footer-actions {
+    padding: var(--s-2) var(--s-4) calc(var(--s-2) + env(safe-area-inset-bottom));
+  }
 }
