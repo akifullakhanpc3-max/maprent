@@ -16,6 +16,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Premium Pulse Pin for Location Selection
+const locationIcon = L.divIcon({
+  className: 'search-anchor-wrapper',
+  html: `
+    <div class="search-anchor-pulse">
+      <div class="search-anchor-dot"></div>
+    </div>
+  `,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
 function MapFixer() {
   const map = useMap();
   useEffect(() => {
@@ -39,7 +51,7 @@ function LocationMarker({ position, setPosition, onLocationFound }) {
   });
 
   return position === null ? null : (
-    <Marker position={position} draggable={true} eventHandlers={{
+    <Marker position={position} icon={locationIcon} draggable={true} eventHandlers={{
       dragend: (e) => {
         const coords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
         setPosition(coords);

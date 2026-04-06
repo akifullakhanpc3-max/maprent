@@ -3,7 +3,6 @@
 .premium-search-wrapper {
   position: relative;
   width: 100%;
-  max-width: 520px;
   z-index: 1000;
   transition: all var(--trans-base);
 }
@@ -12,16 +11,17 @@
   display: flex;
   align-items: center;
   padding: 0 var(--s-4);
-  height: 40px;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
+  height: 48px;
+  background: var(--sidebar-active);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all var(--trans-fast);
 }
 
 .search-box-container:focus-within {
   border-color: var(--primary-color);
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.1);
 }
 
 .search-icon-prefix {
@@ -29,7 +29,7 @@
   align-items: center;
   justify-content: center;
   margin-right: var(--s-3);
-  color: var(--text-muted);
+  color: var(--sidebar-muted);
 }
 
 .search-input-field {
@@ -37,14 +37,14 @@
   border: none;
   background: transparent;
   outline: none;
-  font-size: var(--ts-sm);
-  color: var(--text-main);
+  font-size: 14px;
+  color: #FFFFFF;
   font-weight: 500;
   width: 100%;
 }
 
 .search-input-field::placeholder {
-  color: var(--text-low);
+  color: var(--sidebar-muted);
   font-weight: 400;
 }
 
@@ -57,24 +57,24 @@
 .search-clear-btn-premium {
   padding: 4px;
   border-radius: var(--radius-sm);
-  color: var(--text-muted);
+  color: var(--sidebar-muted);
   transition: all var(--trans-fast);
 }
 
 .search-clear-btn-premium:hover {
-  background: var(--bg-surface);
-  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 /* Suggestions Portal (Linear Style) */
 .suggestions-portal {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   left: 0;
   right: 0;
-  background: var(--bg-card);
+  background: #FFFFFF;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-premium);
   overflow: hidden;
   max-height: 400px;
@@ -87,9 +87,10 @@
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   color: var(--text-low);
   border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
 }
 
 .suggestions-scrollable {
@@ -102,10 +103,10 @@
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: var(--radius-sm);
   transition: all var(--trans-fast);
-  gap: var(--s-3);
+  gap: var(--s-4);
   text-align: left;
 }
 
@@ -114,14 +115,14 @@
 }
 
 .suggestion-location-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--text-muted);
   transition: all var(--trans-fast);
 }
@@ -138,15 +139,18 @@
 }
 
 .suggestion-main-title {
-  font-size: var(--ts-sm);
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text-main);
 }
 
 .suggestion-sub-addr {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .suggestion-go-icon {
@@ -159,8 +163,4 @@
 .suggestion-btn-item:hover .suggestion-go-icon {
   opacity: 1;
   transform: translateX(0);
-}
-
-@media (max-width: 640px) {
-  .mobile-hidden { display: none; }
 }

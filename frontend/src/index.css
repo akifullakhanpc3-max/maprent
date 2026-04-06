@@ -1,43 +1,35 @@
 :root {
-  /* --- 1. Minimalist "Linear" Light Palette --- */
+  /* --- 1. Luxury "SaaS Dashboard" Palette --- */
   --bg-main: #FFFFFF;
-  /* Pure Page Background */
   --bg-surface: #F8FAFC;
-  /* Subtle Sections (Slate 50) */
   --bg-card: #FFFFFF;
-  /* Component Background */
   --bg-hover: #F1F5F9;
-  /* Interaction (Slate 100) */
   --bg-soft: #F1F5F9;
+  
+  /* Sidebar & Navigation (Deep Navy #0D1B3E) */
+  --sidebar-bg: #0D1B3E;
+  --sidebar-active: #162955;
+  --sidebar-text: #FFFFFF;
+  --sidebar-muted: #94A3B8;
 
   --border-subtle: #E2E8F0;
-  /* Slate 200 (Clean Lines) */
   --border-medium: #CBD5E1;
-  /* Slate 300 */
   --border-strong: #94A3B8;
-  /* Slate 400 */
   --border-accent: #334155;
-  /* Slate 700 */
 
-  --primary-color: #0F172A;
-  /* Deep Navy/Black (Primary) */
-  --primary-hover: #1E293B;
-  --primary-transparent: rgba(15, 23, 42, 0.05);
-
-  --accent-blue: #1E4DB7;
-  /* Occupra Blue (CTA Accent) */
+  --primary-color: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-transparent: rgba(37, 99, 235, 0.08);
+  
+  --accent-blue: #2563EB;
   --success-color: #10B981;
   --error-color: #EF4444;
   --warning-color: #F59E0B;
 
   --text-main: #0F172A;
-  /* Slate 900 (High Contrast) */
   --text-muted: #475569;
-  /* Slate 600 */
   --text-low: #94A3B8;
-  /* Slate 400 */
   --text-white: #FFFFFF;
-  --text-light: #6B7280;
 
   /* --- 2. Spacing & Radius --- */
   --s-1: 4px;
@@ -50,32 +42,31 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* --- 3. Transitions & Performance --- */
-  --trans-fast: 150ms ease;
-  --trans-base: 200ms ease;
+  --trans-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* --- 4. Shadows (Airy Light Shadows) --- */
+  /* --- 4. Shadows (Premium Elevation) --- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
   --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 15px var(--primary-transparent);
+  --shadow-glow: 0 0 20px var(--primary-transparent);
 
-  /* Glass Utility Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-blur: blur(12px);
-
-  /* --- 5. Typography --- */
-  --font-main: 'Inter', system-ui, sans-serif;
+  /* --- 5. Typography (Luxury Mix) --- */
+  --font-luxury: 'Playfair Display', serif;
+  --font-main: 'DM Sans', system-ui, sans-serif;
+  
   --ts-xs: 11px;
   --ts-sm: 13px;
   --ts-base: 15px;
   --ts-md: 17px;
   --ts-lg: 20px;
   --ts-xl: 24px;
+  --ts-2xl: 32px;
 }
 
 /* Base Reset & Fluidity */
@@ -94,9 +85,9 @@
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden; /* CRITICAL: Absolute safeguard against horizontal scroll */
+  overflow-x: hidden; /* Absolute safeguard against horizontal scroll */
   height: 100%;
-  min-height: 100dvh; /* Modern viewport support */
+  min-height: 100dvh;
 }
 
 /* Global Responsive Media Reset - EXCLUDING Map Tiles */
