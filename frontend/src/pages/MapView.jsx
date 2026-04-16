@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed } from 'lucide-react';
+import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { usePropertyStore } from '../store/usePropertyStore';
@@ -11,6 +11,11 @@ import NavigationPanel from '../components/NavigationPanel';
 import 'leaflet/dist/leaflet.css';
 import '../styles/pages/MapView.css';
 
+// Tile Providers for road visualization
+const TILE_PROVIDERS = {
+  streets: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+};
 
 // Leaflet radius auto-fitter
 function AutoFitCircle({ lat, lng, radius }) {
@@ -19,24 +24,12 @@ function AutoFitCircle({ lat, lng, radius }) {
     if (radius && lat && lng) {
       const latLng = L.latLng([lat, lng]);
       const bounds = latLng.toBounds(radius * 1000);
-
       const currentBounds = map.getBounds();
       if (!currentBounds.contains(bounds)) {
         map.fitBounds(bounds, { padding: [20, 20], animate: true });
       }
     }
   }, [lat, lng, radius, map]);
-  return null;
-}
-
-// Leaflet layout fix for React mount and visibility changes
-function MapFixer({ showMap }) {
-  const map = useMap();
-  useEffect(() => {
-    map.invalidateSize();
-    const timers = [100, 300, 500].map(ms => setTimeout(() => map.invalidateSize(), ms));
-    return () => timers.forEach(t => clearTimeout(t));
-  }, [map, showMap]);
   return null;
 }
 
@@ -60,44 +53,6 @@ const redIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
-// Memoized Property Marker to prevent un-necessary map re-renders
-const PropertyMarker = React.memo(({ property, onClick, onShowRoute }) => {
-  const map = useMap();
-
-  return (
-    <Marker
-      position={[property.location.coordinates[1], property.location.coordinates[0]]}
-      eventHandlers={{ click: onClick }}
-    >
-      <Popup keepInView={true} minWidth={240}>
-        <div className="flex-col gap-3">
-          <h4 className="popup-title">{property.title}</h4>
-          <div className="popup-price-row">
-            <p className="popup-price">₹{property.rent.toLocaleString()}</p>
-            <span className="badge !bg-surface !border-subtle !text-[9px]">{property.bhkType}</span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onShowRoute(property)}
-              className="btn btn-primary flex-1 !py-2.5 !text-[11px] uppercase tracking-widest font-bold"
-            >
-              <Navigation2 size={12} className="mr-2" />
-              Directions
-            </button>
-            <button
-              onClick={() => map.closePopup()}
-              className="btn btn-ghost !border !border-slate-200 !px-4 !text-[10px] uppercase font-bold tracking-tight"
-              title="Close Popup"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </Popup>
-    </Marker>
-  );
-}, (prev, next) => prev.property._id === next.property._id);
-
 // Component to handle map move/zoom/click events
 function MapEventsHandler({ onMapClick }) {
   const { setFilter, filters } = usePropertyStore();
@@ -119,12 +74,6 @@ function MapEventsHandler({ onMapClick }) {
       if (onMapClick) onMapClick([e.latlng.lat, e.latlng.lng]);
     }
   });
-
-  useEffect(() => {
-    return () => {
-      if (moveEndTimeout.current) clearTimeout(moveEndTimeout.current);
-    };
-  }, []);
 
   return null;
 }
@@ -163,24 +112,24 @@ export default function MapView() {
   const [routeData, setRouteData] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewStyle, setViewStyle] = useState('streets');
   const { properties, filters, loading, setFilter, setFilters } = usePropertyStore();
   const { user } = useAuthStore();
   const mapRef = useRef(null);
   const sidebarRef = useRef(null);
   const [searchAnchor, setSearchAnchor] = useState(null);
-  const [mobileMapHeight, setMobileMapHeight] = useState(80); // percentage
+  const [mobileMapHeight, setMobileMapHeight] = useState(80);
 
   const handleLocationSelect = useCallback((coords) => {
     if (mapRef.current && Array.isArray(coords)) {
-      mapRef.current.flyTo(coords, 14);
-      if (window.innerWidth <= 768) setMobileMapHeight(80); // Restore on search
+      mapRef.current.flyTo(coords, 14, { duration: 1.5 });
+      if (window.innerWidth <= 768) setMobileMapHeight(80);
     }
   }, []);
 
   const handleSidebarScroll = (e) => {
     if (window.innerWidth > 768) return;
     const st = e.target.scrollTop;
-    // Aggressive collapse: 80vh down to 0vh over 500px scroll
     const progress = Math.min(st / 500, 1);
     const newHeight = 80 * (1 - progress);
     if (Math.abs(newHeight - mobileMapHeight) > 1) {
@@ -204,7 +153,7 @@ export default function MapView() {
     const end = [property.location.coordinates[0], property.location.coordinates[1]];
 
     try {
-      const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`);
+      const response = await fetch(`https://router.project-osrm.org/base/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`);
       const data = await response.json();
       if (data.routes?.[0]) {
         const route = data.routes[0];
@@ -223,11 +172,17 @@ export default function MapView() {
   const handleSearchArea = () => {
     if (!mapRef.current) return;
     const bounds = mapRef.current.getBounds();
-    // Clear proximity search coordinates to allow bounds-based discovery
     setFilters({
       bounds: `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`,
       lat: null,
       lng: null
+    });
+  };
+
+  const handleLocateMe = () => {
+    if (!mapRef.current) return;
+    mapRef.current.locate().on('locationfound', (e) => {
+      mapRef.current.flyTo(e.latlng, 15, { duration: 2 });
     });
   };
 
@@ -242,7 +197,7 @@ export default function MapView() {
   const circleOptions = useMemo(() => ({
     color: 'var(--primary-color)',
     fillColor: 'var(--primary-color)',
-    fillOpacity: 0.05,
+    fillOpacity: 0.1,
     weight: 2,
     dashArray: '8, 8'
   }), []);
@@ -255,8 +210,9 @@ export default function MapView() {
             <div className="brand-icon-box !w-8 !h-8 !bg-accent-blue/10">
               <MapIcon size={18} className="text-accent-blue" />
             </div>
-            <h1 className="brand-name luxury-title text-white">MAP<span className="text-accent-blue">RENT</span></h1>
+            <h1 className="brand-name luxury-title text-white">OCCUPRA</h1>
           </div>
+          <p className="text-[10px] text-slate-400 -mt-5 mb-6 font-medium tracking-wide uppercase">Find your perfect space, your way.</p>
           <div className="sidebar-search-wrap">
             <MapSearchBar onSearch={handleLocationSelect} />
           </div>
@@ -281,12 +237,6 @@ export default function MapView() {
             />
           )}
         </div>
-
-        <div className="sidebar-footer-actions">
-          {!user && (
-            <button className="btn btn-secondary !bg-sidebar-active !text-white !border-transparent w-full">Sign In to Platform</button>
-          )}
-        </div>
       </aside>
 
       <main
@@ -301,8 +251,8 @@ export default function MapView() {
           zoomControl={false}
         >
           <TileLayer
-            attribution='&copy; OpenStreetMap'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; ESRI'
+            url={TILE_PROVIDERS[viewStyle]}
           />
           <MapEventsHandler onMapClick={handleMapClick} />
 
@@ -310,18 +260,13 @@ export default function MapView() {
             <Marker position={searchAnchor} icon={redIcon}>
               <Popup className="premium-discovery-popup">
                 <div className="flex-col gap-3 min-w-[200px]">
-                  <p className="label-base !mb-0 text-slate-400">Selected Location</p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setFilters({ lat: null, lng: null });
-                        mapRef.current?.closePopup();
-                      }}
-                      className="btn btn-ghost !border-slate-200 !text-xs w-full"
-                    >
-                      Clear Selection
-                    </button>
-                  </div>
+                  <p className="label-base !mb-0 text-slate-400">Target Area</p>
+                  <button
+                    onClick={() => setFilters({ lat: null, lng: null })}
+                    className="btn btn-ghost !border-slate-200 !text-xs w-full"
+                  >
+                    Clear Selection
+                  </button>
                 </div>
               </Popup>
             </Marker>
@@ -338,7 +283,7 @@ export default function MapView() {
             </>
           )}
 
-          {routeData && <Polyline positions={routeData.coordinates} color="var(--primary-color)" weight={4} opacity={0.8} />}
+          {routeData && <Polyline positions={routeData.coordinates} color="var(--primary-color)" weight={5} opacity={0.8} />}
 
           {useMemo(() => properties.map(property => (
             <PriceMarker
@@ -347,10 +292,7 @@ export default function MapView() {
               isActive={highlightedId === property._id || selectedProperty?._id === property._id}
               onClick={() => {
                 setHighlightedId(property._id);
-                // On mobile, scroll to top if not already there, to collapse the map
-                if (window.innerWidth <= 768) {
-                  sidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-                }
+                if (window.innerWidth <= 768) sidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                 const card = document.getElementById(`property-card-${property._id}`);
                 if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
@@ -358,25 +300,37 @@ export default function MapView() {
           )), [properties, highlightedId, selectedProperty])}
         </MapContainer>
 
-        {/* Floating SaaS Controls */}
+        {/* Floating Controls */}
         <div className="map-overlay-center-top">
           <button onClick={handleSearchArea} className="search-area-btn shadow-premium">
             <Search size={14} />
-            <span>Search This Area</span>
+            <span>Discover Properties</span>
           </button>
         </div>
 
         <div className="map-overlay-bottom-right flex-col gap-3">
           <div className="zoom-controls-stack shadow-premium">
-            <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">+</button>
-            <div className="zoom-divider" />
-            <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">−</button>
+              <button 
+                onClick={() => setViewStyle(prev => prev === 'streets' ? 'satellite' : 'streets')}
+                className="zoom-btn"
+                title="Toggle Base Map"
+              >
+                 <Layers size={18} />
+              </button>
+              <div className="zoom-divider" />
+              <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
+                 <LocateFixed size={18} />
+              </button>
+              <div className="zoom-divider" />
+              <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
+              <div className="zoom-divider" />
+              <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
           </div>
+          
           <button onClick={() => setIsFilterOpen(true)} className="map-floating-action-btn shadow-premium">
             <Filter size={20} />
           </button>
         </div>
-
       </main>
 
       <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />

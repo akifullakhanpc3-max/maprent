@@ -4,15 +4,17 @@ import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { User, Home, Mail, Lock, UserPlus, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/pages/Auth.css';
+import logo from '../../logo/Occupra logo.png';
+
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user'); 
+  const [role, setRole] = useState('user');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   const { register, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
 
@@ -36,16 +38,16 @@ export default function Register() {
   return (
     <div className="auth-page animate-fade-in">
       <div className="auth-container">
-        
+
         <div className="auth-header">
-           <Link to="/" className="auth-brand">
-              <ShieldCheck size={18} className="text-indigo-600" />
-              <span className="auth-brand-text">MapRent</span>
-           </Link>
-           <div className="flex-col gap-1">
-             <h1 className="auth-title">Create Account</h1>
-             <p className="auth-subtitle">Join the platform to manage your rentals</p>
-           </div>
+          <Link to="/" className="auth-brand">
+            {logo ? <img src={logo} alt="Occupra" className="logo-auth-hero" /> :
+              <span className="auth-brand-text">Occupra</span>}
+          </Link>
+          <div className="flex-col gap-1">
+            <h1 className="auth-title">Create Account</h1>
+            <p className="auth-subtitle">Join the platform to manage your rentals</p>
+          </div>
         </div>
 
         <div className="auth-card">
@@ -56,7 +58,7 @@ export default function Register() {
                 <span>{error}</span>
               </div>
             )}
-            
+
             {/* ROLE SELECTOR */}
             <div className="form-group">
               <label className="label-base">Account Type</label>
@@ -66,10 +68,10 @@ export default function Register() {
                   onClick={() => setRole('user')}
                   className={`role-btn ${role === 'user' ? 'active' : ''}`}
                 >
-                    <div className="role-icon-box">
-                      <User size={20} />
-                    </div>
-                    <span className="role-title">Tenant</span>
+                  <div className="role-icon-box">
+                    <User size={20} />
+                  </div>
+                  <span className="role-title">Tenant</span>
                 </button>
 
                 <button
@@ -77,10 +79,10 @@ export default function Register() {
                   onClick={() => setRole('owner')}
                   className={`role-btn ${role === 'owner' ? 'active' : ''}`}
                 >
-                    <div className="role-icon-box">
-                      <Home size={20} />
-                    </div>
-                    <span className="role-title">Owner</span>
+                  <div className="role-icon-box">
+                    <Home size={20} />
+                  </div>
+                  <span className="role-title">Owner</span>
                 </button>
               </div>
             </div>

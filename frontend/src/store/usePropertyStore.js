@@ -16,6 +16,7 @@ export const usePropertyStore = create((set, get) => ({
     lat: null,
     lng: null,
     amenities: [],
+    allowedFor: [], // Multi-select filters
   },
 
   setFilter: (key, value) => {
@@ -47,7 +48,7 @@ export const usePropertyStore = create((set, get) => ({
   },
 
   fetchProperties: async () => {
-    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities } = get().filters;
+    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities, allowedFor } = get().filters;
     
     // We need either bounds OR (lat/lng/radius) to fetch.
     if (!bounds && !(lat && lng)) {
@@ -68,7 +69,8 @@ export const usePropertyStore = create((set, get) => ({
           maxRent: maxRent === 200000 ? undefined : maxRent, 
           bhkType: bhkType === 'All' ? undefined : bhkType,
           city: city === 'All' ? undefined : city,
-          amenities: amenities.length > 0 ? amenities.join(',') : undefined
+          amenities: amenities.length > 0 ? amenities.join(',') : undefined,
+          filter: allowedFor.length > 0 ? allowedFor.join(',') : undefined
         }
       });
       set({ properties: res.data || [], loading: false });

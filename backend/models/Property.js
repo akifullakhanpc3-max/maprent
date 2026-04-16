@@ -81,6 +81,12 @@ const propertySchema = new mongoose.Schema({
       required: true,
     }
   },
+  allowedFor: {
+    type: [String],
+    enum: ['Bachelors', 'Family', 'Couples'],
+    default: ['Bachelors', 'Family', 'Couples'],
+    index: true,
+  },
   isActive: {
     type: Boolean,
     default: true,

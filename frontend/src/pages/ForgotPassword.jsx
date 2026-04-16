@@ -39,7 +39,7 @@ export default function ForgotPassword() {
         <div className="auth-header">
            <Link to="/" className="auth-brand">
               <ShieldCheck size={18} className="text-indigo-600" />
-              <span className="auth-brand-text">MapRent</span>
+              <span className="auth-brand-text">Occupra</span>
            </Link>
            <div className="flex-col gap-1">
              <h1 className="auth-title">Reset Password</h1>

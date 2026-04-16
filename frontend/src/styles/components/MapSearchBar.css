@@ -38,12 +38,18 @@
   background: transparent;
   outline: none;
   font-size: 14px;
-  color: #FFFFFF;
+  color: white;
   font-weight: 500;
   width: 100%;
 }
 
+.search-input-field:focus {
+  color: black;
+}
+
+
 .search-input-field::placeholder {
+
   color: var(--sidebar-muted);
   font-weight: 400;
 }

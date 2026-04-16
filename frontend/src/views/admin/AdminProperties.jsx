@@ -103,7 +103,7 @@ export default function AdminProperties() {
              <h1 className="text-2xl font-black tracking-tighter">Property Moderation</h1>
              <span className="count-badge !bg-slate-900">{properties.length} NODES</span>
           </div>
-          <p className="page-subtitle">Centralized oversight of the MapRent ecosystem</p>
+          <p className="page-subtitle">Centralized oversight of the Occupra ecosystem</p>
         </div>
         
         <div className="admin-search-group w-full lg:max-w-md">

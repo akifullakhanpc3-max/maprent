@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, Home, Calendar, LogOut, ShieldAlert, Activity, 
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import '../../styles/views/Dashboards.css';
+import logo from '../../../logo/Occupra logo.png';
 
 export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,12 +43,7 @@ export default function AdminLayout() {
       <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <Link to="/" className="flex-row gap-3">
-            <div 
-              style={{ background: 'var(--primary-color)' }}
-              className="flex-center w-9 h-9 rounded-md text-white shadow-sm"
-            >
-              <ShieldAlert size={18} />
-            </div>
+            <img src={logo} alt="Occupra" className="logo-sidebar-compact" />
             <div className="flex-col">
               <span className="brand-name text-white">ADMIN</span>
               <span className="label-base !text-[8px] !m-0 !tracking-[0.2em] text-slate-500">Infrastructure</span>

@@ -81,7 +81,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                 <p className="text-sm leading-relaxed text-sidebar-muted">{selectedProperty.description}</p>
              </div>
 
-             <div className="sidebar-filter-section mt-8 mb-12">
+             <div className="sidebar-filter-section mt-8">
                 <h4 className="filter-label">Amenities</h4>
                 <div className="card-tags-host">
                    {selectedProperty.amenities?.map((amenity, idx) => (
@@ -89,6 +89,19 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                    ))}
                 </div>
              </div>
+
+             {selectedProperty.allowedFor && selectedProperty.allowedFor.length > 0 && (
+               <div className="sidebar-filter-section mt-8 mb-12">
+                  <h4 className="filter-label">Suitable For</h4>
+                  <div className="flex gap-2">
+                     {selectedProperty.allowedFor.map((type, idx) => (
+                       <div key={idx} className="mini-tag !bg-accent-blue/10 !text-accent-blue !border-accent-blue/20">
+                         {type}
+                       </div>
+                     ))}
+                  </div>
+               </div>
+             )}
           </div>
         </div>
 

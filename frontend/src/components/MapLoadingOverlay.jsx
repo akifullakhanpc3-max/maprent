@@ -19,8 +19,8 @@ export default function MapLoadingOverlay({ isVisible }) {
               <ShieldCheck className="w-4 h-4 text-primary-color" />
               <span className="label-base !m-0 !text-[9px]">Geospatial Sync</span>
            </div>
-           <h3 className="text-2xl font-black text-main uppercase tracking-tighter">Scanning <span className="text-secondary-color">Sector</span></h3>
-           <p className="label-base !lowercase !text-muted">Intercepting real-time market assets...</p>
+           <h3 className="text-2xl font-black text-main uppercase tracking-tighter">Locating <span className="text-secondary-color">Spaces</span></h3>
+           <p className="label-base !lowercase !text-muted">Occupra is finding your perfect home...</p>
         </div>
 
         <div className="w-full h-1 bg-surface rounded-full overflow-hidden">

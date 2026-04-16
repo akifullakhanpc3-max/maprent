@@ -112,7 +112,7 @@ export default function PropertyDetails() {
                      <span className="premium-badge !px-4 !py-2 !text-[9px] uppercase tracking-widest">{property.bhkType} Unit</span>
                      <div className="verification-badge !px-4 !py-2 !text-[9px] bg-slate-900/40 text-white backdrop-blur uppercase tracking-widest">
                         <ShieldCheck size={12} />
-                        <span>MapRent Verified</span>
+                        <span>Occupra Verified</span>
                      </div>
                   </div>
                </div>
@@ -203,7 +203,7 @@ export default function PropertyDetails() {
                         </button>
 
                         <p className="text-center text-[10px] font-black text-slate-300 uppercase tracking-widest mt-2">
-                           Secure Discovery via MapRent Neural Grid
+                           Secure Discovery via Occupra Neural Grid
                         </p>
                      </div>
                   </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, SlidersHorizontal, MapPin, Wifi, Car, Wind, Utensils, Tv, RotateCcw } from 'lucide-react';
+import { X, SlidersHorizontal, MapPin, Wifi, Car, Wind, Utensils, Tv, RotateCcw, User, Users, Heart } from 'lucide-react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import '../styles/components/FilterPanel.css';
 
@@ -29,6 +29,20 @@ export default function FilterPanel({ isOpen, onClose }) {
     { id: 'TV', icon: <Tv size={14} /> },
   ];
 
+  const userTypes = [
+    { id: 'Bachelors', icon: <User size={14} /> },
+    { id: 'Family', icon: <Users size={14} /> },
+    { id: 'Couples', icon: <Heart size={14} /> },
+  ];
+
+  const handleToggle = (key, id) => {
+    const current = filters[key] || [];
+    const updated = current.includes(id) 
+      ? current.filter(item => item !== id) 
+      : [...current, id];
+    setFilter(key, updated);
+  };
+
   const handleAmenityToggle = (id) => {
     const current = filters.amenities || [];
     const updated = current.includes(id) 
@@ -43,7 +57,8 @@ export default function FilterPanel({ isOpen, onClose }) {
       bhkType: 'All', 
       city: 'All', 
       radius: 5, 
-      amenities: [] 
+      amenities: [],
+      allowedFor: [] 
     });
   };
 
@@ -158,6 +173,36 @@ export default function FilterPanel({ isOpen, onClose }) {
                    {type}
                  </button>
                ))}
+            </div>
+          </section>
+
+          {/* User Type Filters (Occupra Core) */}
+          <section className="discovery-section">
+            <div className="discovery-section-header">
+               <label className="label-base">Who is this for?</label>
+               {filters.allowedFor?.length > 0 && (
+                 <button 
+                  onClick={() => setFilter('allowedFor', [])}
+                  className="text-[10px] font-bold text-accent-blue uppercase tracking-tighter"
+                 >
+                   Clear Selection
+                 </button>
+               )}
+            </div>
+            <div className="tab-group-container wrap">
+               {userTypes.map(type => {
+                 const isActive = filters.allowedFor?.includes(type.id);
+                 return (
+                   <button
+                     key={type.id}
+                     onClick={() => handleToggle('allowedFor', type.id)}
+                     className={`tab-chip-item ${isActive ? 'active' : ''} !px-6 gap-2 !h-12`}
+                   >
+                     {type.icon}
+                     <span>{type.id}</span>
+                   </button>
+                 );
+               })}
             </div>
           </section>
 

@@ -82,7 +82,7 @@ export default function AdminDashboard() {
             <div className="flex-col gap-2">
               <h2 className="text-xl md:text-2xl font-black text-main tracking-tight px-4">System Integrity Panel</h2>
               <p className="text-muted text-sm font-medium max-w-xl mx-auto leading-relaxed px-4">
-                 You are accessing the core administrative layer of MapRent. Maintain operational stability through real-time moderation and security oversight.
+                 You are accessing the core administrative layer of Occupra. Maintain operational stability through real-time moderation and security oversight.
               </p>
             </div>
             

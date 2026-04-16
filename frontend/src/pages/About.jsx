@@ -30,7 +30,7 @@ export default function About() {
                 Finding your next home <br/><span className="text-indigo-400">starts on the map.</span>
               </h1>
               <p className="text-slate-400 text-sm md:text-lg font-medium leading-relaxed max-w-2xl mx-auto uppercase tracking-wide">
-                MapRent simplifies the rental journey by connecting tenants directly with property owners.
+                Occupra simplifies the rental journey by connecting tenants directly with property owners.
               </p>
             </div>
             <div className="flex items-center gap-4 mt-4">

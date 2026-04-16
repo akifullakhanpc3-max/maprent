@@ -22,7 +22,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-      folder: 'maprent_properties',
+      folder: 'occupra_properties',
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
       transformation: [{ width: 1200, crop: 'limit' }]
     }
@@ -74,6 +74,11 @@ router.get('/', async (req, res) => {
     if (amenities) {
       const amenitiesArray = Array.isArray(amenities) ? amenities : amenities.split(',');
       query.amenities = { $all: amenitiesArray };
+    }
+
+    if (req.query.filter) {
+      const allowedForArray = req.query.filter.split(',');
+      query.allowedFor = { $in: allowedForArray };
     }
 
     // Geospatial Priority: Radius > Bounds
@@ -136,11 +141,23 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/properties
 // @desc    Create a new property
 // @access  Private (Owner)
+const aiService = require('../services/aiService');
+
 router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, res) => {
   try {
-    const { title, description, rent, bhkType, city, amenities, video, phone, whatsapp, lat, lng } = req.query.city ? req.query : req.body;
+    const { title, description, rent, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI } = req.query.city ? req.query : req.body;
+    
+    let finalDescription = description;
+    if (useAI) {
+      try {
+        finalDescription = await aiService.generatePropertyDescription({ title, rent, bhkType, amenities: JSON.parse(amenities), allowedFor: JSON.parse(allowedFor) });
+      } catch (aiErr) {
+        console.error('AI Description failed, falling back to user description:', aiErr.message);
+      }
+    }
     
     const parsedAmenities = amenities ? (Array.isArray(amenities) ? amenities : JSON.parse(amenities)) : [];
+    const parsedAllowedFor = allowedFor ? (Array.isArray(allowedFor) ? allowedFor : JSON.parse(allowedFor)) : ['Bachelors', 'Family', 'Couples'];
 
     const imageUrls = req.files ? req.files.map(file => {
       // If Cloudinary handled it, file.path is a full HTTPS URL
@@ -153,11 +170,12 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       ownerId: req.user.id,
       tenantId: req.user.tenantId || null,
       title,
-      description,
+      description: finalDescription,
       rent: Number(rent),
       bhkType,
       city,
       amenities: parsedAmenities,
+      allowedFor: parsedAllowedFor,
       video,
       phone,
       whatsapp,

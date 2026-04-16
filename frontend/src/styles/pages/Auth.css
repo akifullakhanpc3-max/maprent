@@ -40,12 +40,15 @@
 .auth-brand {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--s-3);
   background: var(--bg-surface);
   padding: 8px 16px;
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
   transition: all var(--trans-fast);
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .auth-brand-text {

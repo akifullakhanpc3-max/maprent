@@ -771,3 +771,35 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-low);
 }
+
+/* --- 7. Logo Styling (Robust & Responsive) --- */
+.logo-header {
+  height: 36px;
+  max-height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+.logo-auth-hero {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .logo-auth-hero {
+    height: 64px;
+  }
+}
+
+.logo-sidebar-compact {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}

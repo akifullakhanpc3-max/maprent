@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../api/axios';
-import { X, Upload, MapPin, Search, Check, Info, ShieldCheck } from 'lucide-react';
+import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
 import MapSearchBar from './MapSearchBar';
 import '../styles/components/BookingFormModal.css'; // Reusing modal core styles
@@ -72,6 +72,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     bhkType: '1BHK',
     city: 'Bangalore',
     amenities: [],
+    allowedFor: [],
     phone: '',
     whatsapp: '',
     isActive: true
@@ -112,6 +113,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         bhkType: existingProperty.bhkType,
         city: existingProperty.city || 'Bangalore',
         amenities: existingProperty.amenities || [],
+        allowedFor: existingProperty.allowedFor || [],
         phone: existingProperty.phone,
         whatsapp: existingProperty.whatsapp,
         isActive: existingProperty.isActive
@@ -141,6 +143,14 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     setFormData(prev => ({ ...prev, amenities: updated }));
   };
 
+  const handleAllowedForToggle = (type) => {
+    const current = formData.allowedFor;
+    const updated = current.includes(type) 
+      ? current.filter(t => t !== type) 
+      : [...current, type];
+    setFormData(prev => ({ ...prev, allowedFor: updated }));
+  };
+
   const handleFileChange = (e) => {
     setImages(Array.from(e.target.files));
   };
@@ -148,6 +158,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!position) return setError('Please select a location on the map.');
+    if (formData.allowedFor.length === 0) return setError('Please select at least one Allowed Tenant Type.');
     setLoading(true);
 
     try {
@@ -160,7 +171,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       } else {
         const payload = new FormData();
         Object.keys(formData).forEach(key => {
-          if (key === 'amenities') {
+          if (key === 'amenities' || key === 'allowedFor') {
             payload.append(key, JSON.stringify(formData[key]));
           } else {
             payload.append(key, formData[key]);
@@ -296,6 +307,31 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                           >
                             {option}
                              {active && <Check size={12} className="ml-1" />}
+                          </button>
+                        );
+                      })}
+                   </div>
+                </div>
+
+                <div className="flex-col gap-3">
+                   <label className="label-base">Allowed Tenant Type</label>
+                   <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { label: 'Bachelors', icon: User },
+                        { label: 'Family', icon: Users },
+                        { label: 'Couples', icon: Heart }
+                      ].map(option => {
+                        const active = formData.allowedFor.includes(option.label);
+                        const Icon = option.icon;
+                        return (
+                          <button 
+                            key={option.label} type="button" 
+                            onClick={() => handleAllowedForToggle(option.label)}
+                            className={`btn !h-10 !text-[11px] !px-3 flex items-center justify-center gap-2 border-2 transition-all ${active ? 'btn-primary !border-primary-color' : 'btn-secondary !border-slate-100 hover:!border-slate-300'}`}
+                          >
+                            <Icon size={14} />
+                            {option.label}
+                             {active && <Check size={12} className="ml-auto" />}
                           </button>
                         );
                       })}

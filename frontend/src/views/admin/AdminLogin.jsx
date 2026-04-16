@@ -64,7 +64,7 @@ export default function AdminLogin() {
                   type="email" 
                   required
                   className="input-base auth-input"
-                  placeholder="master_admin@maprent.com"
+                  placeholder="master_admin@occupra.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
                 />

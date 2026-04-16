@@ -43,7 +43,7 @@ app.use('/api', limiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/occupra')
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.error('MongoDB Connection Error:', err));
 

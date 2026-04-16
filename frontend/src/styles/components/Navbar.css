@@ -44,12 +44,15 @@
   align-items: center;
   transition: transform var(--trans-fast);
   flex-shrink: 0;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .brand-logo {
   display: flex;
   align-items: center;
   gap: var(--s-3);
+  max-height: 100%;
 }
 
 .brand-icon-box {
