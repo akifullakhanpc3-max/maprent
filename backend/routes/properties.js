@@ -51,7 +51,7 @@ const upload = multer({ storage: storage });
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities } = req.query;
+    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities, floor } = req.query;
 
     let query = { status: 'approved' };
 
@@ -74,6 +74,20 @@ router.get('/', async (req, res) => {
     if (amenities) {
       const amenitiesArray = Array.isArray(amenities) ? amenities : amenities.split(',');
       query.amenities = { $all: amenitiesArray };
+    }
+
+    if (floor !== undefined && floor !== 'All') {
+      if (floor === 'ground') {
+        query.floor = 0;
+      } else if (floor === '1-4') {
+        query.floor = { $gte: 1, $lte: 4 };
+      } else if (floor === '5-10') {
+        query.floor = { $gte: 5, $lte: 10 };
+      } else if (floor === '11+') {
+        query.floor = { $gte: 11 };
+      } else if (!isNaN(floor)) {
+        query.floor = Number(floor);
+      }
     }
 
     if (req.query.filter) {
@@ -145,7 +159,7 @@ const aiService = require('../services/aiService');
 
 router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, res) => {
   try {
-    const { title, description, rent, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI } = req.query.city ? req.query : req.body;
+    const { title, description, rent, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors } = req.query.city ? req.query : req.body;
     
     let finalDescription = description;
     if (useAI) {
@@ -183,7 +197,9 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       location: {
         type: 'Point',
         coordinates: [Number(lng), Number(lat)]
-      }
+      },
+      floor: floor ? Number(floor) : 0,
+      totalFloors: totalFloors ? Number(totalFloors) : 1
     });
 
     const property = await newProperty.save();
@@ -206,7 +222,7 @@ router.put('/:id', [auth, requireOwner], async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    const { title, description, rent, bhkType, phone, whatsapp, isActive, lat, lng } = req.body;
+    const { title, description, rent, bhkType, phone, whatsapp, isActive, lat, lng, floor, totalFloors } = req.body;
     
     if (title) property.title = title;
     if (description) property.description = description;
@@ -215,6 +231,8 @@ router.put('/:id', [auth, requireOwner], async (req, res) => {
     if (phone) property.phone = phone;
     if (whatsapp) property.whatsapp = whatsapp;
     if (isActive !== undefined) property.isActive = isActive;
+    if (floor !== undefined) property.floor = Number(floor);
+    if (totalFloors !== undefined) property.totalFloors = Number(totalFloors);
 
     if (lat !== undefined && lng !== undefined) {
       property.location = {

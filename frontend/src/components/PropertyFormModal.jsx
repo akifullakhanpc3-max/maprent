@@ -75,7 +75,9 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     allowedFor: [],
     phone: '',
     whatsapp: '',
-    isActive: true
+    isActive: true,
+    floor: 0,
+    totalFloors: 1
   });
   
   const [position, setPosition] = useState(null);
@@ -116,7 +118,9 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         allowedFor: existingProperty.allowedFor || [],
         phone: existingProperty.phone,
         whatsapp: existingProperty.whatsapp,
-        isActive: existingProperty.isActive
+        isActive: existingProperty.isActive,
+        floor: existingProperty.floor || 0,
+        totalFloors: existingProperty.totalFloors || 1
       });
       setPosition([existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]]);
     } else if (initialCoords) {
@@ -281,6 +285,27 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                        className="input-base" 
                        placeholder="25000" 
                      />
+                  </div>
+                  <div className="flex-1 flex-col gap-2">
+                     <label className="label-base">Floor Context</label>
+                     <div className="flex gap-2">
+                       <input 
+                         type="number" name="floor" required 
+                         value={formData.floor} onChange={handleChange} 
+                         className="input-base text-center" 
+                         placeholder="Floor" 
+                         min="0"
+                       />
+                       <div className="flex items-center text-slate-300 font-bold">/</div>
+                       <input 
+                         type="number" name="totalFloors" required 
+                         value={formData.totalFloors} onChange={handleChange} 
+                         className="input-base text-center" 
+                         placeholder="Total" 
+                         min="1"
+                       />
+                     </div>
+                     <p className="text-[10px] text-slate-400 font-medium whitespace-nowrap">0 = Ground Floor</p>
                   </div>
                 </div>
 

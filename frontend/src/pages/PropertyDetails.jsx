@@ -11,6 +11,16 @@ import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Navbar from '../components/Navbar';
 import '../styles/pages/PropertyDetails.css'; // Refined details styling
 
+const getFloorSuffix = (floor) => {
+  if (floor >= 11 && floor <= 13) return 'th';
+  switch (floor % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+};
+
 export default function PropertyDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -183,6 +193,18 @@ export default function PropertyDetails() {
                              <span className="stat-val !text-sm font-black text-slate-900">Verified</span>
                           </div>
                         </div>
+                        {property.floor !== undefined && (
+                          <div className="action-stat-card !flex-1 !bg-slate-50 !border-none !p-5 rounded-2xl col-span-2">
+                            <Grid size={18} className="text-indigo-500" />
+                            <div className="flex-col">
+                               <span className="stat-label !text-[8px] uppercase tracking-widest font-black text-slate-400">Vertical Context</span>
+                               <span className="stat-val !text-sm font-black text-slate-900">
+                                 {property.floor === 0 ? 'Ground Floor' : `${property.floor}${getFloorSuffix(property.floor)} Floor`}
+                                 {property.totalFloors > 1 && ` of ${property.totalFloors} Storeys`}
+                               </span>
+                            </div>
+                          </div>
+                        )}
                      </div>
 
                      <div className="flex-col gap-4 mt-2">

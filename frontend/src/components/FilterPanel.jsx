@@ -193,9 +193,33 @@ export default function FilterPanel({ isOpen, onClose }) {
                 <button
                   key={type}
                   onClick={() => setFilter('bhkType', type)}
-                  className={`tab-chip-item ${filters.bhkType === type ? 'active' : ''}`}
+                  className={`tab-chip-item ${filters.bhkType === type ? 'is-active' : ''}`}
                 >
                   {type}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Floor Level Preference */}
+          <section className="discovery-section">
+            <div className="discovery-section-header">
+              <label className="label-base">Floor Preference</label>
+            </div>
+            <div className="tab-group-container wrap">
+              {[
+                { id: 'All', label: 'Any Floor' },
+                { id: 'ground', label: 'Ground' },
+                { id: '1-4', label: 'Low (1-4)' },
+                { id: '5-10', label: 'Mid (5-10)' },
+                { id: '11+', label: 'High (11+)' }
+              ].map(option => (
+                <button
+                  key={option.id}
+                  onClick={() => setFilter('floorType', option.id)}
+                  className={`tab-chip-item ${filters.floorType === option.id ? 'active' : ''}`}
+                >
+                  {option.label}
                 </button>
               ))}
             </div>

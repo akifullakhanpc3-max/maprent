@@ -70,9 +70,15 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
             <div className="sidebar-filter-section">
               <h4 className="filter-label">Quick Details</h4>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <div className="mini-tag !text-[10px] !py-1 !px-3">{selectedProperty.bhkType} Unit</div>
                 <div className="mini-tag !text-[10px] !py-1 !px-3 font-bold !text-primary-color">Verified Listing</div>
+                {selectedProperty.floor !== undefined && (
+                  <div className="mini-tag !text-[10px] !py-1 !px-3 !bg-slate-100 !text-slate-600">
+                    {selectedProperty.floor === 0 ? 'Ground Floor' : `Floor ${selectedProperty.floor}`}
+                    {selectedProperty.totalFloors > 1 && ` of ${selectedProperty.totalFloors}`}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -247,6 +253,12 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                   <div className="card-meta-host">
                     <MapPin size={10} className="text-accent-blue" />
                     <span className="truncate">{property.city || 'Regional Area'}</span>
+                    {property.floor !== undefined && (
+                      <span className="ml-2 pl-2 border-l border-slate-700 text-slate-400">
+                        {property.floor === 0 ? 'Ground' : `${property.floor}F`}
+                        {property.totalFloors > 1 && `/${property.totalFloors}`}
+                      </span>
+                    )}
                   </div>
 
                   {property.amenities && property.amenities.length > 0 && (

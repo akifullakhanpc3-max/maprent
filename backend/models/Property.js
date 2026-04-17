@@ -87,6 +87,14 @@ const propertySchema = new mongoose.Schema({
     default: ['Bachelors', 'Family', 'Couples'],
     index: true,
   },
+  floor: {
+    type: Number,
+    default: 0, // 0 = Ground, 1 = 1st, etc.
+  },
+  totalFloors: {
+    type: Number,
+    default: 1,
+  },
   isActive: {
     type: Boolean,
     default: true,
