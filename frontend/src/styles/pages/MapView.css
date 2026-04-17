@@ -159,14 +159,11 @@
   box-shadow: var(--shadow-lg);
 }
 
-.map-overlay-bottom-right {
+.map-overlay-zoom-controls {
   position: absolute;
-  bottom: var(--s-6);
+  top: var(--s-6);
   right: var(--s-6);
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .zoom-controls-stack {
@@ -175,7 +172,19 @@
   border: 1px solid var(--border-subtle);
   overflow: hidden;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Horizontal on Desktop */
+}
+
+@media (max-width: 768px) {
+  .map-overlay-zoom-controls {
+    top: auto;
+    bottom: var(--s-6); /* Now sitting directly at the bottom on mobile */
+    right: var(--s-6);
+  }
+
+  .zoom-controls-stack {
+    flex-direction: column; /* Vertical on Mobile */
+  }
 }
 
 .zoom-btn {
@@ -194,10 +203,30 @@
   background: var(--bg-surface);
 }
 
+.zoom-btn.filter-action-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.zoom-btn.filter-action-btn:hover {
+  background: var(--primary-hover);
+}
+
 .zoom-divider {
-  height: 1px;
+  width: 1px;
+  /* Vertical divider for Desktop horizontal layout */
+  height: auto;
   background: var(--border-subtle);
-  margin: 0 8px;
+  margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+  .zoom-divider {
+    width: auto;
+    height: 1px;
+    /* Horizontal divider for Mobile vertical layout */
+    margin: 0 8px;
+  }
 }
 
 .map-floating-action-btn {
@@ -356,7 +385,8 @@
 /* Custom Overrides for Leaflet Clarity (Google Maps Style) */
 
 .luxury-leaflet-map .leaflet-container {
-  background: #fdfdfd !important; /* Neutral background similar to Google Maps */
+  background: #fdfdfd !important;
+  /* Neutral background similar to Google Maps */
   outline: none;
 }
 

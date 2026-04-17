@@ -326,7 +326,7 @@ export default function MapView() {
           <MapSearchBar onSearch={handleLocationSelect} />
         </div>
 
-        <div className="map-overlay-bottom-right flex-col gap-3">
+        <div className="map-overlay-zoom-controls">
           <div className="zoom-controls-stack shadow-premium">
             <button
               onClick={() => setViewStyle(prev => prev === 'streets' ? 'satellite' : 'streets')}
@@ -343,11 +343,15 @@ export default function MapView() {
             <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
             <div className="zoom-divider" />
             <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
+            <div className="zoom-divider" />
+            <button 
+              onClick={() => setIsFilterOpen(true)} 
+              className="zoom-btn filter-action-btn" 
+              title="Open Filters"
+            >
+              <Filter size={18} />
+            </button>
           </div>
-
-          <button onClick={() => setIsFilterOpen(true)} className="map-floating-action-btn shadow-premium">
-            <Filter size={20} />
-          </button>
         </div>
       </main>
 
