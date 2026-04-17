@@ -21,7 +21,7 @@ const propertySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  rent: {
+  price: {
     type: Number,
     required: true,
     index: true,
@@ -94,6 +94,10 @@ const propertySchema = new mongoose.Schema({
   totalFloors: {
     type: Number,
     default: 1,
+  },
+  advancedFeatures: {
+    type: [String],
+    default: [],
   },
   isActive: {
     type: Boolean,

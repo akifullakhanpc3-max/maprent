@@ -18,7 +18,7 @@ async function createSampleProperty() {
       ownerId: owner._id,
       title: 'Sample Urban Apartment',
       description: 'A premium 2BHK apartment with city views and modern amenities.',
-      rent: 45000,
+      price: 45000,
       bhkType: '2BHK',
       city: 'Bangalore',
       location: {

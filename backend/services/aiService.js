@@ -66,7 +66,7 @@ async function generateWithResilience(prompt, isFallback = false, attempt = 1) {
 async function generatePropertyDescription(details) {
   const prompt = `Generate a modern, attractive rental property description for Occupra.
   Title: ${details.title}
-  Rent: ${details.rent}
+  Price: ${details.price}
   Type: ${details.bhkType}
   Amenities: ${details.amenities?.join(', ')}
   Allowed For: ${details.allowedFor?.join(', ')}

@@ -64,8 +64,8 @@ export default function FilterPanel({ isOpen, onClose }) {
 
   const resetFilters = () => {
     setFilters({
-      minRent: 0,
-      maxRent: 200000,
+      minPrice: 0,
+      maxPrice: 200000,
       bhkType: 'All',
       city: 'All',
       radius: 5,
@@ -152,8 +152,8 @@ export default function FilterPanel({ isOpen, onClose }) {
                 <input
                   type="number"
                   placeholder="Min"
-                  value={filters.minRent || ''}
-                  onChange={(e) => setFilter('minRent', Number(e.target.value))}
+                  value={filters.minPrice || ''}
+                  onChange={(e) => setFilter('minPrice', Number(e.target.value))}
                   className="budget-input-field"
                 />
               </div>
@@ -163,8 +163,8 @@ export default function FilterPanel({ isOpen, onClose }) {
                 <input
                   type="number"
                   placeholder="Max"
-                  value={filters.maxRent || ''}
-                  onChange={(e) => setFilter('maxRent', Number(e.target.value))}
+                  value={filters.maxPrice === 200000 ? '' : filters.maxPrice || ''}
+                  onChange={(e) => setFilter('maxPrice', e.target.value ? Number(e.target.value) : 200000)}
                   className="budget-input-field"
                 />
               </div>
@@ -173,7 +173,7 @@ export default function FilterPanel({ isOpen, onClose }) {
                {[20000, 50000, 100000].map(p => (
                  <button 
                   key={p} 
-                  onClick={() => setFilter('maxRent', p)}
+                  onClick={() => setFilter('maxPrice', p)}
                   className="mini-tag !cursor-pointer hover:!bg-slate-200"
                  >
                    Under {p/1000}k
@@ -189,15 +189,15 @@ export default function FilterPanel({ isOpen, onClose }) {
               <label className="label-base">Unit Configuration</label>
             </div>
             <div className="tab-group-container wrap">
-              {['All', '1BHK', '2BHK', '3BHK', 'Studio', 'Villa'].map(type => (
-                <button
-                  key={type}
-                  onClick={() => setFilter('bhkType', type)}
-                  className={`tab-chip-item ${filters.bhkType === type ? 'is-active' : ''}`}
-                >
-                  {type}
-                </button>
-              ))}
+               {['All', '1BHK', '2BHK', '3BHK', 'Studio', 'Villa'].map(type => (
+                 <button
+                   key={type}
+                   onClick={() => setFilter('bhkType', type)}
+                   className={`tab-chip-item ${filters.bhkType === type ? 'is-active' : ''}`}
+                 >
+                   {type}
+                 </button>
+               ))}
             </div>
           </section>
 
@@ -207,19 +207,43 @@ export default function FilterPanel({ isOpen, onClose }) {
               <label className="label-base">Floor Preference</label>
             </div>
             <div className="tab-group-container wrap">
-              {[
-                { id: 'All', label: 'Any Floor' },
-                { id: 'ground', label: 'Ground' },
-                { id: '1-4', label: 'Low (1-4)' },
-                { id: '5-10', label: 'Mid (5-10)' },
-                { id: '11+', label: 'High (11+)' }
-              ].map(option => (
+               {[
+                 { id: 'All', label: 'Any Floor' },
+                 { id: 'ground', label: 'Ground' },
+                 { id: '1-4', label: 'Low (1-4)' },
+                 { id: '5-10', label: 'Mid (5-10)' },
+                 { id: '11+', label: 'High (11+)' }
+               ].map(option => (
+                 <button
+                   key={option.id}
+                   onClick={() => setFilter('floorType', option.id)}
+                   className={`tab-chip-item ${filters.floorType === option.id ? 'is-active' : ''}`}
+                 >
+                   {option.label}
+                 </button>
+               ))}
+            </div>
+          </section>
+
+          {/* Premium Protocol Filters (Multi-select) */}
+          <section className="discovery-section">
+            <div className="discovery-section-header">
+              <label className="label-base">Premium Amenities</label>
+            </div>
+            <div className="tab-group-container wrap">
+              {['Furnished', 'Balcony', 'Parking', 'Power Backup', 'Lift', 'Security', 'Pet Friendly', 'Gated Community'].map(feature => (
                 <button
-                  key={option.id}
-                  onClick={() => setFilter('floorType', option.id)}
-                  className={`tab-chip-item ${filters.floorType === option.id ? 'active' : ''}`}
+                  key={feature}
+                  onClick={() => {
+                    const current = filters.advancedFeatures || [];
+                    const next = current.includes(feature) 
+                      ? current.filter(f => f !== feature) 
+                      : [...current, feature];
+                    setFilter('advancedFeatures', next);
+                  }}
+                  className={`tab-chip-item ${(filters.advancedFeatures || []).includes(feature) ? 'is-active' : ''}`}
                 >
-                  {option.label}
+                  {feature}
                 </button>
               ))}
             </div>

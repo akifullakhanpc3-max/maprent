@@ -23,7 +23,7 @@ export default function AdminProperties() {
     setEditingId(property._id);
     setEditData({
       title: property.title,
-      rent: property.rent,
+      price: property.price,
       bhkType: property.bhkType,
       description: property.description || '',
       phone: property.phone || '',
@@ -168,7 +168,7 @@ export default function AdminProperties() {
                     </td>
                     <td className="hidden sm:table-cell">
                        <div className="flex-col gap-0">
-                          <span className="text-[15px] font-extrabold text-main">₹{p.rent.toLocaleString()}</span>
+                          <span className="text-[15px] font-extrabold text-main">{p.price ? '₹' + p.price.toLocaleString() : 'Price N/A'}</span>
                           <span className="text-[8px] font-black text-low uppercase tracking-[0.2em]">Monthly Yield</span>
                        </div>
                     </td>
@@ -286,8 +286,8 @@ export default function AdminProperties() {
                                   <input type="text" className="input-base" value={editData.title} onChange={(e) => setEditData({...editData, title: e.target.value})} />
                                </div>
                                <div className="flex-col gap-2">
-                                  <label className="label-base uppercase !text-[10px] font-black tracking-widest text-low">Target Rent (₹)</label>
-                                  <input type="number" className="input-base" value={editData.rent} onChange={(e) => setEditData({...editData, rent: e.target.value})} />
+                                  <label className="label-base uppercase !text-[10px] font-black tracking-widest text-low">Target Price (₹)</label>
+                                  <input type="number" className="input-base" value={editData.price} onChange={(e) => setEditData({...editData, price: e.target.value})} />
                                </div>
                                <div className="form-group flex-col gap-2">
                                   <label className="label-base uppercase !text-[10px] font-black tracking-widest text-low">Node Type</label>

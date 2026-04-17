@@ -208,16 +208,25 @@
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 8px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .mini-tag {
-  padding: 2px 6px;
+  padding: 4px 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  font-size: 9px;
+  border-radius: 6px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--sidebar-muted);
   text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Card Action Buttons (Quick Access) */

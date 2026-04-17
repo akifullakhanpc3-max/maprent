@@ -64,11 +64,13 @@ function LocationMarker({ position, setPosition, onLocationFound }) {
 export default function PropertyFormModal({ isOpen, onClose, refresh, existingProperty, initialCoords }) {
   const cities = ['Bangalore', 'Delhi', 'Mumbai', 'Chennai', 'Hyderabad', 'Pune'];
   const amenityOptions = ['WiFi', 'Parking', 'AC', 'Kitchen', 'TV', 'Laundry', 'Gym'];
+  const advancedOptions = ['Furnished', 'Semi-Furnished', 'Unfurnished', 'Balcony', 'Power Backup', 'Lift', 'Security', 'Pet Friendly', 'Gated Community'];
+  const predefinedHeadlines = ['1BHK Apartment', '2BHK Apartment', '3BHK Apartment', 'Furnished Flat', 'Family Home'];
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    rent: '',
+    price: '',
     bhkType: '1BHK',
     city: 'Bangalore',
     amenities: [],
@@ -77,10 +79,12 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     whatsapp: '',
     isActive: true,
     floor: 0,
-    totalFloors: 1
+    totalFloors: 1,
+    advancedFeatures: []
   });
-  
+
   const [position, setPosition] = useState(null);
+  const [isCustomHeadline, setIsCustomHeadline] = useState(false);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -111,7 +115,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       setFormData({
         title: existingProperty.title,
         description: existingProperty.description,
-        rent: existingProperty.rent,
+        price: existingProperty.price,
         bhkType: existingProperty.bhkType,
         city: existingProperty.city || 'Bangalore',
         amenities: existingProperty.amenities || [],
@@ -120,9 +124,17 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         whatsapp: existingProperty.whatsapp,
         isActive: existingProperty.isActive,
         floor: existingProperty.floor || 0,
-        totalFloors: existingProperty.totalFloors || 1
+        totalFloors: existingProperty.totalFloors || 1,
+        advancedFeatures: existingProperty.advancedFeatures || []
       });
       setPosition([existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]]);
+      
+      // Determine if headline is custom
+      if (existingProperty.title && !predefinedHeadlines.includes(existingProperty.title)) {
+        setIsCustomHeadline(true);
+      } else {
+        setIsCustomHeadline(false);
+      }
     } else if (initialCoords) {
       setPosition(initialCoords);
       reverseGeocode(initialCoords);
@@ -141,18 +153,26 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
 
   const handleAmenityToggle = (amenity) => {
     const current = formData.amenities;
-    const updated = current.includes(amenity) 
-      ? current.filter(a => a !== amenity) 
+    const updated = current.includes(amenity)
+      ? current.filter(a => a !== amenity)
       : [...current, amenity];
     setFormData(prev => ({ ...prev, amenities: updated }));
   };
 
   const handleAllowedForToggle = (type) => {
     const current = formData.allowedFor;
-    const updated = current.includes(type) 
-      ? current.filter(t => t !== type) 
+    const updated = current.includes(type)
+      ? current.filter(t => t !== type)
       : [...current, type];
     setFormData(prev => ({ ...prev, allowedFor: updated }));
+  };
+
+  const handleAdvancedToggle = (feature) => {
+    const current = formData.advancedFeatures;
+    const updated = current.includes(feature)
+      ? current.filter(f => f !== feature)
+      : [...current, feature];
+    setFormData(prev => ({ ...prev, advancedFeatures: updated }));
   };
 
   const handleFileChange = (e) => {
@@ -175,7 +195,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       } else {
         const payload = new FormData();
         Object.keys(formData).forEach(key => {
-          if (key === 'amenities' || key === 'allowedFor') {
+          if (key === 'amenities' || key === 'allowedFor' || key === 'advancedFeatures') {
             payload.append(key, JSON.stringify(formData[key]));
           } else {
             payload.append(key, formData[key]);
@@ -205,39 +225,39 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       <div className="glass-backdrop" onClick={onClose} />
       <div className="modal-overlay-container">
         <div className="modal-content-standard z-[2001]" style={{ maxWidth: '900px' }}>
-        {/* Header */}
-        <div className="modal-header">
-          <div className="modal-title-stack">
-             <h2 className="modal-title">{existingProperty ? 'Edit Property Listing' : 'Create New Listing'}</h2>
-             <p className="modal-subtitle-pill">Property Specification Console</p>
+          {/* Header */}
+          <div className="modal-header">
+            <div className="modal-title-stack">
+              <h2 className="modal-title">{existingProperty ? 'Edit Property Listing' : 'Create New Listing'}</h2>
+              <p className="modal-subtitle-pill">Property Specification Console</p>
+            </div>
+            <button onClick={onClose} className="btn btn-ghost !p-2">
+              <X size={18} />
+            </button>
           </div>
-          <button onClick={onClose} className="btn btn-ghost !p-2">
-            <X size={18} />
-          </button>
-        </div>
 
-        <div className="modal-body custom-scrollbar">
-          <form onSubmit={handleSubmit} className="modal-form-stack">
-            {error && (
-              <div className="modal-status-box error animate-fade-in">
-                 <Info size={14} /> {error}
-              </div>
-            )}
+          <div className="modal-body custom-scrollbar">
+            <form onSubmit={handleSubmit} className="modal-form-stack">
+              {error && (
+                <div className="modal-status-box error animate-fade-in">
+                  <Info size={14} /> {error}
+                </div>
+              )}
 
-            {/* Map-First Location Section (FULL WIDTH) */}
-            <div className="flex-col gap-2 p-1 bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden mb-2">
-               <div className="flex-between px-4 py-3">
-                 <div className="flex-col">
+              {/* Map-First Location Section (FULL WIDTH) */}
+              <div className="flex-col gap-2 p-1 bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden mb-2">
+                <div className="flex-between px-4 py-3 flex-wrap gap-y-2">
+                  <div className="flex-col min-w-[200px]">
                     <label className="label-base !m-0">Property Location Context</label>
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Search or Pin exactly where the property is located</p>
-                 </div>
-                 <div className="flex-col items-end">
-                    <span className="text-[10px] font-black text-accent-blue uppercase tracking-widest">{formData.city || 'Select City on Map'}</span>
+                  </div>
+                  <div className="flex-col items-start md:items-end">
+                    <span className="text-[10px] font-black text-accent-blue uppercase tracking-widest truncate max-w-[150px]">{formData.city || 'Select City on Map'}</span>
                     <span className="text-[9px] font-bold text-slate-400 uppercase">Auto-detected from Map</span>
-                 </div>
-               </div>
-               
-               <div className="flex-col gap-3">
+                  </div>
+                </div>
+
+                <div className="flex-col gap-3">
                   <div className="px-4 pb-2">
                     <MapSearchBar onSearch={(coords, name) => {
                       handleLocationSelect(coords, name);
@@ -249,98 +269,125 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                   </div>
 
                   <div className="relative border-t border-slate-100" style={{ height: '320px' }}>
-                     <MapContainer 
-                       center={position || [28.6139, 77.2090]} 
-                       zoom={position ? 15 : 5} 
-                       className="w-full h-full z-0"
-                       ref={mapRef}
-                     >
-                        <MapFixer />
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <LocationMarker position={position} setPosition={setPosition} onLocationFound={reverseGeocode} />
-                     </MapContainer>
-                  </div>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left Column: Details */}
-              <div className="flex-col gap-5">
-                <div className="flex-col gap-2">
-                   <label className="label-base">Property Headline</label>
-                   <input 
-                     name="title" required 
-                     value={formData.title} onChange={handleChange} 
-                     className="input-base" 
-                     placeholder="e.g. Modern 2BHK with Balcony" 
-                   />
-                </div>
-
-                <div className="flex-row gap-4">
-                  <div className="flex-1 flex-col gap-2">
-                     <label className="label-base">Monthly Rent (₹)</label>
-                     <input 
-                       type="number" name="rent" required 
-                       value={formData.rent} onChange={handleChange} 
-                       className="input-base" 
-                       placeholder="25000" 
-                     />
-                  </div>
-                  <div className="flex-1 flex-col gap-2">
-                     <label className="label-base">Floor Context</label>
-                     <div className="flex gap-2">
-                       <input 
-                         type="number" name="floor" required 
-                         value={formData.floor} onChange={handleChange} 
-                         className="input-base text-center" 
-                         placeholder="Floor" 
-                         min="0"
-                       />
-                       <div className="flex items-center text-slate-300 font-bold">/</div>
-                       <input 
-                         type="number" name="totalFloors" required 
-                         value={formData.totalFloors} onChange={handleChange} 
-                         className="input-base text-center" 
-                         placeholder="Total" 
-                         min="1"
-                       />
-                     </div>
-                     <p className="text-[10px] text-slate-400 font-medium whitespace-nowrap">0 = Ground Floor</p>
+                    <MapContainer
+                      center={position || [28.6139, 77.2090]}
+                      zoom={position ? 15 : 5}
+                      className="w-full h-full z-0"
+                      ref={mapRef}
+                    >
+                      <MapFixer />
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <LocationMarker position={position} setPosition={setPosition} onLocationFound={reverseGeocode} />
+                    </MapContainer>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex-col gap-2">
-                   <label className="label-base">Detailed Description</label>
-                   <textarea 
-                     name="description" required rows="4" 
-                     value={formData.description} onChange={handleChange} 
-                     className="input-base resize-none !h-auto !py-3" 
-                     placeholder="Describe the space, neighborhood, and terms..." 
-                   />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left Column: Details */}
+                <div className="flex-col gap-5">
+                  <div className="flex-col gap-2">
+                    <label className="label-base">Property Headline</label>
+                    <div className="flex-col gap-2">
+                      <select 
+                        className="input-base cursor-pointer"
+                        value={isCustomHeadline ? 'Other' : formData.title}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'Other') {
+                            setIsCustomHeadline(true);
+                            setFormData(prev => ({ ...prev, title: '' }));
+                          } else {
+                            setIsCustomHeadline(false);
+                            setFormData(prev => ({ ...prev, title: val }));
+                          }
+                        }}
+                      >
+                        <option value="" disabled>Select a headline type...</option>
+                        {predefinedHeadlines.map(h => <option key={h} value={h}>{h}</option>)}
+                        <option value="Other">Other (Custom Headline)</option>
+                      </select>
 
-                <div className="flex-col gap-3">
-                   <label className="label-base">Amenities & Features</label>
-                   <div className="grid grid-cols-3 gap-2">
+                      {isCustomHeadline && (
+                        <div className="animate-fade-in flex-col gap-1">
+                          <input
+                            name="title" required
+                            value={formData.title} onChange={handleChange}
+                            className="input-base border-primary-color bg-primary-color/5"
+                            placeholder="Type your custom headline here..."
+                            autoFocus
+                          />
+                          <p className="text-[10px] text-slate-400 font-medium px-1">Clear and descriptive headlines attract 2x more leads.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-row gap-4">
+                    <div className="flex-1 flex-col gap-2">
+                      <label className="label-base">Monthly Price (₹)</label>
+                      <input
+                        type="number" name="price" required
+                        value={formData.price} onChange={handleChange}
+                        className="input-base"
+                        placeholder="25000"
+                      />
+                    </div>
+                    <div className="flex-1 flex-col gap-2">
+                      <label className="label-base">Floor Context</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="number" name="floor" required
+                          value={formData.floor} onChange={handleChange}
+                          className="input-base text-center"
+                          placeholder="Floor"
+                          min="0"
+                        />
+                        <div className="flex items-center text-slate-300 font-bold">/</div>
+                        <input
+                          type="number" name="totalFloors" required
+                          value={formData.totalFloors} onChange={handleChange}
+                          className="input-base text-center"
+                          placeholder="Total"
+                          min="1"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium whitespace-nowrap">0 = Ground Floor</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-col gap-2">
+                    <label className="label-base">Detailed Description</label>
+                    <textarea
+                      name="description" required rows="4"
+                      value={formData.description} onChange={handleChange}
+                      className="input-base resize-none !h-auto !py-3"
+                      placeholder="Describe the space, neighborhood, and terms..."
+                    />
+                  </div>
+
+                  <div className="flex-col gap-3">
+                    <label className="label-base">Amenities & Features</label>
+                    <div className="grid grid-cols-3 gap-2">
                       {amenityOptions.map(option => {
                         const active = formData.amenities.includes(option);
                         return (
-                          <button 
-                            key={option} type="button" 
+                          <button
+                            key={option} type="button"
                             onClick={() => handleAmenityToggle(option)}
                             className={`btn !h-9 !text-[10px] !px-3 ${active ? 'btn-primary' : 'btn-secondary'}`}
                           >
                             {option}
-                             {active && <Check size={12} className="ml-1" />}
+                            {active && <Check size={12} className="ml-1" />}
                           </button>
                         );
                       })}
-                   </div>
-                </div>
+                    </div>
+                  </div>
 
-                <div className="flex-col gap-3">
-                   <label className="label-base">Allowed Tenant Type</label>
-                   <div className="grid grid-cols-3 gap-2">
+                  <div className="flex-col gap-3">
+                    <label className="label-base">Allowed Tenant Type</label>
+                    <div className="grid grid-cols-3 gap-2">
                       {[
                         { label: 'Bachelors', icon: User },
                         { label: 'Family', icon: Users },
@@ -349,35 +396,55 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                         const active = formData.allowedFor.includes(option.label);
                         const Icon = option.icon;
                         return (
-                          <button 
-                            key={option.label} type="button" 
+                          <button
+                            key={option.label} type="button"
                             onClick={() => handleAllowedForToggle(option.label)}
                             className={`btn !h-10 !text-[11px] !px-3 flex items-center justify-center gap-2 border-2 transition-all ${active ? 'btn-primary !border-primary-color' : 'btn-secondary !border-slate-100 hover:!border-slate-300'}`}
                           >
                             <Icon size={14} />
                             {option.label}
-                             {active && <Check size={12} className="ml-auto" />}
+                            {active && <Check size={12} className="ml-auto" />}
                           </button>
                         );
                       })}
-                   </div>
-                </div>
+                    </div>
+                  </div>
 
-                <div className="flex-row gap-4">
-                   <div className="flex-1 flex-col gap-2">
+                  <div className="flex-col gap-3">
+                    <label className="label-base">Premium Attributes</label>
+                    <div className="flex flex-wrap flex-column gap-2">
+                      {advancedOptions.map(option => {
+                        const active = formData.advancedFeatures.includes(option);
+                        return (
+                          <button
+                            key={option} type="button"
+                            onClick={() => handleAdvancedToggle(option)}
+                            className={`btn !h-9 !text-[10px] !px-4 ${active ? 'btn-primary' : 'btn-secondary !border-slate-100'}`}
+                            style={{ minWidth: 'fit-content' }}
+                          >
+                            {option}
+                            {active && <Check size={12} className="ml-2 flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex-row gap-4">
+                    <div className="flex-1 flex-col gap-2">
                       <label className="label-base">Phone Line</label>
                       <input name="phone" required value={formData.phone} onChange={handleChange} className="input-base" placeholder="+91..." />
-                   </div>
-                   <div className="flex-1 flex-col gap-2">
+                    </div>
+                    <div className="flex-1 flex-col gap-2">
                       <label className="label-base">WhatsApp</label>
                       <input name="whatsapp" required value={formData.whatsapp} onChange={handleChange} className="input-base" placeholder="+91..." />
-                   </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Right Column: Media */}
-              <div className="flex-col gap-5">
-                 <div className="flex-col gap-2">
+                {/* Right Column: Media */}
+                <div className="flex-col gap-5">
+                  <div className="flex-col gap-2">
                     <label className="label-base">Media Assets</label>
                     {!existingProperty ? (
                       <div className="flex-center flex-col gap-2 p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative">
@@ -389,27 +456,27 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                       </div>
                     ) : (
                       <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-3">
-                         <ShieldCheck size={20} className="text-success-color" />
-                         <span className="text-xs font-bold text-slate-500">Live content images are managed separately.</span>
+                        <ShieldCheck size={20} className="text-success-color" />
+                        <span className="text-xs font-bold text-slate-500">Live content images are managed separately.</span>
                       </div>
                     )}
-                 </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="modal-footer !flex-row !justify-end !mt-8 pt-6 border-t border-slate-100">
-               <button type="button" onClick={onClose} className="btn btn-ghost px-6">Cancel</button>
-               <button 
-                 type="submit" disabled={loading}
-                 className="btn btn-primary px-10"
-               >
-                 {loading ? <LoadingSpinner size="small" /> : existingProperty ? 'Commit Changes' : 'Broadcast Listing'}
-               </button>
-            </div>
-          </form>
+              <div className="modal-footer !flex-row !justify-end !mt-8 pt-6 border-t border-slate-100">
+                <button type="button" onClick={onClose} className="btn btn-ghost px-6">Cancel</button>
+                <button
+                  type="submit" disabled={loading}
+                  className="btn btn-primary px-10"
+                >
+                  {loading ? <LoadingSpinner size="small" /> : existingProperty ? 'Commit Changes' : 'Broadcast Listing'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

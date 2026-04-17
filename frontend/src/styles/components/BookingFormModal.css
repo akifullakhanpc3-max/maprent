@@ -1,83 +1,98 @@
 /* src/styles/components/BookingFormModal.css */
 
-.modal-overlay {
+.modal-overlay-container {
   position: fixed;
   inset: 0;
-  z-index: 5000;
+  z-index: 8000; /* Higher than Map (1000), Sidebar (5000), and Detail Overlay (7000) */
   background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--s-6);
+  padding: var(--s-4);
 }
 
-.modal-container {
+.modal-content-standard {
   width: 100%;
-  max-width: 480px;
-  background: var(--bg-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-premium);
+  max-width: 520px;
+  background: white;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
   max-height: 90dvh;
   overflow: hidden;
-  padding-bottom: env(safe-area-inset-bottom);
+  position: relative;
 }
 
 /* Modal Header */
 .modal-header {
-  padding: var(--s-6) var(--s-6) var(--s-4);
+  padding: 1.5rem 2rem;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid #f1f5f9;
+  background: #fafafa;
 }
 
 .modal-title-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
+  gap: 0.25rem;
+  max-width: 85%;
 }
 
 .modal-title {
-  font-size: var(--ts-md);
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .modal-subtitle-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: var(--ts-xs);
-  font-weight: 600;
-  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: white;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid #e2e8f0;
+  width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Modal Body */
 .modal-body {
-  padding: var(--s-6);
+  padding: 2rem;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .modal-status-box {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: var(--s-3) var(--s-4);
-  border-radius: var(--radius-md);
-  font-size: var(--ts-sm);
-  font-weight: 600;
-  margin-bottom: var(--s-6);
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .modal-status-box.error {
-  background: var(--error-bg);
-  color: var(--error-color);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fee2e2;
 }
 
 /* Success State */
@@ -86,51 +101,55 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--s-8) 0;
+  padding: 3rem 1rem;
   text-align: center;
+  gap: 1rem;
 }
 
 .success-icon-ring {
-  width: 64px;
-  height: 64px;
-  background: var(--success-bg);
-  color: var(--success-color);
+  width: 80px;
+  height: 80px;
+  background: #f0fdf4;
+  color: #166534;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--s-4);
+  box-shadow: 0 0 0 8px #f0fdf4;
+  margin-bottom: 1rem;
 }
 
 .success-heading {
-  font-size: var(--ts-md);
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.04em;
 }
 
 .success-message {
-  font-size: var(--ts-sm);
-  color: var(--text-light);
-  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  max-width: 250px;
 }
 
-/* Form Styles */
+/* Form Layout */
 .modal-form-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--s-6);
+  gap: 2rem;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1rem;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: 0.5rem;
 }
 
 .form-field.full-width {
@@ -139,15 +158,43 @@
 
 .input-with-icon {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .input-icon {
   position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
+  left: 1rem;
+  color: #94a3b8;
   pointer-events: none;
+  z-index: 10;
+}
+
+.input-base {
+  width: 100%;
+  height: 3rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 1rem 0 2.75rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+.input-base:focus {
+  background: white;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  outline: none;
+}
+
+textarea.input-base {
+  height: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  line-height: 1.5;
 }
 
 /* Modal Footer */
@@ -155,22 +202,58 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-3);
-  margin-top: var(--s-4);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .modal-trust-tag {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-light);
+  font-size: 9px;
+  font-weight: 800;
+  color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
-@media (max-width: 480px) {
-  .form-grid { grid-template-columns: 1fr; }
-  .form-field.full-width { grid-column: auto; }
+.glass-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 7999;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-field.full-width {
+    grid-column: span 1;
+  }
+  
+  .modal-content-standard {
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  .modal-header {
+    padding: 1.5rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

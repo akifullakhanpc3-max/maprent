@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api, { BASE_URL } from '../../api/axios';
 import PropertyFormModal from '../../components/PropertyFormModal';
 import { Plus, Trash2, Edit2, MapPin, Search, Building2, LayoutGrid, AlertCircle, TrendingUp } from 'lucide-react';
@@ -12,6 +13,9 @@ export default function ManageProperties() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const fetchProperties = async () => {
     try {
@@ -28,6 +32,24 @@ export default function ManageProperties() {
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  // Handle auto-open for 'List New Asset' via Sidebar
+  useEffect(() => {
+    if (location.pathname === '/owner/properties/new') {
+      openAddModal();
+    } else if (isModalOpen && !editingProperty) {
+      // If we navigate away from /new but modal is open for 'Add', close it
+      setIsModalOpen(false);
+    }
+  }, [location.pathname]);
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    // If we were on the /new route, clean up URL after closing
+    if (location.pathname === '/owner/properties/new') {
+      navigate('/owner/properties', { replace: true });
+    }
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Permanently delete this listing? This action cannot be undone.')) {
@@ -157,7 +179,7 @@ export default function ManageProperties() {
                     <div className="property-info-grid mt-2">
                        <div className="info-item-premium">
                           <span className="info-label-premium">Rate</span>
-                          <span className="info-value-premium">₹{property.rent.toLocaleString()}</span>
+                          <span className="info-value-premium">{property.price ? '₹' + property.price.toLocaleString() : 'N/A'}</span>
                           <span className="text-[9px] font-bold text-low mt-1">/MO</span>
                        </div>
                        <div className="info-item-premium">
@@ -193,7 +215,7 @@ export default function ManageProperties() {
       {isModalOpen && (
         <PropertyFormModal 
           isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+          onClose={handleModalClose} 
           refresh={fetchProperties}
           existingProperty={editingProperty} 
         />

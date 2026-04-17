@@ -69,6 +69,14 @@
   --ts-lg: 20px;
   --ts-xl: 24px;
   --ts-2xl: 32px;
+
+  /* --- 6. Z-Index Stack --- */
+  --z-map: 0;
+  --z-card: 10;
+  --z-nav: 5000;
+  --z-overlay: 6000;
+  --z-modal: 7000;
+  --z-toast: 8000;
 }
 
 /* Base Reset & Fluidity */
@@ -140,6 +148,7 @@ button {
   white-space: nowrap;
   border: 1px solid transparent;
   height: 44px;
+  flex-shrink: 0; /* Prevent squashing in flex containers */
   /* SaaS Standard */
 }
 
@@ -224,6 +233,8 @@ button {
   margin-bottom: var(--s-2);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .card {
@@ -793,6 +804,12 @@ button {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-low);
+}
+
+/* Custom Scrollbar Clipping Fix */
+.custom-scrollbar-container {
+  overflow-y: auto;
+  padding-right: 4px; /* Space for scrollbar */
 }
 
 /* --- 7. Logo Styling (Robust & Responsive) --- */

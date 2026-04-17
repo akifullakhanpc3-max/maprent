@@ -26,6 +26,7 @@ import MyBookings from './views/user/MyBookings';
 import OwnerDashboard from './views/owner/OwnerDashboard';
 import ManageProperties from './views/owner/ManageProperties';
 import ManageBookings from './views/owner/ManageBookings';
+import ManageAvailability from './views/owner/ManageAvailability';
 
 // Admin Panel Views
 import AdminDashboard from './views/admin/AdminDashboard';
@@ -89,7 +90,9 @@ function App() {
         <Route path="/owner" element={<OwnerLayout />}>
           <Route path="dashboard" element={<OwnerDashboard />} />
           <Route path="properties" element={<ManageProperties />} />
+          <Route path="properties/new" element={<ManageProperties />} />
           <Route path="bookings" element={<ManageBookings />} />
+          <Route path="availability" element={<ManageAvailability />} />
           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/owner/dashboard" replace />} />
         </Route>

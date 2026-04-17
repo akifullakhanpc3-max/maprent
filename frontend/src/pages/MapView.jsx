@@ -8,6 +8,7 @@ import MapSearchBar from '../components/MapSearchBar';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListPane from '../components/PropertyListPane';
 import NavigationPanel from '../components/NavigationPanel';
+import PropertyDetailsOverlay from '../components/PropertyDetailsOverlay';
 import 'leaflet/dist/leaflet.css';
 import '../styles/pages/MapView.css';
 
@@ -91,7 +92,10 @@ function MapEventsHandler({ onMapClick }) {
 
 // Price Pin Icon Generator
 const createPriceIcon = (price, isActive = false) => {
-  const formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L` : `₹${(price / 1000).toFixed(0)}k`;
+  let formattedPrice = 'N/A';
+  if (price) {
+    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L` : `₹${(price / 1000).toFixed(0)}k`;
+  }
   return L.divIcon({
     className: 'custom-price-pin',
     html: `
@@ -110,7 +114,7 @@ const PriceMarker = React.memo(({ property, isActive, onClick }) => {
   return (
     <Marker
       position={[property.location.coordinates[1], property.location.coordinates[0]]}
-      icon={createPriceIcon(property.rent, isActive)}
+      icon={createPriceIcon(property.price, isActive)}
       eventHandlers={{ click: onClick }}
       zIndexOffset={isActive ? 1000 : 0}
     />
@@ -129,23 +133,15 @@ export default function MapView() {
   const mapRef = useRef(null);
   const sidebarRef = useRef(null);
   const [searchAnchor, setSearchAnchor] = useState(null);
-  const [mobileMapHeight, setMobileMapHeight] = useState(80);
 
   const handleLocationSelect = useCallback((coords) => {
     if (mapRef.current && Array.isArray(coords)) {
       mapRef.current.flyTo(coords, 14, { duration: 1.5 });
-      if (window.innerWidth <= 768) setMobileMapHeight(80);
     }
   }, []);
 
   const handleSidebarScroll = (e) => {
-    if (window.innerWidth > 768) return;
-    const st = e.target.scrollTop;
-    const progress = Math.min(st / 500, 1);
-    const newHeight = 80 * (1 - progress);
-    if (Math.abs(newHeight - mobileMapHeight) > 1) {
-      setMobileMapHeight(newHeight);
-    }
+    // Legacy height reactive logic removed for fixed 100vh layout
   };
 
   const handleMapClick = useCallback((coords) => {
@@ -251,10 +247,7 @@ export default function MapView() {
         </div>
       </aside>
 
-      <main
-        className="map-main-viewport"
-        style={{ '--mobile-map-h': `${mobileMapHeight}vh` }}
-      >
+      <main className="map-main-viewport">
         <MapContainer
           center={[12.9716, 77.5946]}
           zoom={12}
@@ -356,6 +349,17 @@ export default function MapView() {
       </main>
 
       <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+
+      {selectedProperty && (
+        <PropertyDetailsOverlay 
+          property={selectedProperty} 
+          onClose={() => setSelectedProperty(null)}
+          onShowRoute={(p) => {
+            setSelectedProperty(null);
+            handleShowRoute(p);
+          }}
+        />
+      )}
     </div>
   );
 }

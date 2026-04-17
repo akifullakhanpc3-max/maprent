@@ -63,8 +63,8 @@ export default function BookingFormModal({ isOpen, onClose, propertyId, property
         <div className="modal-header">
           <div className="modal-title-stack">
             <h3 className="modal-title">Property Application</h3>
-            <div className="modal-subtitle-pill">
-               <span>Applying for: {propertyTitle}</span>
+            <div className="modal-subtitle-pill" title={propertyTitle}>
+               <span>Context: {propertyTitle}</span>
             </div>
           </div>
           <button onClick={onClose} className="btn btn-ghost !p-2">
@@ -138,6 +138,7 @@ export default function BookingFormModal({ isOpen, onClose, propertyId, property
                       type="number" name="duration" required min="1" 
                       value={formData.duration} onChange={handleChange} 
                       className="input-base !pl-10" 
+                      placeholder="Months" 
                     />
                   </div>
                 </div>

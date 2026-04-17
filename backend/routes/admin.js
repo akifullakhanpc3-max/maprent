@@ -286,11 +286,11 @@ router.put('/properties/:id', adminAuth, async (req, res) => {
     let property = await Property.findById(req.params.id);
     if (!property) return res.status(404).json({ msg: 'Property not found' });
 
-    const { title, description, rent, bhkType, phone, whatsapp, amenities } = req.body;
+    const { title, description, price, bhkType, phone, whatsapp, amenities } = req.body;
     
     if (title) property.title = title;
     if (description) property.description = description;
-    if (rent) property.rent = rent;
+    if (price) property.price = price;
     if (bhkType) property.bhkType = bhkType;
     if (phone) property.phone = phone;
     if (whatsapp !== undefined) property.whatsapp = whatsapp;

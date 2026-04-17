@@ -89,7 +89,7 @@ export default function MyBookings() {
                   </div>
                   
                   <div className="flex-between items-center mb-4">
-                     <p className="text-indigo-600 font-bold text-lg">₹{booking.propertyId?.rent?.toLocaleString()} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/ month</span></p>
+                     <p className="text-indigo-600 font-bold text-lg">{booking.propertyId?.price ? '₹' + booking.propertyId.price.toLocaleString() : 'Price N/A'} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/ month</span></p>
                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-1.5"><MapPin size={12} className="text-indigo-400" /> {booking.propertyId?.city || 'Bengaluru'}</p>
                   </div>
 

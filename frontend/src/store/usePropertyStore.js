@@ -8,8 +8,8 @@ export const usePropertyStore = create((set, get) => ({
   // Discovery filters
   filters: {
     bounds: null,
-    minRent: 0,
-    maxRent: 200000,
+    minPrice: 0,
+    maxPrice: 200000,
     bhkType: 'All',
     city: 'All',
     radius: 5, // km
@@ -18,6 +18,7 @@ export const usePropertyStore = create((set, get) => ({
     amenities: [],
     allowedFor: [], // Multi-select filters
     floorType: 'All', // ground, 1-4, 5-10, 11+
+    advancedFeatures: [],
   },
 
   setFilter: (key, value) => {
@@ -49,7 +50,7 @@ export const usePropertyStore = create((set, get) => ({
   },
 
   fetchProperties: async () => {
-    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities, allowedFor, floorType } = get().filters;
+    const { bounds, minPrice, maxPrice, bhkType, city, radius, lat, lng, amenities, allowedFor, floorType } = get().filters;
     
     // We need either bounds OR (lat/lng/radius) to fetch.
     if (!bounds && !(lat && lng)) {
@@ -66,13 +67,14 @@ export const usePropertyStore = create((set, get) => ({
           lng: (lat && lng) ? lng : undefined,
           radius: (lat && lng) ? radius : undefined,
           bounds: !(lat && lng) ? bounds : undefined,
-          minRent: minRent || undefined,
-          maxRent: maxRent === 200000 ? undefined : maxRent, 
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice === 200000 ? undefined : maxPrice, 
           bhkType: bhkType === 'All' ? undefined : bhkType,
           city: city === 'All' ? undefined : city,
           amenities: amenities.length > 0 ? amenities.join(',') : undefined,
           filter: allowedFor.length > 0 ? allowedFor.join(',') : undefined,
-          floor: floorType === 'All' ? undefined : floorType
+          floor: floorType === 'All' ? undefined : floorType,
+          advancedFeatures: (get().filters.advancedFeatures || []).length > 0 ? get().filters.advancedFeatures.join(',') : undefined
         }
       });
       set({ properties: res.data || [], loading: false });

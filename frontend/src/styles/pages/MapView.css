@@ -10,11 +10,12 @@
   position: relative;
 }
 
-/* 📱 Mobile Specific Overflow logic */
+/* 📱 Mobile Specific Logic: Map Fixed, Sidebar Layered */
 @media (max-width: 768px) {
   .map-dashboard-layout {
     flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
+    /* Prevent parent scrolling */
   }
 }
 
@@ -34,8 +35,13 @@
 @media (max-width: 768px) {
   .sidebar-discovery-pane {
     width: 100%;
-    height: auto;
-    min-height: 100vh;
+    height: 50vh;
+    /* Fixed height for mobile scroll window */
+    min-height: 50vh;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: #0a0f1e;
+    /* Darker mobile contrast */
   }
 }
 
@@ -134,6 +140,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 var(--s-4);
 }
 
 .search-area-btn {
@@ -172,18 +181,21 @@
   border: 1px solid var(--border-subtle);
   overflow: hidden;
   display: flex;
-  flex-direction: row; /* Horizontal on Desktop */
+  flex-direction: row;
+  /* Horizontal on Desktop */
 }
 
 @media (max-width: 768px) {
   .map-overlay-zoom-controls {
     top: auto;
-    bottom: var(--s-6); /* Now sitting directly at the bottom on mobile */
+    bottom: var(--s-6);
+    /* Now sitting directly at the bottom on mobile */
     right: var(--s-6);
   }
 
   .zoom-controls-stack {
-    flex-direction: column; /* Vertical on Mobile */
+    flex-direction: column;
+    /* Vertical on Mobile */
   }
 }
 
@@ -424,4 +436,221 @@
 
 .premium-discovery-popup .leaflet-popup-tip {
   background: white !important;
+}
+
+/* --- OVERLAY INTERACTION SYSTEM --- */
+
+.discovery-overlay-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 7000;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.overlay-slide-panel {
+  padding: 20px;
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  height: 100%;
+  background: white;
+  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  z-index: 5001;
+}
+
+/* Master UI v5: Precision Floating Card Architecture */
+@media (min-width: 769px) {
+  .overlay-slide-panel.master-card-panel {
+    height: 88vh;
+    margin-top: 6vh;
+    margin-right: 1.5rem;
+    margin-left: auto;
+    border-radius: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.04),
+      0 40px 100px rgba(0, 0, 0, 0.1),
+      0 80px 150px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@media (max-width: 768px) {
+  .overlay-slide-panel {
+    max-width: 100%;
+    height: 94vh;
+    margin-top: auto;
+    border-radius: 32px 32px 0 0;
+  }
+}
+
+.overlay-sticky-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  background: white;
+  z-index: 10;
+}
+
+.overlay-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.overlay-hero-section {
+  width: 100%;
+  aspect-ratio: 16/10;
+  position: relative;
+  background: #f8fafc;
+}
+
+.overlay-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+}
+
+.overlay-meta-overlay {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Master UI v5 Hardening: Centralized Structural Classes */
+.master-card-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  background: #ffffff !important;
+}
+
+.master-price-hero {
+  background: #090e1a !important;
+  border-radius: 24px !important;
+  padding: 2rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+  box-shadow: 0 30px 60px rgba(9, 14, 26, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+@media (min-width: 1024px) {
+  .master-price-hero {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 2.5rem !important;
+  }
+}
+
+.price-value-master {
+  font-family: inherit;
+  font-size: 3rem !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.05em !important;
+  line-height: 1 !important;
+}
+
+.master-spec-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+}
+
+@media (min-width: 1024px) {
+  .master-spec-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+}
+
+.master-spec-item {
+  background: #f8fafc !important;
+  border: 1px solid #f1f5f9 !important;
+  border-radius: 20px !important;
+  padding: 1.25rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.master-spec-item:hover {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+.spec-icon-host {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.overlay-sticky-footer {
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  z-index: 100 !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.03) !important;
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .animate-slide-left {
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }

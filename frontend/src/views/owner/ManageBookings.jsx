@@ -35,7 +35,7 @@ export default function ManageBookings() {
     <div className="flex-col gap-8 animate-fade-in">
       {/* HEADER SECTION */}
       <div className="console-card flex flex-col md:flex-row justify-between items-center gap-6 !p-6 md:!p-8 !bg-slate-900 border-none relative overflow-hidden">
-         <div className="absolute top-0 right-0 p-8 opacity-5">
+         <div className="absolute top-0 right-0 p-8 opacity-5 hidden md:block">
             <Calendar size={100} className="text-white" />
          </div>
          <div className="relative z-10 flex-col gap-1 text-center md:text-left">
@@ -43,12 +43,12 @@ export default function ManageBookings() {
             <p className="text-slate-400 text-sm font-medium">Review and process incoming property applications.</p>
          </div>
          
-         <div className="relative z-10 flex bg-white/5 p-1 rounded-xl border border-white/10">
+         <div className="relative z-10 flex flex-wrap justify-center md:justify-start bg-white/5 p-1 rounded-xl border border-white/10 gap-1">
             {['all', 'pending', 'accepted', 'rejected'].map((f) => (
                <button
                  key={f}
                  onClick={() => setFilter(f)}
-                 className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                 className={`px-3 md:px-4 py-1.5 rounded-lg text-[9px] md:text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                    filter === f 
                      ? 'bg-indigo-600 text-white' 
                      : 'text-slate-400 hover:text-white'
@@ -99,7 +99,7 @@ export default function ManageBookings() {
                  </div>
                  <div className="flex-col gap-1 text-center md:text-left">
                     <h3 className="text-sm font-bold text-slate-900 truncate">{booking.propertyId?.title || 'Property Listing'}</h3>
-                    <p className="text-indigo-600 font-bold text-sm">₹{booking.propertyId?.rent?.toLocaleString()}</p>
+                    <p className="text-indigo-600 font-bold text-sm">{booking.propertyId?.price ? '₹' + booking.propertyId.price.toLocaleString() : 'Price N/A'}</p>
                  </div>
               </div>
 

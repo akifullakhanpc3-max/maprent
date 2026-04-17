@@ -51,15 +51,15 @@ const upload = multer({ storage: storage });
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { bounds, minRent, maxRent, bhkType, city, radius, lat, lng, amenities, floor } = req.query;
+    const { bounds, minPrice, maxPrice, bhkType, city, radius, lat, lng, amenities, floor } = req.query;
 
     let query = { status: 'approved' };
 
     // Basic filters
-    if (minRent || maxRent) {
-      query.rent = {};
-      if (minRent) query.rent.$gte = Number(minRent);
-      if (maxRent) query.rent.$lte = Number(maxRent);
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
     if (bhkType && bhkType !== 'All') {
@@ -88,6 +88,11 @@ router.get('/', async (req, res) => {
       } else if (!isNaN(floor)) {
         query.floor = Number(floor);
       }
+    }
+
+    if (req.query.advancedFeatures) {
+      const advancedArray = req.query.advancedFeatures.split(',');
+      query.advancedFeatures = { $all: advancedArray };
     }
 
     if (req.query.filter) {
@@ -159,12 +164,12 @@ const aiService = require('../services/aiService');
 
 router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, res) => {
   try {
-    const { title, description, rent, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors } = req.query.city ? req.query : req.body;
+    const { title, description, price, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors, advancedFeatures } = req.query.city ? req.query : req.body;
     
     let finalDescription = description;
     if (useAI) {
       try {
-        finalDescription = await aiService.generatePropertyDescription({ title, rent, bhkType, amenities: JSON.parse(amenities), allowedFor: JSON.parse(allowedFor) });
+        finalDescription = await aiService.generatePropertyDescription({ title, price, bhkType, amenities: JSON.parse(amenities), allowedFor: JSON.parse(allowedFor) });
       } catch (aiErr) {
         console.error('AI Description failed, falling back to user description:', aiErr.message);
       }
@@ -172,6 +177,7 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
     
     const parsedAmenities = amenities ? (Array.isArray(amenities) ? amenities : JSON.parse(amenities)) : [];
     const parsedAllowedFor = allowedFor ? (Array.isArray(allowedFor) ? allowedFor : JSON.parse(allowedFor)) : ['Bachelors', 'Family', 'Couples'];
+    const parsedAdvancedFeatures = advancedFeatures ? (Array.isArray(advancedFeatures) ? advancedFeatures : JSON.parse(advancedFeatures)) : [];
 
     const imageUrls = req.files ? req.files.map(file => {
       // If Cloudinary handled it, file.path is a full HTTPS URL
@@ -185,7 +191,7 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       tenantId: req.user.tenantId || null,
       title,
       description: finalDescription,
-      rent: Number(rent),
+      price: Number(price),
       bhkType,
       city,
       amenities: parsedAmenities,
@@ -199,7 +205,8 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
         coordinates: [Number(lng), Number(lat)]
       },
       floor: floor ? Number(floor) : 0,
-      totalFloors: totalFloors ? Number(totalFloors) : 1
+      totalFloors: totalFloors ? Number(totalFloors) : 1,
+      advancedFeatures: parsedAdvancedFeatures
     });
 
     const property = await newProperty.save();
@@ -222,17 +229,18 @@ router.put('/:id', [auth, requireOwner], async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    const { title, description, rent, bhkType, phone, whatsapp, isActive, lat, lng, floor, totalFloors } = req.body;
+    const { title, description, price, bhkType, phone, whatsapp, isActive, lat, lng, floor, totalFloors, advancedFeatures } = req.body;
     
     if (title) property.title = title;
     if (description) property.description = description;
-    if (rent) property.rent = Number(rent);
+    if (price) property.price = Number(price);
     if (bhkType) property.bhkType = bhkType;
     if (phone) property.phone = phone;
     if (whatsapp) property.whatsapp = whatsapp;
     if (isActive !== undefined) property.isActive = isActive;
     if (floor !== undefined) property.floor = Number(floor);
     if (totalFloors !== undefined) property.totalFloors = Number(totalFloors);
+    if (advancedFeatures) property.advancedFeatures = advancedFeatures;
 
     if (lat !== undefined && lng !== undefined) {
       property.location = {

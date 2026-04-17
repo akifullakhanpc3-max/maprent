@@ -44,12 +44,18 @@
   justify-content: center;
   gap: var(--s-3);
   background: var(--bg-surface);
-  padding: 8px 16px;
-  border-radius: 12px;
+  padding: 10px 18px;
+  border-radius: 14px;
   border: 1px solid var(--border-subtle);
   transition: all var(--trans-fast);
   max-width: 100%;
-  overflow: hidden;
+}
+
+.logo-auth-hero {
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .auth-brand-text {

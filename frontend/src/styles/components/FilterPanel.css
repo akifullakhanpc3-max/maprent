@@ -56,44 +56,50 @@
 
 /* Header Section */
 .discovery-header {
-  padding: calc(var(--s-10) + env(safe-area-inset-top)) var(--s-8) var(--s-6);
+  padding: calc(var(--s-8) + env(safe-area-inset-top)) var(--s-6) var(--s-5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
+  background: white;
 }
 
 .discovery-title-group {
   display: flex;
   align-items: center;
-  gap: var(--s-4);
+  gap: var(--s-3);
+  min-width: 0;
 }
 
 .discovery-icon-box {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: var(--slate-900);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
 }
 
 .discovery-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   color: var(--slate-900);
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .discovery-subtitle {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   color: var(--text-low);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-top: 2px;
+  letter-spacing: 0.12em;
+  margin-top: 1px;
 }
 
 
@@ -248,12 +254,12 @@
 
 /* Footer Section */
 .discovery-footer {
-  padding: var(--s-8) var(--s-8) calc(var(--s-8) + env(safe-area-inset-bottom));
-  background: var(--bg-surface);
+  padding: var(--s-6) var(--s-6) calc(var(--s-6) + env(safe-area-inset-bottom));
+  background: white;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  gap: var(--s-4);
+  gap: var(--s-3);
 }
 
 .discovery-reset-btn {
