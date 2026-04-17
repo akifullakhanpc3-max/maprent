@@ -37,18 +37,18 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
       
       <div className="overlay-slide-panel master-card-panel animate-slide-left">
         {/* Glass Header */}
-        <div className="sticky top-0 z-30 flex items-center justify-between p-4 md:p-5 bg-white/95 backdrop-blur-xl border-b border-slate-100">
-           <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500">
+        <div className="sticky top-0 w-full z-30 flex items-center justify-between px-4 py-3 md:p-5 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+           <button onClick={onClose} className="p-2 shrink-0 rounded-full hover:bg-slate-100 transition-colors text-slate-500">
               <X size={20} />
            </button>
-           <div className="flex items-center gap-3">
+           <div className="flex items-center gap-3 shrink-0">
               <button 
                 onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`w-10 h-10 flex-center rounded-full border transition-all ${isWishlisted ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
+                className={`w-10 h-10 shrink-0 flex-center rounded-full border transition-all ${isWishlisted ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
               >
                 <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
               </button>
-              <button className="w-10 h-10 flex-center rounded-full border border-slate-100 bg-white text-slate-400 hover:border-slate-300 transition-all">
+              <button className="w-10 h-10 shrink-0 flex-center rounded-full border border-slate-100 bg-white text-slate-400 hover:border-slate-300 transition-all">
                 <Share2 size={18} />
               </button>
            </div>

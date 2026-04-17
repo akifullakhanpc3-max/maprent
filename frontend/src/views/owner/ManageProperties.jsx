@@ -58,6 +58,7 @@ export default function ManageProperties() {
         setProperties(properties.filter(p => p._id !== id));
       } catch (err) {
         console.error(err);
+        alert(err.response?.data?.msg || 'An error occurred while deleting the property. Are you authorized?');
       }
     }
   };
@@ -193,14 +194,14 @@ export default function ManageProperties() {
 
                 <div className="card-actions-panel">
                    <button 
-                     onClick={() => openEditModal(property)}
+                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); openEditModal(property); }}
                      className="action-btn-dashboard edit"
                      title="Edit Assets"
                    >
                      <Edit2 size={16} />
                    </button>
                    <button 
-                     onClick={() => handleDelete(property._id)}
+                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(property._id); }}
                      className="action-btn-dashboard delete"
                      title="Liquidate Listing"
                    >

@@ -119,8 +119,8 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         title: existingProperty.title,
         description: existingProperty.description,
         price: existingProperty.price,
-        securityDeposit: existingProperty.securityDeposit || '',
-        maintenance: existingProperty.maintenance || '',
+        securityDeposit: (existingProperty.securityDeposit !== undefined && existingProperty.securityDeposit !== null) ? existingProperty.securityDeposit : '',
+        maintenance: (existingProperty.maintenance !== undefined && existingProperty.maintenance !== null) ? existingProperty.maintenance : '',
         negotiable: existingProperty.negotiable || false,
         bhkType: existingProperty.bhkType,
         city: existingProperty.city || 'Bangalore',
@@ -129,7 +129,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         phone: existingProperty.phone,
         whatsapp: existingProperty.whatsapp,
         isActive: existingProperty.isActive,
-        floor: existingProperty.floor || 0,
+        floor: existingProperty.floor !== undefined ? existingProperty.floor : 0,
         totalFloors: existingProperty.totalFloors || 1,
         advancedFeatures: existingProperty.advancedFeatures || []
       });

@@ -93,8 +93,14 @@ function MapEventsHandler({ onMapClick }) {
 // Price Pin Icon Generator
 const createPriceIcon = (price, isActive = false) => {
   let formattedPrice = 'N/A';
-  if (price) {
-    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L` : `₹${(price / 1000).toFixed(0)}k`;
+  if (price !== undefined && price !== null && price > 0) {
+    if (price >= 100000) {
+      formattedPrice = `₹${(price / 100000).toFixed(1)}L`;
+    } else if (price >= 1000) {
+      formattedPrice = `₹${(price / 1000).toFixed(0)}k`;
+    } else {
+      formattedPrice = `₹${price}`;
+    }
   }
   return L.divIcon({
     className: 'custom-price-pin',
