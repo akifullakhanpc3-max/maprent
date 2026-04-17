@@ -175,9 +175,20 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       }
     }
     
-    const parsedAmenities = amenities ? (Array.isArray(amenities) ? amenities : JSON.parse(amenities)) : [];
-    const parsedAllowedFor = allowedFor ? (Array.isArray(allowedFor) ? allowedFor : JSON.parse(allowedFor)) : ['Bachelors', 'Family', 'Couples'];
-    const parsedAdvancedFeatures = advancedFeatures ? (Array.isArray(advancedFeatures) ? advancedFeatures : JSON.parse(advancedFeatures)) : [];
+    const parseJSONField = (field, defaultVal) => {
+      if (!field || field === 'undefined') return defaultVal;
+      if (Array.isArray(field)) return field;
+      try {
+        return JSON.parse(field);
+      } catch (e) {
+        console.error('Error parsing field:', field, e);
+        return defaultVal;
+      }
+    };
+
+    const parsedAmenities = parseJSONField(amenities, []);
+    const parsedAllowedFor = parseJSONField(allowedFor, ['Bachelors', 'Family', 'Couples']);
+    const parsedAdvancedFeatures = parseJSONField(advancedFeatures, []);
 
     const imageUrls = req.files ? req.files.map(file => {
       // If Cloudinary handled it, file.path is a full HTTPS URL
@@ -212,8 +223,8 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
     const property = await newProperty.save();
     res.json(property);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Property creation error:', err);
+    res.status(500).json({ msg: err.message || 'Server Error' });
   }
 });
 

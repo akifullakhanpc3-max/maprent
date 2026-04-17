@@ -291,6 +291,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     <div className="flex-col gap-2">
                       <select 
                         className="input-base cursor-pointer"
+                        required
                         value={isCustomHeadline ? 'Other' : formData.title}
                         onChange={(e) => {
                           const val = e.target.value;
