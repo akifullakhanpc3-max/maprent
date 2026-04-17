@@ -53,10 +53,9 @@ export default function AdminDashboard() {
          <p className="page-subtitle">Monitor platform health, property moderation, and user activity.</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="stats-grid">
         {cards?.map((card, i) => (
-          <div key={i} className="stat-card">
+          <div key={i} className="stat-card" style={{ '--delay': i * 0.8 }}>
               <div className="flex-between items-start">
                 <div className="w-10 h-10 rounded-lg bg-card border border-subtle flex-center text-primary">
                   <card.icon size={20} />

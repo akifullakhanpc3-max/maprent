@@ -39,7 +39,7 @@ export default function UserDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Booking Card */}
-        <div className="console-card flex-col gap-6 group hover:border-primary hover:border-opacity-30 transition-all duration-300">
+        <div className="console-card flex-col gap-6 group hover:border-primary hover:border-opacity-30 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
           <div className="w-12 h-12 bg-card rounded-xl flex-center text-primary border border-subtle shadow-lg group-hover:shadow-primary/5 transition-all">
             <Calendar size={24} />
           </div>
@@ -58,7 +58,7 @@ export default function UserDashboard() {
         </div>
 
         {/* Explore Card */}
-        <div className="console-card flex-col gap-6 group hover:border-primary hover:border-opacity-30 transition-all duration-300">
+        <div className="console-card flex-col gap-6 group hover:border-primary hover:border-opacity-30 transition-all duration-300" style={{ animationDelay: '1.2s' }}>
           <div className="w-12 h-12 bg-card rounded-xl flex-center text-muted border border-subtle shadow-lg group-hover:shadow-primary/5 transition-all">
             <Search size={24} />
           </div>

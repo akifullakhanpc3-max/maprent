@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation, Phone, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation, Phone, MessageSquare, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../api/axios';
 import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import '../styles/components/PropertyListPane.css';
 
 export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute }) {
+  const navigate = useNavigate();
   const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -212,7 +214,10 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                 <div 
                   key={property._id}
                   id={`property-card-${property._id}`}
-                  onClick={() => setHighlightedId(property._id)}
+                  onClick={() => {
+                    setHighlightedId(property._id);
+                    setSelectedProperty(property);
+                  }}
                   className={`premium-sidebar-card ${highlightedId === property._id ? 'is-highlighted' : ''}`}
                 >
                   <div className="card-image-host">
@@ -249,11 +254,22 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                           <Phone size={10} />
                           Call Agent
                        </button>
-                       <button className="quick-action-btn btn-whatsapp" onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/910000000000`, '_blank'); }}>
+                        <button className="quick-action-btn btn-whatsapp" onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/910000000000`, '_blank'); }}>
                           <MessageSquare size={10} />
                           WhatsApp
                        </button>
                     </div>
+                    
+                    <button 
+                      className="btn btn-secondary !h-9 !text-[10px] w-full mt-2 !bg-sidebar-active !text-white !border-transparent hover:!bg-sidebar-muted/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/property/${property._id}`);
+                      }}
+                    >
+                       <ExternalLink size={10} className="mr-2" />
+                       View Full System Details
+                    </button>
                   </div>
                 </div>
               ))}

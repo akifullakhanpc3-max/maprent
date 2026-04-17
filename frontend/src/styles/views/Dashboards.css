@@ -23,7 +23,7 @@
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s var(--trans-gravity);
   box-shadow: var(--shadow-lg);
 }
 
@@ -158,9 +158,11 @@
   border: 1px solid var(--border-subtle);
   padding: var(--s-6);
   box-shadow: var(--shadow-sm);
-  transition: all var(--trans-fast);
+  transition: all var(--trans-base);
   width: 100%;
   min-width: 0;
+  animation: antiGravityFloat 10s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Responsive Flex Utility */
@@ -176,7 +178,8 @@
 }
 
 .console-card:hover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--shadow-premium);
 }
 
 .stats-grid {
@@ -200,6 +203,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
+  animation: antiGravityFloat 8s ease-in-out infinite;
+  animation-delay: calc(var(--delay, 0) * 1s);
+  will-change: transform;
 }
 
 .stat-value {

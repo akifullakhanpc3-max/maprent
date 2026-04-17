@@ -35,10 +35,9 @@ export default function OwnerDashboard() {
         </Link>
       </div>
 
-      {/* Stats Grid */}
       <div className="stats-grid">
         {stats.map((stat, i) => (
-          <div key={i} className="stat-card">
+          <div key={i} className="stat-card" style={{ '--delay': i * 1.1 }}>
               <div className="flex-between items-start">
                  <div className="w-10 h-10 rounded-lg bg-card border border-subtle flex-center text-muted">
                    <stat.icon size={20} />

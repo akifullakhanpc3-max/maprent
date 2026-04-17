@@ -46,8 +46,10 @@
   --radius-full: 9999px;
 
   /* --- 3. Transitions & Performance --- */
-  --trans-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --trans-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-fast: 150ms cubic-bezier(0.23, 1, 0.32, 1);
+  --trans-base: 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  --trans-gravity: cubic-bezier(0.5, 0, 0.3, 1);
+  --anim-float: antiGravityFloat 8s ease-in-out infinite;
 
   /* --- 4. Shadows (Premium Elevation) --- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -159,7 +161,8 @@ button {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-cta {
@@ -234,8 +237,8 @@ button {
 
 .card:hover {
   border-color: var(--border-medium);
-  box-shadow: var(--shadow-md);
-  /* Use transform only on outer wrap if needed, otherwise box-shadow is safer */
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-lg);
 }
 
 .badge {
@@ -602,7 +605,7 @@ button {
   opacity: 0;
 }
 
-.pointer-events-none {
+.pointer-events-none, .decorative-glow {
   pointer-events: none;
 }
 
@@ -611,49 +614,69 @@ button {
 }
 
 /* SaaS Animations */
-.animate-fade-in {
-  animation: fadeIn var(--trans-base) ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp var(--trans-base) ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Anti-Gravity Floating System */
+.animate-float {
+  animation: antiGravityFloat 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-delayed {
+  animation: antiGravityFloat 9s ease-in-out infinite;
+  animation-delay: 1.5s;
+  will-change: transform;
+}
+
+.animate-float-fast {
+  animation: antiGravityFloat 6s ease-in-out infinite;
+  animation-delay: 0.5s;
+  will-change: transform;
+}
+
+@keyframes antiGravityFloat {
+  0% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(1deg); }
+  66% { transform: translateY(4px) rotate(-0.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes fluidFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modernized Base Animations */
+.animate-fade-in {
+  animation: fadeIn 0.8s var(--trans-gravity) forwards;
+}
+
+.animate-slide-up {
+  animation: fluidFadeUp 0.6s var(--trans-base) forwards;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float, .animate-float-delayed, .animate-float-fast,
+  .animate-fade-in, .animate-slide-up, .btn:active {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .animate-fade-in {
+    opacity: 1 !important;
+    animation: fadeIn 0.1s linear forwards !important;
+  }
+}
+
 
 /* Visibility Utilities */
 .hidden {

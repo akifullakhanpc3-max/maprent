@@ -42,10 +42,14 @@
 .brand-link {
   display: flex;
   align-items: center;
-  transition: transform var(--trans-fast);
+  transition: transform var(--trans-gravity);
   flex-shrink: 0;
   max-height: 100%;
   overflow: hidden;
+}
+
+.brand-link:hover {
+  transform: translateY(-1px) scale(1.02);
 }
 
 .brand-logo {
@@ -150,9 +154,10 @@
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform var(--trans-base);
+  transition: transform 0.6s var(--trans-gravity);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  will-change: transform;
 }
 
 @media (max-width: 480px) {

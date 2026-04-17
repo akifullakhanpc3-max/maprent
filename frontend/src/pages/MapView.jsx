@@ -292,6 +292,7 @@ export default function MapView() {
               isActive={highlightedId === property._id || selectedProperty?._id === property._id}
               onClick={() => {
                 setHighlightedId(property._id);
+                setSelectedProperty(property);
                 if (window.innerWidth <= 768) sidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                 const card = document.getElementById(`property-card-${property._id}`);
                 if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });

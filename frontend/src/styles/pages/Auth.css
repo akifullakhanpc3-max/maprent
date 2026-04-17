@@ -21,6 +21,7 @@
   gap: var(--s-6);
   position: relative;
   z-index: 10;
+  animation: fadeIn 1.2s var(--trans-gravity) forwards;
 }
 
 @media (min-width: 768px) {
@@ -73,14 +74,13 @@
 }
 
 .auth-card {
-  background: var(--bg-surface);
-  padding: var(--s-10) var(--s-8);
-  border-radius: 20px;
-  border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
+  animation: antiGravityFloat 10s ease-in-out infinite;
+  animation-delay: 0.5s;
+  will-change: transform;
 }
 
 @media (max-width: 480px) {
