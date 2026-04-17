@@ -216,6 +216,13 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         });
       }
       refresh();
+      
+      // Force global store to sync so discovery map instantly updates!
+      const globalStore = usePropertyStore.getState();
+      if (globalStore && globalStore.fetchProperties) {
+        globalStore.fetchProperties();
+      }
+      
       onClose();
     } catch (err) {
       setError(err.response?.data?.msg || 'An error occurred during listing.');

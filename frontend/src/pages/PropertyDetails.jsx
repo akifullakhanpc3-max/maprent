@@ -195,7 +195,22 @@ export default function PropertyDetails() {
                     <div className="status-pill success !px-4 !py-2 uppercase font-black text-[10px] tracking-widest">Live Asset</div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 pb-6 border-b border-slate-50">
+                    <div className="flex-col gap-1">
+                      <span className="uppercase !text-[8px] font-black tracking-widest text-slate-400">Security Deposit</span>
+                      <p className="text-sm font-black text-slate-700 tracking-tighter">
+                        {(property.securityDeposit !== undefined && property.securityDeposit !== null) ? '₹' + property.securityDeposit.toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                    <div className="flex-col gap-1 border-l border-slate-100 pl-4">
+                      <span className="uppercase !text-[8px] font-black tracking-widest text-slate-400">Maintenance</span>
+                      <p className="text-sm font-black text-slate-700 tracking-tighter">
+                        {property.maintenance ? '₹' + property.maintenance.toLocaleString() : 'Not Specified'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2">
                     <div className="action-stat-card !flex-1 !bg-slate-50 !border-none !p-5 rounded-2xl">
                       <Zap size={18} className="text-amber-500" />
                       <div className="flex-col">
