@@ -1,0 +1,88 @@
+/* d:\akif\ashish\frontend\src\styles\components\DiscoverCities.css */
+
+.discover-cities-container {
+  margin-bottom: var(--s-8);
+  padding: 0 var(--s-1);
+}
+
+.discovery-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discovery-indicator {
+  width: 3px;
+  height: 14px;
+  background: var(--primary-color);
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--primary-color);
+}
+
+.discovery-title {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #fff;
+}
+
+.cities-scroll-viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  margin: 0 calc(-1 * var(--s-4));
+  padding: 0 var(--s-4);
+}
+
+.cities-scroll-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.cities-chip-row {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 4px;
+  flex-wrap: nowrap;
+}
+
+.city-explore-chip {
+  flex: 0 0 auto;
+  height: 38px;
+  padding: 0 16px;
+  background: var(--sidebar-active);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+  color: var(--sidebar-muted);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans-fast);
+  white-space: nowrap;
+}
+
+.city-explore-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.city-explore-chip.is-active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .city-explore-chip {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 11px;
+  }
+}

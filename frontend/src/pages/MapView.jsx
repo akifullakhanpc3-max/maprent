@@ -12,9 +12,20 @@ import 'leaflet/dist/leaflet.css';
 import '../styles/pages/MapView.css';
 
 // Tile Providers for road visualization
+// Professional-Grade Tile Providers (Google Maps–like Density)
 const TILE_PROVIDERS = {
-  streets: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  streets: {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxNativeZoom: 18,
+    maxZoom: 20
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community',
+    maxNativeZoom: 18,
+    maxZoom: 20
+  }
 };
 
 // Leaflet radius auto-fitter
@@ -133,7 +144,7 @@ export default function MapView() {
     const progress = Math.min(st / 500, 1);
     const newHeight = 80 * (1 - progress);
     if (Math.abs(newHeight - mobileMapHeight) > 1) {
-       setMobileMapHeight(newHeight);
+      setMobileMapHeight(newHeight);
     }
   };
 
@@ -206,16 +217,16 @@ export default function MapView() {
     <div className="map-dashboard-layout animate-fade-in">
       <aside className="sidebar-discovery-pane">
         <div className="sidebar-header-glow">
-          <div className="flex-row items-center gap-3 mb-6">
+          {/* <div className="flex-row items-center gap-3 mb-6">
             <div className="brand-icon-box !w-8 !h-8 !bg-accent-blue/10">
               <MapIcon size={18} className="text-accent-blue" />
             </div>
             <h1 className="brand-name luxury-title text-white">OCCUPRA</h1>
-          </div>
-          <p className="text-[10px] text-slate-400 -mt-5 mb-6 font-medium tracking-wide uppercase">Find your perfect space, your way.</p>
-          <div className="sidebar-search-wrap">
+          </div> */}
+          {/* <p className="text-[10px] text-slate-400 -mt-5 mb-6 font-medium tracking-wide uppercase">Find your perfect space, your way.</p> */}
+          {/* <div className="sidebar-search-wrap">
             <MapSearchBar onSearch={handleLocationSelect} />
-          </div>
+          </div> */}
         </div>
 
         <div className="sidebar-content-scroll custom-scrollbar" onScroll={handleSidebarScroll} ref={sidebarRef}>
@@ -234,6 +245,7 @@ export default function MapView() {
               highlightedId={highlightedId}
               setHighlightedId={setHighlightedId}
               onShowRoute={handleShowRoute}
+              onSearchArea={handleSearchArea}
             />
           )}
         </div>
@@ -249,10 +261,14 @@ export default function MapView() {
           className="luxury-leaflet-map"
           ref={mapRef}
           zoomControl={false}
+          minZoom={3}
+          maxZoom={20}
         >
           <TileLayer
-            attribution='&copy; ESRI'
-            url={TILE_PROVIDERS[viewStyle]}
+            attribution={TILE_PROVIDERS[viewStyle].attribution}
+            url={TILE_PROVIDERS[viewStyle].url}
+            maxNativeZoom={TILE_PROVIDERS[viewStyle].maxNativeZoom}
+            maxZoom={TILE_PROVIDERS[viewStyle].maxZoom}
           />
           <MapEventsHandler onMapClick={handleMapClick} />
 
@@ -303,31 +319,32 @@ export default function MapView() {
 
         {/* Floating Controls */}
         <div className="map-overlay-center-top">
-          <button onClick={handleSearchArea} className="search-area-btn shadow-premium">
+          {/* <button onClick={handleSearchArea} className="search-area-btn shadow-premium">
             <Search size={14} />
-            <span>Discover Properties</span>
-          </button>
+            <span>Discover All Properties</span>
+          </button> */}
+          <MapSearchBar onSearch={handleLocationSelect} />
         </div>
 
         <div className="map-overlay-bottom-right flex-col gap-3">
           <div className="zoom-controls-stack shadow-premium">
-              <button 
-                onClick={() => setViewStyle(prev => prev === 'streets' ? 'satellite' : 'streets')}
-                className="zoom-btn"
-                title="Toggle Base Map"
-              >
-                 <Layers size={18} />
-              </button>
-              <div className="zoom-divider" />
-              <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
-                 <LocateFixed size={18} />
-              </button>
-              <div className="zoom-divider" />
-              <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
-              <div className="zoom-divider" />
-              <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
+            <button
+              onClick={() => setViewStyle(prev => prev === 'streets' ? 'satellite' : 'streets')}
+              className="zoom-btn"
+              title="Toggle Base Map"
+            >
+              <Layers size={18} />
+            </button>
+            <div className="zoom-divider" />
+            <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
+              <LocateFixed size={18} />
+            </button>
+            <div className="zoom-divider" />
+            <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
+            <div className="zoom-divider" />
+            <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
           </div>
-          
+
           <button onClick={() => setIsFilterOpen(true)} className="map-floating-action-btn shadow-premium">
             <Filter size={20} />
           </button>

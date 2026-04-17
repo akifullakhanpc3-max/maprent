@@ -12,6 +12,12 @@ const auth = async (req, res, next) => {
     const bearer = token.split(' ')[1] || token; // handle 'Bearer TOKEN' or just 'TOKEN'
     const decoded = jwt.verify(bearer, process.env.JWT_SECRET);
     
+    // Safety check: Ensure the payload structure matches expectations
+    if (!decoded || !decoded.user) {
+      console.warn('[AUTH_RESILIENCE] Malformed token payload detected');
+      return res.status(401).json({ msg: 'Token parsing failed or malformed signal' });
+    }
+
     // Attach decoded user data to request
     req.user = {
       id: decoded.user.id,

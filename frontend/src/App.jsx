@@ -47,7 +47,7 @@ const RootRedirect = () => {
   const { isAuthenticated, user, loading } = useAuthStore();
   if (loading) return <LoadingSpinner fullScreen text="Initialising Core Systems" />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  
+
   // Master Admin also goes to admin dashboard but sees more options
   if (user.role === 'master_admin' || user.role === 'admin') {
     return <Navigate to="/admin/dashboard" replace />;
@@ -78,31 +78,31 @@ function App() {
 
         {/* TENANT PORTAL (User Role) */}
         <Route path="/user" element={<UserLayout />}>
-           <Route path="dashboard" element={<UserDashboard />} />
-           <Route path="explore" element={<div style={{ height: 'calc(100vh - 120px)' }}><ExploreProperties /></div>} />
-           <Route path="bookings" element={<MyBookings />} />
-           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
-           <Route index element={<Navigate to="/user/dashboard" replace />} />
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="explore" element={<div style={{ height: 'calc(100vh - 120px)' }}><ExploreProperties /></div>} />
+          <Route path="bookings" element={<MyBookings />} />
+          <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
+          <Route index element={<Navigate to="/user/dashboard" replace />} />
         </Route>
 
         {/* LANDLORD PORTAL (Owner Role) */}
         <Route path="/owner" element={<OwnerLayout />}>
-           <Route path="dashboard" element={<OwnerDashboard />} />
-           <Route path="properties" element={<ManageProperties />} />
-           <Route path="bookings" element={<ManageBookings />} />
-           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
-           <Route index element={<Navigate to="/owner/dashboard" replace />} />
+          <Route path="dashboard" element={<OwnerDashboard />} />
+          <Route path="properties" element={<ManageProperties />} />
+          <Route path="bookings" element={<ManageBookings />} />
+          <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
+          <Route index element={<Navigate to="/owner/dashboard" replace />} />
         </Route>
 
         {/* PLATFORM OPERATIONS (Admin Role) */}
         <Route path="/admin" element={<AdminLayout />}>
-           <Route path="dashboard" element={<AdminDashboard />} />
-           <Route path="users" element={<AdminUsers />} />
-           <Route path="properties" element={<AdminProperties />} />
-           <Route path="bookings" element={<AdminBookings />} />
-           <Route path="logs" element={<AdminLogs />} />
-           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
-           <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="properties" element={<AdminProperties />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="logs" element={<AdminLogs />} />
+          <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
 
         {/* SYSTEM REDIRECTORS */}

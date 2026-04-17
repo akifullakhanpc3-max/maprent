@@ -6,10 +6,14 @@
   left: 0;
   width: 100%;
   height: 80px;
-  z-index: 6000; /* ABOVE Map (1000) and Sidebar (5000) */
+  /* Reverted to compact height */
+  z-index: 6000;
+  /* ABOVE Map (1000) and Sidebar (5000) */
   transition: all var(--trans-base);
-  background: rgba(255, 255, 255, 0.7); /* Base transparency for glass look */
-  backdrop-filter: blur(12px); /* Constant high-end blur */
+  background: rgba(255, 255, 255, 0.7);
+  /* Base transparency for glass look */
+  backdrop-filter: blur(12px);
+  /* Constant high-end blur */
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
@@ -29,8 +33,11 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 var(--s-4); /* Reduced for better mobile usage */
+  padding: 0 var(--s-4);
+  /* Reduced for better mobile usage */
 }
+
+
 
 @media (min-width: 1024px) {
   .navbar-container {
@@ -44,12 +51,24 @@
   align-items: center;
   transition: transform var(--trans-gravity);
   flex-shrink: 0;
-  max-height: 100%;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .brand-link:hover {
   transform: translateY(-1px) scale(1.02);
+}
+
+.logo-header {
+  height: 130px;
+  /* Enlarged size within compact navbar */
+  width: auto;
+  margin: 4px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  transform: scale(1.8);
+  z-index: 6001;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
 }
 
 .brand-logo {
@@ -128,7 +147,8 @@
   inset: 0;
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 5000; /* Higher than map controls */
+  z-index: 5000;
+  /* Higher than map controls */
   opacity: 0;
   visibility: hidden;
   transition: all var(--trans-base);
@@ -146,7 +166,8 @@
   top: 0;
   right: 0;
   width: 100%;
-  max-width: 300px; /* Slimmer for better accessibility */
+  max-width: 300px;
+  /* Slimmer for better accessibility */
   height: 100vh;
   height: 100dvh;
   background: var(--bg-surface);
@@ -162,7 +183,8 @@
 
 @media (max-width: 480px) {
   .mobile-menu-pane {
-    max-width: 100%; /* Full screen on very small devices */
+    max-width: 100%;
+    /* Full screen on very small devices */
   }
 }
 
@@ -204,7 +226,8 @@
   font-size: 15px;
 }
 
-.mobile-nav-item:hover, .mobile-nav-item.active {
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
   background: var(--bg-soft);
   color: var(--accent-blue);
 }
@@ -216,12 +239,19 @@
 }
 
 @media (max-width: 1023px) {
-  .nav-center-search { display: none; }
-  .hidden-mobile { display: none !important; }
+  .nav-center-search {
+    display: none;
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
 }
 
 @media (min-width: 1024px) {
-  .visible-mobile { display: none !important; }
+  .visible-mobile {
+    display: none !important;
+  }
 }
 
 .mobile-nav-icon {

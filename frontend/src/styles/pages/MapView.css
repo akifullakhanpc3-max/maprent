@@ -59,6 +59,7 @@
 .sidebar-content-scroll {
   flex: 1;
   overflow-y: auto;
+  margin-top: 3px;
   padding: 0 var(--s-4);
   display: flex;
   flex-direction: column;
@@ -352,19 +353,42 @@
   }
 }
 
-/* Custom Overrides for Leaflet */
-.luxury-leaflet-map .leaflet-tile {
-  filter: grayscale(1) contrast(1.1) brightness(1.05);
-  opacity: 0.9;
-}
+/* Custom Overrides for Leaflet Clarity (Google Maps Style) */
 
 .luxury-leaflet-map .leaflet-container {
-  background: #f8fafc !important;
+  background: #fdfdfd !important; /* Neutral background similar to Google Maps */
+  outline: none;
+}
+
+/* Ensure Tile Layer is CRISP and High Contrast */
+.luxury-leaflet-map .leaflet-tile-pane {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+.luxury-leaflet-map .leaflet-tile {
+  filter: none !important;
+  opacity: 1 !important;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Clearer Roads & Streets rendering */
+.luxury-leaflet-map .leaflet-layer {
+  z-index: 1;
+}
+
+/* Markers should always pop above the streets */
+.luxury-leaflet-map .leaflet-marker-pane {
+  z-index: 600 !important;
+}
+
+.luxury-leaflet-map .leaflet-popup-pane {
+  z-index: 700 !important;
 }
 
 .premium-discovery-popup .leaflet-popup-content-wrapper {
   border-radius: 16px !important;
-  box-shadow: var(--shadow-premium) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
   border: 1px solid var(--border-subtle) !important;
 }
 

@@ -41,7 +41,7 @@ export default function Navbar() {
         <Link to="/" className="brand-link" onClick={closeMenu}>
           {logo ? <img src={logo} alt="Occupra" className="logo-header" /> :
             <span className="auth-brand-text">Occupra</span>}
-          <span className="brand-tagline hidden-mobile">Find your perfect space, your way.</span>
+          {/* <span className="brand-tagline hidden-mobile">Find your perfect space, your way.</span> */}
         </Link>
 
 

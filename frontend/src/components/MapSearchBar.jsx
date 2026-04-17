@@ -67,7 +67,7 @@ export default function MapSearchBar({ onSearch }) {
           value={query}
           onChange={handleInputChange}
           onFocus={() => query.length > 2 && setShowPortal(true)}
-          placeholder="Search by area or landmark..."
+          placeholder="Search by city, area or landmark..."
           className="search-input-field"
         />
 

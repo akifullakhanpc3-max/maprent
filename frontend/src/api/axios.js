@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-export const BASE_URL = 'https://maprent-1.onrender.com';
+// Use environment variable if available, fallback to legacy Render URL
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://maprent-1.onrender.com';
 
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -16,6 +17,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to handle auth failures globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn('[AUTH_INTERCEPTOR] Session invalid or forbidden access. Purging token...');
+      localStorage.removeItem('token');
+      // Optional: window.location.href = '/login'; 
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default api;

@@ -8,14 +8,21 @@ export const useAuthStore = create((set, get) => ({
   loading: true,
 
   loadUser: async () => {
-    if (!localStorage.getItem('token')) {
-      set({ loading: false });
+    const token = localStorage.getItem('token');
+    if (!token || token === 'undefined') {
+      localStorage.removeItem('token');
+      set({ loading: false, isAuthenticated: false });
       return;
     }
     try {
       const res = await api.get('/auth/me');
-      set({ user: res.data, isAuthenticated: true, loading: false });
+      if (res.data) {
+        set({ user: res.data, isAuthenticated: true, loading: false });
+      } else {
+        throw new Error('Signal integrity failure');
+      }
     } catch (err) {
+      console.warn('[AUTH_STORE] Verification failed. Session purged.');
       localStorage.removeItem('token');
       set({ user: null, token: null, isAuthenticated: false, loading: false });
     }

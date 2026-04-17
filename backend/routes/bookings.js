@@ -5,6 +5,31 @@ const { requireUser, requireOwner } = require('../middleware/roles');
 const Booking = require('../models/Booking');
 const Property = require('../models/Property');
 
+// @route   GET /api/bookings
+// @desc    Fail-safe root route for discovery probes
+// @access  Private (Admin or Owner)
+router.get('/', auth, async (req, res) => {
+  try {
+    // If Admin, they see all. If Owner, they see their incoming.
+    if (req.user.role === 'admin') {
+      const bookings = await Booking.find().populate('propertyId', 'title');
+      return res.json(bookings);
+    } 
+    
+    if (req.user.role === 'owner') {
+      const bookings = await Booking.find({ ownerId: req.user.id }).populate('propertyId', 'title');
+      return res.json(bookings);
+    }
+
+    // Default for Tenants: return empty or their own if they hit this directly
+    const bookings = await Booking.find({ userId: req.user.id }).populate('propertyId', 'title');
+    res.json(bookings);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route   POST /api/bookings
 // @desc    Submit a new booking request
 // @access  Private (Tenants)
