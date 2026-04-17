@@ -164,7 +164,7 @@ const aiService = require('../services/aiService');
 
 router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, res) => {
   try {
-    const { title, description, price, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors, advancedFeatures } = req.query.city ? req.query : req.body;
+    const { title, description, price, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors, advancedFeatures, securityDeposit, maintenance, negotiable } = req.query.city ? req.query : req.body;
     
     let finalDescription = description;
     if (useAI) {
@@ -203,6 +203,9 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       title,
       description: finalDescription,
       price: Number(price),
+      securityDeposit: (securityDeposit !== undefined && securityDeposit !== '') ? Number(securityDeposit) : null,
+      maintenance: (maintenance !== undefined && maintenance !== '') ? Number(maintenance) : null,
+      negotiable: negotiable === 'true' || negotiable === true,
       bhkType,
       city,
       amenities: parsedAmenities,
@@ -240,11 +243,14 @@ router.put('/:id', [auth, requireOwner], async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    const { title, description, price, bhkType, phone, whatsapp, isActive, lat, lng, floor, totalFloors, advancedFeatures } = req.body;
+    const { title, description, price, bhkType, phone, whatsapp, isActive, lat, lng, floor, totalFloors, advancedFeatures, securityDeposit, maintenance, negotiable } = req.body;
     
     if (title) property.title = title;
     if (description) property.description = description;
     if (price) property.price = Number(price);
+    if (securityDeposit !== undefined) property.securityDeposit = (securityDeposit !== '') ? Number(securityDeposit) : null;
+    if (maintenance !== undefined) property.maintenance = (maintenance !== '') ? Number(maintenance) : null;
+    if (negotiable !== undefined) property.negotiable = negotiable === 'true' || negotiable === true;
     if (bhkType) property.bhkType = bhkType;
     if (phone) property.phone = phone;
     if (whatsapp) property.whatsapp = whatsapp;

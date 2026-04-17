@@ -19,6 +19,9 @@ async function createSampleProperty() {
       title: 'Sample Urban Apartment',
       description: 'A premium 2BHK apartment with city views and modern amenities.',
       price: 45000,
+      securityDeposit: 90000,
+      maintenance: 3000,
+      negotiable: true,
       bhkType: '2BHK',
       city: 'Bangalore',
       location: {

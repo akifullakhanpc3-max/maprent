@@ -91,7 +91,10 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
               {/* Hardened Price Hero */}
               <div className="master-price-hero">
                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Monthly Subscription</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2 flex items-center gap-2">
+                      Monthly Subscription
+                      {property.negotiable && <span className="bg-indigo-500/20 text-indigo-200 px-2 py-0.5 rounded text-[8px]">Negotiable</span>}
+                    </span>
                     <div className="flex items-baseline gap-2">
                        <span className="price-value-master tracking-tighter">{property.price ? '₹' + property.price.toLocaleString() : 'Price N/A'}</span>
                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">/ Node</span>
@@ -100,7 +103,18 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                  <div className="hidden lg:block h-16 w-px bg-white/10" />
                  <div className="flex flex-col">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Security Deposit</span>
-                    <span className="text-xl md:text-2xl font-bold text-slate-200 tracking-tight">{property.price ? '₹' + (property.price * 2).toLocaleString() : 'N/A'}</span>
+                    <span className="text-xl md:text-2xl font-bold text-slate-200 tracking-tight">
+                       {(property.securityDeposit !== undefined && property.securityDeposit !== null)
+                          ? '₹' + property.securityDeposit.toLocaleString() 
+                          : 'N/A'}
+                    </span>
+                 </div>
+                 <div className="hidden lg:block h-16 w-px bg-white/10" />
+                 <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Maintenance</span>
+                    <span className="text-xl md:text-2xl font-bold text-slate-200 tracking-tight">
+                       {property.maintenance ? '₹' + property.maintenance.toLocaleString() : 'Not Specified'}
+                    </span>
                  </div>
               </div>
 

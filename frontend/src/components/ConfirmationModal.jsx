@@ -7,13 +7,13 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
   const isDanger = type === 'danger';
 
   return (
-    <div className="modal-overlay">
-      <div className="mobile-overlay visible" onClick={onClose} />
-      
-      <div 
-        className="modal-container animate-fade-in animate-scale-in !max-w-sm"
-        style={{ position: 'relative', zIndex: 5000 }}
-      >
+    <>
+      <div className="glass-backdrop active" onClick={onClose} style={{ zIndex: 9900 }} />
+      <div className="modal-overlay-container" style={{ zIndex: 9990 }}>
+        <div 
+          className="modal-content-standard animate-fade-in animate-scale-in"
+          style={{ position: 'relative', maxWidth: '400px', margin: 'auto' }}
+        >
         <div className="modal-header">
           <div className="modal-title-stack">
             <h3 className="modal-title">{title}</h3>
@@ -37,7 +37,7 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
           <div className="flex-row gap-3">
             <button 
               onClick={onConfirm} 
-              className={`btn flex-1 ${isDanger ? 'btn-danger' : 'btn-primary'}`}
+              className={`btn flex-1 ${isDanger ? 'bg-rose-600 hover:bg-rose-700 text-white border-none shadow-md' : 'btn-primary'}`}
             >
               {confirmText}
             </button>
@@ -50,6 +50,7 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

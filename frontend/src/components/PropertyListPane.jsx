@@ -147,10 +147,13 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                 </div>
 
                 <div className="card-info-host">
-                  <div className="card-header-row">
+                  <div className="card-header-row flex items-start justify-between">
                     <h3 className="card-title-host">{property.title}</h3>
-                    <div className="card-price-host">
-                      {property.price ? '₹' + property.price.toLocaleString() : 'Price N/A'}
+                    <div className="flex-col items-end gap-1">
+                      <div className="card-price-host">
+                        {property.price ? '₹' + property.price.toLocaleString() : 'Price N/A'}
+                      </div>
+                      {property.negotiable && <span className="text-[8px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Negotiable</span>}
                     </div>
                   </div>
 

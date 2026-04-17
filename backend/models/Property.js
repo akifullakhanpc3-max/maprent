@@ -26,6 +26,20 @@ const propertySchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  securityDeposit: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  maintenance: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  negotiable: {
+    type: Boolean,
+    default: false,
+  },
   bhkType: {
     type: String,
     required: true,

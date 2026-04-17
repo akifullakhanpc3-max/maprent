@@ -71,6 +71,9 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     title: '',
     description: '',
     price: '',
+    securityDeposit: '',
+    maintenance: '',
+    negotiable: false,
     bhkType: '1BHK',
     city: 'Bangalore',
     amenities: [],
@@ -116,6 +119,9 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         title: existingProperty.title,
         description: existingProperty.description,
         price: existingProperty.price,
+        securityDeposit: existingProperty.securityDeposit || '',
+        maintenance: existingProperty.maintenance || '',
+        negotiable: existingProperty.negotiable || false,
         bhkType: existingProperty.bhkType,
         city: existingProperty.city || 'Bangalore',
         amenities: existingProperty.amenities || [],
@@ -324,15 +330,59 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     </div>
                   </div>
 
+                  <div className="flex-col gap-3 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <label className="label-base !m-0 !mb-2 flex items-center gap-2">
+                      <Info size={14} className="text-indigo-500" /> Pricing Details
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Base Price (₹) *</label>
+                        <input
+                          type="number" name="price" required min="1"
+                          value={formData.price} onChange={handleChange}
+                          className="input-base !h-10" placeholder="25000"
+                        />
+                      </div>
+                      <div className="flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Security Deposit (₹) *</label>
+                        <input
+                          type="number" name="securityDeposit" required min="0"
+                          value={formData.securityDeposit} onChange={handleChange}
+                          className="input-base !h-10" placeholder="e.g. 50000"
+                        />
+                      </div>
+                      <div className="flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Maintenance (Monthly)</label>
+                        <input
+                          type="number" name="maintenance"
+                          value={formData.maintenance} onChange={handleChange}
+                          className="input-base !h-10" placeholder="Optional"
+                        />
+                      </div>
+                      <div className="flex-col gap-2 justify-center">
+                        <label className="flex items-center gap-3 mt-4 cursor-pointer w-max">
+                          <input 
+                            type="checkbox" name="negotiable" 
+                            checked={formData.negotiable} onChange={handleChange}
+                            className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                          />
+                          <span className="text-xs font-bold text-slate-600">Price is Negotiable</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex-row gap-4">
                     <div className="flex-1 flex-col gap-2">
-                      <label className="label-base">Monthly Price (₹)</label>
-                      <input
-                        type="number" name="price" required
-                        value={formData.price} onChange={handleChange}
-                        className="input-base"
-                        placeholder="25000"
-                      />
+                      <label className="label-base">Topology</label>
+                      <select name="bhkType" value={formData.bhkType} onChange={handleChange} className="input-base">
+                        <option value="1BHK">1BHK</option>
+                        <option value="2BHK">2BHK</option>
+                        <option value="3BHK">3BHK</option>
+                        <option value="4BHK">4BHK</option>
+                        <option value="Studio">Studio</option>
+                        <option value="Villa">Villa</option>
+                      </select>
                     </div>
                     <div className="flex-1 flex-col gap-2">
                       <label className="label-base">Floor Context</label>
