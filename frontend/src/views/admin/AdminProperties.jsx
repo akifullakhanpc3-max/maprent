@@ -195,15 +195,15 @@ export default function AdminProperties() {
                             <div className="flex items-center gap-2 pr-2 border-r border-slate-100">
                                <button 
                                  onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'approved', title: p.title }) }}
-                                 className="mod-btn-circle approve" title="Approve Entry"
+                                 className="btn btn-primary !h-8 !px-3 gap-2 text-[10px] uppercase font-bold tracking-wider bg-emerald-500 hover:bg-emerald-600 border-none" title="Authorize Entry"
                                >
-                                 <CheckCircle size={18} />
+                                 <CheckCircle size={14} /> Authorize
                                </button>
                                <button 
                                  onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'rejected', title: p.title }) }}
-                                 className="mod-btn-circle reject" title="Reject Entry"
+                                 className="btn !h-8 !px-3 gap-2 text-[10px] uppercase font-bold tracking-wider border border-rose-200 text-rose-600 bg-rose-50 hover:bg-rose-100" title="Reject Entry"
                                >
-                                 <XCircle size={18} />
+                                 <XCircle size={14} /> Reject
                                </button>
                             </div>
                           )}
