@@ -21,8 +21,9 @@ export default function AdminLogin() {
       await login(formData.email.trim(), formData.password);
       
       const { user } = useAuthStore.getState();
-      if (user.role !== 'admin' && user.role !== 'master_admin') {
-         throw new Error('Secondary administrative credentials required for access.');
+      const adminRoles = ['admin', 'master_admin', 'employee', 'worker'];
+      if (!adminRoles.includes(user.role)) {
+         throw new Error('Access denied. No administrative privileges found on this account.');
       }
 
       window.location.href = '/admin/dashboard';
