@@ -86,6 +86,9 @@
   animation: fadeSlide 0.2s ease;
 }
 
+
+
+
 /* Smooth entry */
 @keyframes fadeSlide {
   from {

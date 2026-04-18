@@ -48,7 +48,7 @@ import StatusOverlay from './components/StatusOverlay';
 const RootRedirect = () => {
   const { isAuthenticated, user, loading } = useAuthStore();
   if (loading) return <LoadingSpinner fullScreen text="Initialising Core Systems" />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
 
   const adminRoles = ['master_admin', 'admin', 'employee', 'worker'];
   if (adminRoles.includes(user.role)) {

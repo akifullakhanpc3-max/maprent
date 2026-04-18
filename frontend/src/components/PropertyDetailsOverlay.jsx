@@ -2,11 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { X, MapPin, Grid, CheckCircle2, Share2, Heart, ShieldCheck, Zap, Clock, Navigation2, Phone, MessageSquare, ChevronRight, Layers, Maximize } from 'lucide-react';
 import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
-import { BASE_URL } from '../api/axios';
+import api, { BASE_URL } from '../api/axios';
 
 export default function PropertyDetailsOverlay({ property, onClose, onShowRoute }) {
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('Spam');
+  const [reportDetails, setReportDetails] = useState('');
+  const [reportStatus, setReportStatus] = useState({ loading: false, success: false, error: '' });
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    setReportStatus({ loading: true, success: false, error: '' });
+    try {
+      await api.post(`/properties/${property._id}/report`, {
+        reason: reportReason,
+        details: reportDetails
+      });
+      setReportStatus({ loading: false, success: true, error: '' });
+      setTimeout(() => setShowReportModal(false), 2000);
+    } catch (err) {
+      setReportStatus({ loading: false, success: false, error: 'Failed to submit report. Please try again.' });
+    }
+  };
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -73,6 +92,11 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                  <div className="bg-emerald-500 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg">
                     Live Now
                  </div>
+                 {property.isPinned && (
+                    <div className="bg-amber-500 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg animate-pulse">
+                      Pinned · {property.pinnedAt ? new Date(property.pinnedAt).toLocaleDateString() : 'Featured'}
+                    </div>
+                  )}
               </div>
            </div>
 
@@ -118,46 +142,30 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                  </div>
               </div>
 
-              {/* Hardened Tactical Grid */}
-              <div className="master-spec-grid">
-                  <div className="master-spec-item">
-                     <div className="spec-icon-host bg-indigo-50 text-indigo-600">
-                        <Layers size={16} strokeWidth={2.5} />
-                     </div>
-                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Topology</span>
-                        <span className="text-sm font-black text-slate-800 leading-none">{property.bhkType}</span>
-                     </div>
+              {/* Unit Specifications Grid */}
+              <div className="flex flex-col gap-5">
+                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-4">
+                  Unit Specification
+                  <div className="h-px bg-slate-100 grow" />
+                </h4>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="flex flex-col p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Total Area</span>
+                    <span className="text-xs font-black text-slate-800 uppercase">{property.sqft || '1200'} SQFT</span>
                   </div>
-                  <div className="master-spec-item">
-                     <div className="spec-icon-host bg-amber-50 text-amber-600">
-                        <Maximize size={16} strokeWidth={2.5} />
-                     </div>
-                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Verticality</span>
-                        <span className="text-sm font-black text-slate-800 leading-none">
-                           {property.floor !== undefined ? (property.floor === 0 ? 'Ground Lvl' : `${property.floor}${getFloorSuffix(property.floor)} Floor`) : 'Contact'}
-                        </span>
-                     </div>
+                  <div className="flex flex-col p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Food Habit</span>
+                    <span className="text-xs font-black text-slate-800 uppercase">{property.foodPreference || 'Any'}</span>
                   </div>
-                  <div className="master-spec-item">
-                     <div className="spec-icon-host bg-emerald-50 text-emerald-600">
-                        <Clock size={16} strokeWidth={2.5} />
-                     </div>
-                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Activation</span>
-                        <span className="text-sm font-black text-slate-800 leading-none">Immediate</span>
-                     </div>
+                  <div className="flex flex-col p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Community</span>
+                    <span className="text-xs font-black text-slate-800 uppercase">{property.propertyType || 'Non-Gated'}</span>
                   </div>
-                  <div className="master-spec-item">
-                     <div className="spec-icon-host bg-rose-50 text-rose-600">
-                        <ShieldCheck size={16} strokeWidth={2.5} />
-                     </div>
-                     <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Integrity</span>
-                        <span className="text-sm font-black text-slate-800 leading-none">Verified</span>
-                     </div>
+                  <div className="flex flex-col p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Pet Policy</span>
+                    <span className="text-xs font-black text-slate-800 uppercase">{property.petsAllowed ? 'Allowed' : 'Not Allowed'}</span>
                   </div>
+                </div>
               </div>
 
               {/* Narrative Section */}
@@ -169,6 +177,13 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                  <p className="text-slate-600 leading-relaxed text-base md:text-lg font-medium">
                     {property.description || "Experience premium living in this meticulously designed unit, optimized for modern lifestyles with high-end finishes and neural-verified security protocols."}
                  </p>
+                 <button 
+                    onClick={() => setShowReportModal(true)}
+                    className="w-fit text-[10px] font-black text-rose-500 uppercase tracking-widest hover:text-rose-700 transition-colors flex items-center gap-2 mt-2"
+                  >
+                    <ShieldCheck size={14} />
+                    Report this Listing
+                  </button>
               </div>
 
               {/* Ecosystem (Amenities) */}
@@ -262,6 +277,59 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
           propertyId={property._id}
           propertyTitle={property.title}
         />
+      )}
+
+      {showReportModal && (
+        <div className="fixed inset-0 z-[8000] flex-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowReportModal(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl animate-fade-in">
+            <h2 className="text-xl font-black text-slate-900 mb-2">Report Property</h2>
+            <p className="text-xs font-medium text-slate-400 mb-6 uppercase tracking-widest">Help us keep Occupra safe</p>
+            
+            {reportStatus.success ? (
+              <div className="p-6 bg-emerald-50 text-emerald-600 rounded-2xl text-center font-black text-sm">
+                Report submitted successfully!
+              </div>
+            ) : (
+              <form onSubmit={handleReportSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase">Reason for report</label>
+                  <select 
+                    value={reportReason} 
+                    onChange={(e) => setReportReason(e.target.value)}
+                    className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-800"
+                  >
+                    <option value="Spam">Spam</option>
+                    <option value="Fake Listing">Fake Listing</option>
+                    <option value="Incorrect Info">Incorrect Info</option>
+                    <option value="Offensive Content">Offensive Content</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase">Additional Details</label>
+                  <textarea 
+                    value={reportDetails}
+                    onChange={(e) => setReportDetails(e.target.value)}
+                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium text-slate-800 min-h-[100px] resize-none"
+                    placeholder="Tell us what's wrong..."
+                  />
+                </div>
+                {reportStatus.error && <p className="text-xs font-bold text-rose-500">{reportStatus.error}</p>}
+                <div className="flex gap-3 mt-4">
+                  <button type="button" onClick={() => setShowReportModal(false)} className="flex-1 h-12 rounded-xl text-slate-400 font-bold text-xs">CANCEL</button>
+                  <button 
+                    type="submit" 
+                    disabled={reportStatus.loading}
+                    className="flex-1 h-12 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20"
+                  >
+                    {reportStatus.loading ? 'SUBMITTING...' : 'SUBMIT REPORT'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

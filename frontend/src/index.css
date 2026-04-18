@@ -5,7 +5,7 @@
   --bg-card: #FFFFFF;
   --bg-hover: #F1F5F9;
   --bg-soft: #F1F5F9;
-  
+
   /* Sidebar & Navigation (Deep Navy #0D1B3E) */
   --sidebar-bg: #0D1B3E;
   --sidebar-active: #162955;
@@ -20,7 +20,7 @@
   --primary-color: #2563EB;
   --primary-hover: #1D4ED8;
   --primary-transparent: rgba(37, 99, 235, 0.08);
-  
+
   --accent-blue: #2563EB;
   --success-color: #10B981;
   --error-color: #EF4444;
@@ -61,7 +61,7 @@
   /* --- 5. Typography (Luxury Mix) --- */
   --font-luxury: 'Playfair Display', serif;
   --font-main: 'DM Sans', system-ui, sans-serif;
-  
+
   --ts-xs: 11px;
   --ts-sm: 13px;
   --ts-base: 15px;
@@ -84,7 +84,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  overflow-wrap: break-word; /* Global text overflow protection */
+  overflow-wrap: break-word;
+  /* Global text overflow protection */
 }
 
 /* Allow Map elements (Leaflet) to bypass fluidity resets */
@@ -92,18 +93,36 @@
   max-width: 100%;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden; /* Absolute safeguard against horizontal scroll */
+  overflow-x: hidden;
+  /* Absolute safeguard against horizontal scroll */
   height: 100%;
   min-height: 100dvh;
 }
 
+/* Global Interactive Cursors */
+a,
+button,
+[role="button"],
+.cursor-pointer,
+.btn,
+.tab-chip-item {
+  cursor: pointer;
+}
+
+/* Global Reset for Text Fields */
+input,
+textarea {
+  cursor: text;
+}
+
 /* Global Responsive Media Reset - EXCLUDING Map Tiles */
-img:not(.leaflet-container img), 
-video, 
-canvas, 
+img:not(.leaflet-container img),
+video,
+canvas,
 svg:not(.leaflet-container svg) {
   max-width: 100%;
   height: auto;
@@ -128,7 +147,6 @@ a {
 button {
   background: none;
   border: none;
-  cursor: pointer;
   font-family: inherit;
   outline: none;
 }
@@ -148,7 +166,8 @@ button {
   white-space: nowrap;
   border: 1px solid transparent;
   height: 44px;
-  flex-shrink: 0; /* Prevent squashing in flex containers */
+  flex-shrink: 0;
+  /* Prevent squashing in flex containers */
   /* SaaS Standard */
 }
 
@@ -289,8 +308,10 @@ button {
   display: flex;
   gap: var(--s-2);
   padding: var(--s-1) 0;
-  flex: 1;                /* 🔥 ADDED */
-  min-width: 0;           /* 🔥 CRITICAL */
+  flex: 1;
+  /* 🔥 ADDED */
+  min-width: 0;
+  /* 🔥 CRITICAL */
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -329,13 +350,15 @@ button {
   align-items: center;
   gap: 12px;
   padding-right: 8px;
-  flex: 1;              /* 🔥 ADDED */
+  flex: 1;
+  /* 🔥 ADDED */
   min-width: 0;
   overflow: hidden;
 }
 
 .tab-chip-item {
-  flex: 0 0 auto;       /* 🔥 FIX */
+  flex: 0 0 auto;
+  /* 🔥 FIX */
   height: 40px;
   padding: 0 var(--s-4);
   background: var(--bg-surface);
@@ -358,7 +381,8 @@ button {
 }
 
 .tab-chip-item.active {
-  background: var(--primary-color);   /* FIXED */
+  background: var(--primary-color);
+  /* FIXED */
   border-color: var(--primary-color);
   color: white;
   box-shadow: var(--shadow-sm);
@@ -370,8 +394,10 @@ button {
   justify-content: space-between;
   gap: var(--s-4);
   width: 100%;
-  min-width: 0;           /* 🔥 CRITICAL FIX */
-  overflow: hidden;       /* prevent overflow */
+  min-width: 0;
+  /* 🔥 CRITICAL FIX */
+  overflow: hidden;
+  /* prevent overflow */
 }
 
 /* Layout Utilities */
@@ -406,6 +432,22 @@ button {
 
 .max-w-7xl {
   max-width: 80rem;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .flex {
@@ -616,7 +658,8 @@ button {
   opacity: 0;
 }
 
-.pointer-events-none, .decorative-glow {
+.pointer-events-none,
+.decorative-glow {
   pointer-events: none;
 }
 
@@ -648,10 +691,21 @@ button {
 }
 
 @keyframes antiGravityFloat {
-  0% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-8px) rotate(1deg); }
-  66% { transform: translateY(4px) rotate(-0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+
+  66% {
+    transform: translateY(4px) rotate(-0.5deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
 }
 
 @keyframes fluidFadeUp {
@@ -659,6 +713,7 @@ button {
     opacity: 0;
     transform: translateY(20px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -676,12 +731,18 @@ button {
 
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .animate-float, .animate-float-delayed, .animate-float-fast,
-  .animate-fade-in, .animate-slide-up, .btn:active {
+
+  .animate-float,
+  .animate-float-delayed,
+  .animate-float-fast,
+  .animate-fade-in,
+  .animate-slide-up,
+  .btn:active {
     animation: none !important;
     transition: none !important;
     transform: none !important;
   }
+
   .animate-fade-in {
     opacity: 1 !important;
     animation: fadeIn 0.1s linear forwards !important;
@@ -784,7 +845,8 @@ button {
   padding: var(--s-6);
   display: flex;
   flex-direction: column;
-  min-height: 0; /* Critical for flex scroll */
+  min-height: 0;
+  /* Critical for flex scroll */
 }
 
 /* Custom Scrollbar (Stealth Dark) */
@@ -809,7 +871,8 @@ button {
 /* Custom Scrollbar Clipping Fix */
 .custom-scrollbar-container {
   overflow-y: auto;
-  padding-right: 4px; /* Space for scrollbar */
+  padding-right: 4px;
+  /* Space for scrollbar */
 }
 
 /* --- 7. Logo Styling (Robust & Responsive) --- */

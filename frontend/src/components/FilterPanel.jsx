@@ -231,7 +231,7 @@ export default function FilterPanel({ isOpen, onClose }) {
               <label className="label-base">Premium Amenities</label>
             </div>
             <div className="tab-group-container wrap">
-              {['Furnished', 'Balcony', 'Parking', 'Power Backup', 'Lift', 'Security', 'Pet Friendly', 'Gated Community'].map(feature => (
+              {['Furnished', 'Unfurnished'].map(feature => (
                 <button
                   key={feature}
                   onClick={() => {

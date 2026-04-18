@@ -6,24 +6,23 @@
   left: 0;
   width: 100%;
   height: 80px;
-  /* Reverted to compact height */
   z-index: 6000;
-  /* ABOVE Map (1000) and Sidebar (5000) */
-  transition: all var(--trans-base);
-  background: rgba(255, 255, 255, 0.7);
-  /* Base transparency for glass look */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.05); /* Very transparent base */
   backdrop-filter: blur(12px);
-  /* Constant high-end blur */
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navbar.scrolled {
-  background: rgba(255, 255, 255, 0.9);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.05),
+    0 4px 6px -2px rgba(0, 0, 0, 0.02);
 }
 
 .navbar-container {

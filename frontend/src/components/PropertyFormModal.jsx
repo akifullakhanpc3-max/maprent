@@ -65,7 +65,7 @@ function LocationMarker({ position, setPosition, onLocationFound }) {
 export default function PropertyFormModal({ isOpen, onClose, refresh, existingProperty, initialCoords }) {
   const cities = ['Bangalore', 'Delhi', 'Mumbai', 'Chennai', 'Hyderabad', 'Pune'];
   const amenityOptions = ['WiFi', 'Parking', 'AC', 'Kitchen', 'TV', 'Laundry', 'Gym'];
-  const advancedOptions = ['Furnished', 'Semi-Furnished', 'Unfurnished', 'Balcony', 'Power Backup', 'Lift', 'Security', 'Pet Friendly', 'Gated Community'];
+  const advancedOptions = ['Furnished', 'Unfurnished'];
   const predefinedHeadlines = ['1BHK Apartment', '2BHK Apartment', '3BHK Apartment', 'Furnished Flat', 'Family Home'];
 
   const [formData, setFormData] = useState({
@@ -84,7 +84,11 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     isActive: true,
     floor: 0,
     totalFloors: 1,
-    advancedFeatures: []
+    advancedFeatures: [],
+    sqft: '',
+    foodPreference: 'Any',
+    petsAllowed: false,
+    propertyType: 'Non-Gated'
   });
 
   const [position, setPosition] = useState(null);
@@ -132,7 +136,11 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         isActive: existingProperty.isActive,
         floor: existingProperty.floor !== undefined ? existingProperty.floor : 0,
         totalFloors: existingProperty.totalFloors || 1,
-        advancedFeatures: existingProperty.advancedFeatures || []
+        advancedFeatures: existingProperty.advancedFeatures || [],
+        sqft: existingProperty.sqft || '',
+        foodPreference: existingProperty.foodPreference || 'Any',
+        petsAllowed: existingProperty.petsAllowed || false,
+        propertyType: existingProperty.propertyType || 'Non-Gated'
       });
       setPosition([existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]]);
       
@@ -415,6 +423,42 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div className="flex-col gap-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Square Foot Area</label>
+                      <input
+                        type="number" name="sqft" required
+                        value={formData.sqft} onChange={handleChange}
+                        className="input-base !h-10" placeholder="e.g. 1200"
+                      />
+                    </div>
+                    <div className="flex-col gap-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Food Preference</label>
+                      <select name="foodPreference" value={formData.foodPreference} onChange={handleChange} className="input-base !h-10">
+                        <option value="Any">Any Habits</option>
+                        <option value="Veg">Pure Veg</option>
+                        <option value="Non-Veg">Non-Veg Allowed</option>
+                      </select>
+                    </div>
+                    <div className="flex-col gap-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Property Type</label>
+                      <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="input-base !h-10">
+                        <option value="Non-Gated">Non-Gated</option>
+                        <option value="Gated Community">Gated Community</option>
+                      </select>
+                    </div>
+                    <div className="flex-col gap-2 pt-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="checkbox" name="petsAllowed" 
+                          checked={formData.petsAllowed} onChange={handleChange}
+                          className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                        />
+                        <span className="text-xs font-bold text-slate-600">Pets Allowed</span>
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="flex-col gap-2">
                     <label className="label-base">Detailed Description</label>
                     <textarea
@@ -471,7 +515,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
 
                   <div className="flex-col gap-3">
                     <label className="label-base">Premium Attributes</label>
-                    <div className="flex flex-wrap flex-column gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {advancedOptions.map(option => {
                         const active = formData.advancedFeatures.includes(option);
                         return (

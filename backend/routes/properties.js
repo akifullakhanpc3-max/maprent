@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Property = require('../models/Property');
+const Report = require('../models/Report');
 const auth = require('../middleware/auth');
 const { requireOwner } = require('../middleware/roles');
 const multer = require('multer');
@@ -129,7 +130,7 @@ const aiService = require('../services/aiService');
 
 router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, res) => {
   try {
-    const { title, description, price, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors, advancedFeatures, securityDeposit, maintenance, negotiable } = req.query.city ? req.query : req.body;
+    const { title, description, price, bhkType, city, amenities, video, phone, whatsapp, lat, lng, allowedFor, useAI, floor, totalFloors, advancedFeatures, securityDeposit, maintenance, negotiable, sqft, foodPreference, petsAllowed, propertyType } = req.query.city ? req.query : req.body;
     
     let finalDescription = description;
     if (useAI) {
@@ -185,7 +186,11 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
       },
       floor: floor ? Number(floor) : 0,
       totalFloors: totalFloors ? Number(totalFloors) : 1,
-      advancedFeatures: parsedAdvancedFeatures
+      advancedFeatures: parsedAdvancedFeatures,
+      sqft: sqft ? Number(sqft) : 0,
+      foodPreference: foodPreference || 'Any',
+      petsAllowed: petsAllowed === 'true' || petsAllowed === true,
+      propertyType: propertyType || 'Non-Gated'
     });
 
     const property = await newProperty.save();
@@ -262,6 +267,29 @@ router.delete('/:id', [auth, requireOwner], async (req, res) => {
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ msg: 'Property not found' });
     }
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   POST /api/properties/:id/report
+// @desc    Report a property
+// @access  Private
+router.post('/:id/report', auth, async (req, res) => {
+  try {
+    const { reason, details } = req.body;
+    const property = await Property.findById(req.params.id);
+    if (!property) return res.status(404).json({ msg: 'Property not found' });
+
+    const newReport = new Report({
+      propertyId: req.params.id,
+      reporterId: req.user.id,
+      reason,
+      details
+    });
+
+    await newReport.save();
+    res.json({ msg: 'Report submitted successfully' });
+  } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }

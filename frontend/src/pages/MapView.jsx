@@ -54,16 +54,44 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom Premium Pulse Icon for Search Anchor
-const blackIcon = L.divIcon({
+const redIcon = L.divIcon({
   className: 'search-anchor-wrapper',
   html: `
-    <div class="search-anchor-pulse">
-      <div class="search-anchor-dot"></div>
+    <div class="search-anchor-pulse is-primary">
+      <div class="search-anchor-dot is-primary"></div>
     </div>
   `,
   iconSize: [20, 20],
   iconAnchor: [10, 10],
 });
+
+// Dynamic cursor logic for radius boundary detection
+function RadiusCursorHandler({ searchAnchor, radius }) {
+  const map = useMapEvents({
+    mousemove(e) {
+      if (!searchAnchor || !radius) {
+        map.getContainer().classList.remove('cursor-inside');
+        map.getContainer().classList.add('cursor-outside');
+        return;
+      }
+      const distance = e.latlng.distanceTo(L.latLng(searchAnchor));
+      const isInside = distance <= radius * 1000;
+      const container = map.getContainer();
+
+      if (isInside) {
+        container.classList.add('cursor-inside');
+        container.classList.remove('cursor-outside');
+      } else {
+        container.classList.add('cursor-outside');
+        container.classList.remove('cursor-inside');
+      }
+    },
+    mouseout() {
+      map.getContainer().classList.remove('cursor-inside', 'cursor-outside');
+    }
+  });
+  return null;
+}
 
 // Component to handle map move/zoom/click events
 function MapEventsHandler({ onMapClick }) {
@@ -323,11 +351,12 @@ export default function MapView() {
   }, [routeData]);
 
   const circleOptions = useMemo(() => ({
-    color: 'var(--primary-color)',
-    fillColor: 'var(--primary-color)',
-    fillOpacity: 0.1,
-    weight: 2,
-    dashArray: '8, 8'
+    color: '#2563eb',      // Aggressive Primary Blue
+    weight: 3,             // Thicker line for visibility
+    opacity: 0.8,          // High visibility stroke
+    fillColor: '#2563eb',
+    fillOpacity: 0.12,     // Visible but transparent fill
+    stroke: true           // Explicitly enable stroke
   }), []);
 
   return (
@@ -371,13 +400,17 @@ export default function MapView() {
 
       <main className="map-main-viewport">
         <MapContainer
-          center={[12.9716, 77.5946]}
+          center={[12.2958, 76.6394]}
           zoom={12}
           className="luxury-leaflet-map"
           ref={mapRef}
           zoomControl={false}
           minZoom={3}
           maxZoom={20}
+          zoomAnimation={true}
+          fadeAnimation={true}
+          markerZoomAnimation={true}
+          updateWhenIdle={true}
         >
           <TileLayer
             attribution={TILE_PROVIDERS[viewStyle].attribution}
@@ -386,9 +419,10 @@ export default function MapView() {
             maxZoom={TILE_PROVIDERS[viewStyle].maxZoom}
           />
           <MapEventsHandler onMapClick={handleMapClick} />
+          <RadiusCursorHandler searchAnchor={searchAnchor} radius={filters.radius} />
 
           {searchAnchor && !selectedProperty && (
-            <Marker position={searchAnchor} icon={blackIcon}>
+            <Marker position={searchAnchor} icon={redIcon}>
               <Popup className="premium-discovery-popup">
                 <div className="flex-col gap-3 min-w-[200px]">
                   <p className="label-base !mb-0 text-slate-400">Target Area</p>
@@ -403,14 +437,14 @@ export default function MapView() {
             </Marker>
           )}
 
-          {(filters.radius && filters.lat && filters.lng) && (
+          {(filters.radius && searchAnchor) && (
             <>
               <Circle
-                center={[filters.lat, filters.lng]}
+                center={searchAnchor}
                 radius={filters.radius * 1000}
                 pathOptions={circleOptions}
               />
-              <AutoFitCircle lat={filters.lat} lng={filters.lng} radius={filters.radius} />
+              <AutoFitCircle lat={searchAnchor[0]} lng={searchAnchor[1]} radius={filters.radius} />
             </>
           )}
 
@@ -439,8 +473,8 @@ export default function MapView() {
             <span>Discover All Properties</span>
           </button> */}
           <MapSearchBar onSearch={handleLocationSelect} />
-          <button 
-            onClick={() => setIsFilterOpen(true)} 
+          <button
+            onClick={() => setIsFilterOpen(true)}
             className="search-filter-quick-btn shadow-premium"
             title="Open Filters"
           >
@@ -473,8 +507,8 @@ export default function MapView() {
       <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
 
       {selectedProperty && (
-        <PropertyDetailsOverlay 
-          property={selectedProperty} 
+        <PropertyDetailsOverlay
+          property={selectedProperty}
           onClose={() => setSelectedProperty(null)}
           onShowRoute={(p) => {
             setSelectedProperty(null);

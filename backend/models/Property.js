@@ -13,6 +13,25 @@ const propertySchema = new mongoose.Schema({
     default: null,
     index: true,
   },
+  sqft: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  foodPreference: {
+    type: String,
+    enum: ['Veg', 'Non-Veg', 'Any'],
+    default: 'Any',
+  },
+  petsAllowed: {
+    type: Boolean,
+    default: false,
+  },
+  propertyType: {
+    type: String,
+    enum: ['Gated Community', 'Non-Gated'],
+    default: 'Non-Gated',
+  },
   title: {
     type: String,
     required: true,
@@ -67,6 +86,14 @@ const propertySchema = new mongoose.Schema({
   isFeatured: {
     type: Boolean,
     default: false
+  },
+  isPinned: {
+    type: Boolean,
+    default: false,
+  },
+  pinnedAt: {
+    type: Date,
+    default: null,
   },
   views: {
     type: Number,

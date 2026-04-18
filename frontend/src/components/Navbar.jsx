@@ -11,6 +11,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
   const location = useLocation();
+  const adminRoles = ['master_admin', 'admin', 'employee', 'worker'];
+  const dashboardPath = user && adminRoles.includes(user.role) ? '/admin/dashboard' : `/${user?.role}/dashboard`;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -34,7 +36,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
 
         {/* Left: Brand */}
@@ -50,7 +52,7 @@ export default function Navbar() {
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
               <Link
-                to={`/${user.role}/dashboard`}
+                to={dashboardPath}
                 className="btn btn-secondary !h-9 !px-4"
               >
                 <LayoutDashboard size={14} />
