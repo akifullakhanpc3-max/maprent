@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Home, Trash2, CheckCircle, XCircle, Star, StarOff, Pencil, RotateCcw, User, Search, MapPin, AlertCircle, Building2, ExternalLink } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { BASE_URL } from '../../api/axios';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -9,6 +10,13 @@ import '../../styles/views/AdminProperties.css';
 
 export default function AdminProperties() {
   const { properties, fetchProperties, updatePropertyStatus, toggleFeatureProperty, deleteProperty, editProperty, loading, error, setProcessing } = useAdminStore();
+  const { user: authUser } = useAuthStore();
+  const perms = authUser?.permissions || [];
+  const isMaster = authUser?.role === 'master_admin';
+  const canApprove  = isMaster || perms.includes('APPROVE_PROPERTY');
+  const canReject   = isMaster || perms.includes('REJECT_PROPERTY');
+  const canDelete   = isMaster || perms.includes('DELETE_PROPERTY');
+  const canFeature  = isMaster || perms.includes('FEATURE_PROPERTY');
   
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
@@ -245,13 +253,15 @@ export default function AdminProperties() {
                           )}
                           
                           <div className="flex items-center gap-1">
-                             <button
-                               onClick={(e) => { e.stopPropagation(); toggleFeatureProperty(p._id) }}
-                               className={`mod-btn-circle star ${p.isFeatured ? 'active' : ''}`}
-                               title="Toggle Master Status"
-                             >
-                               {p.isFeatured ? <Star size={16} className="fill-current" /> : <StarOff size={16} />}
-                             </button>
+                             {canFeature && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleFeatureProperty(p._id) }}
+                                className={`mod-btn-circle star ${p.isFeatured ? 'active' : ''}`}
+                                title="Toggle Master Status"
+                              >
+                                {p.isFeatured ? <Star size={16} className="fill-current" /> : <StarOff size={16} />}
+                              </button>
+                             )}
                              <button
                                onClick={(e) => { e.stopPropagation(); handleEditClick(p) }}
                                className="mod-btn-circle"
@@ -259,13 +269,15 @@ export default function AdminProperties() {
                              >
                                <Pencil size={16} />
                              </button>
-                             <button
-                               onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'delete', title: p.title }) }}
-                               className="mod-btn-circle reject"
-                               title="Permanently Expunge"
-                             >
-                               <Trash2 size={16} />
-                             </button>
+                             {canDelete && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, id: p._id, status: 'delete', title: p.title }) }}
+                                className="mod-btn-circle reject"
+                                title="Permanently Expunge"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                             )}
                           </div>
                        </div>
                     </td>

@@ -34,6 +34,7 @@ import AdminUsers from './views/admin/AdminUsers';
 import AdminProperties from './views/admin/AdminProperties';
 import AdminBookings from './views/admin/AdminBookings';
 import AdminLogin from './views/admin/AdminLogin';
+import AdminStaff from './views/admin/AdminStaff';
 import AdminLogs from './pages/admin/AdminLogs';
 
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -49,8 +50,8 @@ const RootRedirect = () => {
   if (loading) return <LoadingSpinner fullScreen text="Initialising Core Systems" />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Master Admin also goes to admin dashboard but sees more options
-  if (user.role === 'master_admin' || user.role === 'admin') {
+  const adminRoles = ['master_admin', 'admin', 'employee', 'worker'];
+  if (adminRoles.includes(user.role)) {
     return <Navigate to="/admin/dashboard" replace />;
   }
   return <Navigate to={`/${user.role}/dashboard`} replace />;
@@ -104,6 +105,7 @@ function App() {
           <Route path="properties" element={<AdminProperties />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="logs" element={<AdminLogs />} />
+          <Route path="staff" element={<AdminStaff />} />
           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
         </Route>

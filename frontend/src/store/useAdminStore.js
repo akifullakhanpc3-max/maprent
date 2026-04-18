@@ -6,6 +6,7 @@ export const useAdminStore = create((set, get) => ({
   users: [],
   properties: [],
   bookings: [],
+  staff: [],
   loading: false,
   error: null,
   processing: { loading: false, success: false, error: null, message: '' },
@@ -165,5 +166,43 @@ export const useAdminStore = create((set, get) => ({
     } catch (err) {
       set({ error: err.response?.data?.msg || `Error updating booking status to ${status}` });
     }
-  }
+  },
+
+  // ─── Staff Management (Master Admin Only) ────────────────
+  fetchStaff: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await api.get('/admin/staff');
+      set({ staff: res.data, loading: false });
+    } catch (err) {
+      set({ error: err.response?.data?.msg || 'Error fetching staff', loading: false });
+    }
+  },
+
+  createStaff: async (data) => {
+    const res = await api.post('/admin/staff', data);
+    set((state) => ({ staff: [res.data, ...state.staff] }));
+    return res.data;
+  },
+
+  updateStaffPermissions: async (staffId, permissions) => {
+    const res = await api.put(`/admin/staff/${staffId}/permissions`, { permissions });
+    set((state) => ({
+      staff: state.staff.map((s) => s._id === staffId ? res.data : s)
+    }));
+    return res.data;
+  },
+
+  updateStaffRole: async (staffId, role) => {
+    const res = await api.put(`/admin/staff/${staffId}/role`, { role });
+    set((state) => ({
+      staff: state.staff.map((s) => s._id === staffId ? res.data : s)
+    }));
+    return res.data;
+  },
+
+  deleteStaff: async (staffId) => {
+    await api.delete(`/admin/staff/${staffId}`);
+    set((state) => ({ staff: state.staff.filter((s) => s._id !== staffId) }));
+  },
 }));

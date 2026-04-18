@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { ROLE_DEFAULTS } = require('../utils/permissions');
+
+const ADMIN_ROLES = ['admin', 'master_admin', 'employee', 'worker'];
 
 const adminAuth = async (req, res, next) => {
   const token = req.header('Authorization');
@@ -18,15 +21,21 @@ const adminAuth = async (req, res, next) => {
       return res.status(401).json({ msg: 'User profile no longer exists' });
     }
     
-    // Check Admin / Master Admin Role
-    if (user.role !== 'admin' && user.role !== 'master_admin') {
+    // Check that user has an admin-tier role
+    if (!ADMIN_ROLES.includes(user.role)) {
       return res.status(403).json({ msg: 'Access denied. Administrator privileges required.' });
     }
+
+    // Effective permissions: use explicit array if set, else use role defaults
+    const effectivePermissions = (user.permissions && user.permissions.length > 0)
+      ? user.permissions
+      : (ROLE_DEFAULTS[user.role] || []);
 
     req.user = {
       id: user.id,
       role: user.role,
-      tenantId: user.tenantId ? user.tenantId.toString() : null
+      tenantId: user.tenantId ? user.tenantId.toString() : null,
+      permissions: effectivePermissions,
     };
     next();
   } catch (err) {

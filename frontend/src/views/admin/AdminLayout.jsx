@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Home, Calendar, LogOut, ShieldAlert, Activity, Globe, Menu, X, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Home, Calendar, LogOut, ShieldAlert, Activity, Globe, Menu, X, Settings, UserCog } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import '../../styles/views/Dashboards.css';
@@ -11,21 +11,27 @@ export default function AdminLayout() {
   const location = useLocation();
   const { logout, user, loading } = useAuthStore();
 
+  const ADMIN_ROLES = ['admin', 'master_admin', 'employee', 'worker'];
+  const perms = user?.permissions || [];
+  const isMaster = user?.role === 'master_admin';
+  const hasAdminLevel = ['admin', 'master_admin'].includes(user?.role);
+
   const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Users', href: '/admin/users', icon: Users },
-    { name: 'Properties', href: '/admin/properties', icon: Home },
-    { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
-    ...(user?.role === 'master_admin' ? [
-      { name: 'Tenants', href: '/admin/tenants', icon: Globe }
+    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, show: true },
+    { name: 'Users', href: '/admin/users', icon: Users, show: isMaster || perms.includes('MANAGE_USERS') },
+    { name: 'Properties', href: '/admin/properties', icon: Home, show: true },
+    { name: 'Bookings', href: '/admin/bookings', icon: Calendar, show: isMaster || perms.includes('MANAGE_BOOKINGS') },
+    ...(isMaster ? [
+      { name: 'Tenants', href: '/admin/tenants', icon: Globe, show: true },
+      { name: 'Staff Management', href: '/admin/staff', icon: UserCog, show: true },
     ] : []),
-    { name: 'Activity Logs', href: '/admin/logs', icon: Activity },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
-  ];
+    { name: 'Activity Logs', href: '/admin/logs', icon: Activity, show: isMaster || perms.includes('VIEW_ANALYTICS') },
+    { name: 'Settings', href: '/admin/settings', icon: Settings, show: true },
+  ].filter(item => item.show);
 
   if (loading) return <LoadingSpinner fullScreen />;
 
-  if (!user || (user.role !== 'admin' && user.role !== 'master_admin')) {
+  if (!user || !['admin', 'master_admin', 'employee', 'worker'].includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
@@ -79,7 +85,7 @@ export default function AdminLayout() {
             <div className="flex-1 overflow-hidden">
                <p className="text-white text-xs font-bold truncate">{user?.name || 'Administrator'}</p>
                <p className="label-base !text-[8px] !m-0 truncate text-slate-500">
-                 {user.role === 'master_admin' ? 'Master Protocol' : 'Systems Admin'}
+                 {user.role === 'master_admin' ? 'Master Protocol' : user.role === 'admin' ? 'Systems Admin' : user.role === 'employee' ? 'Employee' : 'Worker'}
                </p>
             </div>
           </div>

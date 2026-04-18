@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ShieldAlert, Trash2, CheckCircle2, XCircle, User, Mail, Shield, Unlock, Lock } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import '../../styles/views/Dashboards.css';
 
 export default function AdminUsers() {
   const { users, fetchUsers, toggleBlockUser, deleteUser, loading, error, setProcessing } = useAdminStore();
+  const { user: authUser } = useAuthStore();
+  const canManageUsers = authUser?.role === 'master_admin' || (authUser?.permissions || []).includes('MANAGE_USERS');
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, type: null, name: '' });
 
   useEffect(() => {
@@ -100,6 +103,7 @@ export default function AdminUsers() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
+                      {canManageUsers && (
                        <button
                         onClick={() => setConfirmModal({ isOpen: true, id: u._id, type: 'block', name: u.name, isBlocked: u.isBlocked })}
                         className={`btn btn-ghost !p-2 !h-auto ${u.isBlocked ? '!text-emerald-600 hover:!bg-emerald-50' : '!text-amber-600 hover:!bg-amber-50'}`}
@@ -107,6 +111,8 @@ export default function AdminUsers() {
                       >
                         {u.isBlocked ? <Unlock size={14} /> : <Lock size={14} />}
                       </button>
+                      )}
+                      {canManageUsers && (
                       <button
                         onClick={() => setConfirmModal({ isOpen: true, id: u._id, type: 'delete', name: u.name })}
                         className="btn btn-ghost !p-2 !h-auto !text-rose-500 hover:!bg-rose-50"
@@ -114,6 +120,10 @@ export default function AdminUsers() {
                       >
                         <Trash2 size={14} />
                       </button>
+                      )}
+                      {!canManageUsers && (
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Read Only</span>
+                      )}
                     </div>
                   </td>
                 </tr>
