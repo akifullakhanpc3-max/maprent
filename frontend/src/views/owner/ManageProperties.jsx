@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api, { BASE_URL } from '../../api/axios';
 import PropertyFormModal from '../../components/PropertyFormModal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import { Plus, Trash2, Edit2, MapPin, Search, Building2, LayoutGrid, AlertCircle, TrendingUp } from 'lucide-react';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
 import '../../styles/views/Dashboards.css';
@@ -13,6 +14,8 @@ export default function ManageProperties() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
+  const [deleting, setDeleting] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,15 +54,18 @@ export default function ManageProperties() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Permanently delete this listing? This action cannot be undone.')) {
-      try {
-        await api.delete(`/properties/${id}`);
-        setProperties(properties.filter(p => p._id !== id));
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.msg || 'An error occurred while deleting the property. Are you authorized?');
-      }
+  const handleDelete = async () => {
+    const id = deleteModal.id;
+    setDeleteModal({ isOpen: false, id: null });
+    setDeleting(id);
+    try {
+      await api.delete(`/properties/${id}`);
+      setProperties(prev => prev.filter(p => p._id !== id));
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.msg || 'An error occurred while deleting the property. Are you authorized?');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -201,11 +207,14 @@ export default function ManageProperties() {
                      <Edit2 size={16} />
                    </button>
                    <button 
-                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(property._id); }}
+                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteModal({ isOpen: true, id: property._id }); }}
                      className="action-btn-dashboard delete"
                      title="Liquidate Listing"
+                     disabled={deleting === property._id}
                    >
-                     <Trash2 size={16} />
+                     {deleting === property._id
+                       ? <div className="w-4 h-4 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
+                       : <Trash2 size={16} />}
                    </button>
                 </div>
              </div>
@@ -221,6 +230,16 @@ export default function ManageProperties() {
           existingProperty={editingProperty} 
         />
       )}
+
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        onConfirm={handleDelete}
+        title="Delete Property Listing?"
+        message="This will permanently remove the listing and all associated data. This action cannot be undone."
+        confirmText="Delete Permanently"
+        type="danger"
+      />
     </div>
   );
 }

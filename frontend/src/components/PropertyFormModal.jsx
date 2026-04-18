@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../api/axios';
+import { usePropertyStore } from '../store/usePropertyStore';
 import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
 import MapSearchBar from './MapSearchBar';

@@ -4,47 +4,12 @@ const Property = require('../models/Property');
 const auth = require('../middleware/auth');
 const { requireOwner } = require('../middleware/roles');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// Configure Cloudinary if keys exist, else fallback to Local
-let storage;
-if (process.env.CLOUDINARY_CLOUD_NAME) {
-  const cloudinary = require('cloudinary').v2;
-  const { CloudinaryStorage } = require('multer-storage-cloudinary');
-  
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-  });
+const { uploadImage } = require('../services/supabaseStorage');
 
-  storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'occupra_properties',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation: [{ width: 1200, crop: 'limit' }]
-    }
-  });
-} else {
-  // Create uploads directory if it doesn't exist
-  const uploadDir = path.join(__dirname, '..', 'uploads');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
+// Use memory storage — files are held in RAM as buffers, then streamed to Supabase
+const upload = multer({ storage: multer.memoryStorage() });
 
-  storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname);
-    }
-  });
-}
-
-const upload = multer({ storage: storage });
 
 // @route   GET /api/properties
 // @desc    Get all properties within map bounds
@@ -190,12 +155,12 @@ router.post('/', [auth, requireOwner, upload.array('images', 10)], async (req, r
     const parsedAllowedFor = parseJSONField(allowedFor, ['Bachelors', 'Family', 'Couples']);
     const parsedAdvancedFeatures = parseJSONField(advancedFeatures, []);
 
-    const imageUrls = req.files ? req.files.map(file => {
-      // If Cloudinary handled it, file.path is a full HTTPS URL
-      if (file.path && file.path.startsWith('http')) return file.path;
-      // Otherwise fallback to local uploads directory mapping
-      return `/uploads/${file.filename}`;
-    }) : [];
+    // Upload all images to Supabase Storage in parallel
+    const imageUrls = req.files && req.files.length > 0
+      ? await Promise.all(
+          req.files.map(file => uploadImage(file.buffer, file.originalname, file.mimetype))
+        )
+      : [];
 
     const newProperty = new Property({
       ownerId: req.user.id,
