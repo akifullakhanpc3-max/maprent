@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Navigation, MapPin, Clock, RotateCcw, ChevronRight, Search, X, Loader2, LocateFixed, AlertCircle, Navigation2, Grid } from 'lucide-react';
 
-export default function NavigationPanel({ routeData, onClear, propertyTitle, onSearchRoute, selectedProperty, onLocate, isRouting }) {
+export default function NavigationPanel({ routeData, onClear, propertyTitle, onSearchRoute, selectedProperty, onLocate }) {
   const [startQuery, setStartQuery] = useState('My Location');
   const [endQuery, setEndQuery] = useState(propertyTitle || '');
   const [searchResults, setSearchResults] = useState({ start: [], end: [] });
@@ -18,6 +18,8 @@ export default function NavigationPanel({ routeData, onClear, propertyTitle, onS
     try {
       await onLocate();
       setStartQuery('Your Current Location');
+      setSearchResults(prev => ({ ...prev, start: [] }));
+      setActiveSearch(null); // Stop searching mode
     } catch (err) {
       console.error('Locate error:', err);
     } finally {
@@ -45,8 +47,11 @@ export default function NavigationPanel({ routeData, onClear, propertyTitle, onS
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (activeSearch && (activeSearch === 'start' ? startQuery : endQuery).length >= 3) {
-        searchLocations(activeSearch === 'start' ? startQuery : endQuery, activeSearch);
+      const currentQuery = activeSearch === 'start' ? startQuery : endQuery;
+      const isManualLocation = currentQuery === 'Your Current Location' || currentQuery === 'My Location';
+      
+      if (activeSearch && currentQuery.length >= 3 && !isManualLocation) {
+        searchLocations(currentQuery, activeSearch);
       }
     }, 500);
     return () => clearTimeout(timer);

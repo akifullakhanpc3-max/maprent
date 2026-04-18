@@ -4,12 +4,13 @@ import { usePropertyStore } from '../store/usePropertyStore';
 import { BASE_URL } from '../api/axios';
 import {
   ArrowLeft, MapPin, Grid, CheckCircle2, Share2, Heart,
-  ShieldCheck, Zap, Info, Clock, Navigation2
+  ShieldCheck, Zap, Info, Clock, Navigation2, Phone, MessageCircle,
+  BarChart2, ChevronDown, ChevronUp, TrendingUp, Home, Calendar, IndianRupee
 } from 'lucide-react';
 import BookingFormModal from '../components/BookingFormModal';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Navbar from '../components/Navbar';
-import '../styles/pages/PropertyDetails.css'; // Refined details styling
+import '../styles/pages/PropertyDetails.css';
 
 const getFloorSuffix = (floor) => {
   if (floor >= 11 && floor <= 13) return 'th';
@@ -30,6 +31,8 @@ export default function PropertyDetails() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [error, setError] = useState(null);
+  const [showAnalyze, setShowAnalyze] = useState(false);
+  const [analyzeLoading, setAnalyzeLoading] = useState(false);
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -48,8 +51,36 @@ export default function PropertyDetails() {
     if (property?.location?.coordinates) {
       const [lng, lat] = property.location.coordinates;
       window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+    } else if (property?.city) {
+      // fallback: navigate by city name
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.city)}`, '_blank');
+    } else {
+      alert('No location data available for this property.');
     }
   };
+
+  const handleAnalyze = () => {
+    if (showAnalyze) return setShowAnalyze(false);
+    setAnalyzeLoading(true);
+    // Simulate brief analysis computation
+    setTimeout(() => {
+      setAnalyzeLoading(false);
+      setShowAnalyze(true);
+    }, 800);
+  };
+
+  // Compute map URL once — uses coordinates for precision, falls back to city+title search.
+  // Never returns '#' so the link is always functional.
+  const mapUrl = (() => {
+    if (!property) return 'https://www.google.com/maps';
+    const coords = property?.location?.coordinates;
+    if (Array.isArray(coords) && coords[0] != null && coords[1] != null) {
+      const [lng, lat] = coords; // GeoJSON: [longitude, latitude]
+      return `https://www.google.com/maps?q=${lat},${lng}&z=16`;
+    }
+    const searchTerm = [property.city, property.title].filter(Boolean).join(' ');
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTerm || 'property')}`;
+  })();
 
   if (loading && !property) {
     return (
@@ -239,26 +270,122 @@ export default function PropertyDetails() {
                     )}
                   </div>
 
-                  <div className="flex-col gap-4 mt-2">
-                    <button
-                      onClick={() => setShowBookingModal(true)}
-                      className="btn btn-primary w-full !h-16 !text-sm !font-black uppercase tracking-widest shadow-xl shadow-indigo-200 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                      <Navigation2 size={18} className="mr-3" />
-                      Commence Application
+                  {/* ── ACTION BUTTONS ── */}
+                  <div className="pd-actions">
+
+                    {/* PRIMARY CTA */}
+                    <button onClick={() => setShowBookingModal(true)} className="pd-btn-primary">
+                      <Navigation2 size={18} />
+                      Start Application
                     </button>
 
+                    {/* CONTACT ROW */}
+                    <div className="pd-btn-row">
+                      {property.whatsapp ? (
+                        <a
+                          href={`https://wa.me/91${property.whatsapp.replace(/\D/g, '')}`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="pd-btn-whatsapp"
+                        >
+                          <MessageCircle size={16} />
+                          WhatsApp
+                        </a>
+                      ) : (
+                        <span className="pd-btn-disabled"><MessageCircle size={14} /> WhatsApp</span>
+                      )}
+                      {property.phone ? (
+                        <a href={`tel:${property.phone}`} className="pd-btn-call">
+                          <Phone size={16} />
+                          Secure Call
+                        </a>
+                      ) : (
+                        <span className="pd-btn-disabled"><Phone size={14} /> Secure Call</span>
+                      )}
+                    </div>
+
+                    {/* ANALYZE BUTTON */}
                     <button
-                      onClick={handleGetDirections}
-                      className="btn-directions"
+                      onClick={handleAnalyze}
+                      className={`pd-btn-analyze ${showAnalyze ? 'active' : ''}`}
+                      disabled={analyzeLoading}
                     >
-                      <MapPin size={14} className="text-indigo-400" />
-                      Navigate to Asset Location
+                      {analyzeLoading ? (
+                        <><div className="pd-spinner" /> Analyzing...</>
+                      ) : (
+                        <><BarChart2 size={15} />
+                        Analyze Property
+                        {showAnalyze ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}</>
+                      )}
                     </button>
 
-                    <p className="text-center text-[10px] font-black text-slate-300 uppercase tracking-widest mt-2">
-                      Secure Discovery via Occupra Neural Grid
-                    </p>
+                    {/* ANALYSIS PANEL */}
+                    {showAnalyze && (
+                      <div className="pd-analyze-panel animate-fade-in">
+                        <p className="pd-analyze-heading">Property Intelligence Report</p>
+                        <div className="pd-analyze-grid">
+                          <div className="pd-analyze-stat">
+                            <IndianRupee size={14} className="text-indigo-500" />
+                            <div>
+                              <span className="pd-stat-label">Monthly Rent</span>
+                              <span className="pd-stat-val">₹{property.price?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                          </div>
+                          {property.securityDeposit != null && (
+                            <div className="pd-analyze-stat">
+                              <ShieldCheck size={14} className="text-emerald-500" />
+                              <div>
+                                <span className="pd-stat-label">Security Deposit</span>
+                                <span className="pd-stat-val">₹{property.securityDeposit.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          )}
+                          <div className="pd-analyze-stat">
+                            <Home size={14} className="text-amber-500" />
+                            <div>
+                              <span className="pd-stat-label">Property Type</span>
+                              <span className="pd-stat-val">{property.bhkType}</span>
+                            </div>
+                          </div>
+                          <div className="pd-analyze-stat">
+                            <TrendingUp size={14} className="text-rose-500" />
+                            <div>
+                              <span className="pd-stat-label">Annual Cost</span>
+                              <span className="pd-stat-val">₹{property.price ? (property.price * 12).toLocaleString() : 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div className="pd-analyze-stat">
+                            <MapPin size={14} className="text-slate-500" />
+                            <div>
+                              <span className="pd-stat-label">Location</span>
+                              <span className="pd-stat-val">{property.city || 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div className="pd-analyze-stat">
+                            <Calendar size={14} className="text-blue-500" />
+                            <div>
+                              <span className="pd-stat-label">Listed Since</span>
+                              <span className="pd-stat-val">{new Date(property.createdAt).toLocaleDateString('en-GB')}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={mapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pd-analyze-map-link"
+                        >
+                          <MapPin size={12} /> View on Google Maps
+                        </a>
+                      </div>
+                    )}
+
+                    {/* NAVIGATE */}
+                    <button onClick={handleGetDirections} className="pd-btn-navigate">
+                      <MapPin size={13} />
+                      Navigate to Location
+                    </button>
+
+                    <p className="pd-footer-note">Secure Discovery via Occupra Neural Grid</p>
                   </div>
                 </div>
 

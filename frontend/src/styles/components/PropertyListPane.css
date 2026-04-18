@@ -11,6 +11,13 @@
   font-family: var(--font-main);
 }
 
+@media (max-width: 768px) {
+  .property-list-pane {
+    height: auto;
+    overflow: visible;
+  }
+}
+
 /* Sidebar Header Overrides */
 .sidebar-header-glow {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -20,6 +27,14 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--s-2) var(--s-4);
+}
+
+@media (max-width: 768px) {
+  .sidebar-content-scroll {
+    overflow-y: visible;
+    height: auto;
+    flex: none;
+  }
 }
 
 /* BHK & Radius Filter Pills */

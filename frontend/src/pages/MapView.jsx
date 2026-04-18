@@ -54,7 +54,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom Premium Pulse Icon for Search Anchor
-const redIcon = L.divIcon({
+const blackIcon = L.divIcon({
   className: 'search-anchor-wrapper',
   html: `
     <div class="search-anchor-pulse">
@@ -161,12 +161,26 @@ export default function MapView() {
 
   const handleShowRoute = useCallback(async (property) => {
     if (!mapRef.current) return;
+
+    // Guard: if property has no coordinates, fall back to Google Maps directions
+    const coords = property?.location?.coordinates;
+    if (!Array.isArray(coords) || coords[0] == null || coords[1] == null) {
+      const destination = property.city || property.title || 'property';
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`,
+        '_blank'
+      );
+      return;
+    }
+
     const center = mapRef.current.getCenter();
     const start = [center.lng, center.lat];
-    const end = [property.location.coordinates[0], property.location.coordinates[1]];
+    const end = [coords[0], coords[1]]; // GeoJSON: [lng, lat]
 
     try {
-      const response = await fetch(`https://router.project-osrm.org/base/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`);
+      // Correct OSRM public endpoint: route/v1 (not base/v1)
+      const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`;
+      const response = await fetch(url);
       const data = await response.json();
       if (data.routes?.[0]) {
         const route = data.routes[0];
@@ -178,8 +192,21 @@ export default function MapView() {
           steps: route.legs?.[0]?.steps || []
         });
         setIsNavigating(true);
+      } else {
+        // OSRM returned no route — fall back to Google Maps
+        window.open(
+          `https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`,
+          '_blank'
+        );
       }
-    } catch (err) { console.error('Routing error:', err); }
+    } catch (err) {
+      console.error('Routing error:', err);
+      // Network failure — fall back to Google Maps
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`,
+        '_blank'
+      );
+    }
   }, []);
 
   const handleSearchArea = () => {
@@ -191,14 +218,6 @@ export default function MapView() {
       lng: null
     });
   };
-
-  const handleLocateMe = () => {
-    if (!mapRef.current) return;
-    mapRef.current.locate().on('locationfound', (e) => {
-      mapRef.current.flyTo(e.latlng, 15, { duration: 2 });
-    });
-  };
-
   useEffect(() => {
     if (filters.lat && filters.lng) {
       setSearchAnchor([filters.lat, filters.lng]);
@@ -206,6 +225,102 @@ export default function MapView() {
       setSearchAnchor(null);
     }
   }, [filters.lat, filters.lng]);
+
+  const handleLocateMe = useCallback(() => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        const err = new Error('Geolocation not supported by this browser.');
+        alert(err.message);
+        reject(err);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const userCoords = [lat, lng];
+
+          // 1. Move the map
+          if (mapRef.current) {
+            mapRef.current.flyTo(userCoords, 15, { duration: 1.5 });
+          }
+
+          // 2. Update Discovery Context (Filters + Anchor)
+          setSearchAnchor(userCoords);
+          setFilters({ lat, lng, bounds: null }); // Clear bounds to prioritize radius search
+
+          // 3. Re-run route from user location to current property destination (if navigating)
+          if (routeData?.coordinates?.length) {
+            const dest = routeData.coordinates[routeData.coordinates.length - 1];
+            const startStr = `${lng},${lat}`;
+            const endStr = `${dest[1]},${dest[0]}`; // convert back from [lat,lng] to [lng,lat] for OSRM
+            fetch(`https://router.project-osrm.org/route/v1/driving/${startStr};${endStr}?overview=full&geometries=geojson&steps=true`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.routes?.[0]) {
+                  const route = data.routes[0];
+                  setRouteData(prev => ({
+                    ...prev,
+                    coordinates: route.geometry.coordinates.map(c => [c[1], c[0]]),
+                    distance: route.distance,
+                    duration: route.duration,
+                    steps: route.legs?.[0]?.steps || []
+                  }));
+                }
+              })
+              .catch(console.error);
+          }
+          resolve(userCoords);
+        },
+        (err) => {
+          let msg = 'Unable to retrieve your location.';
+          if (err.code === 1) msg = 'Location access denied. Please enable permissions in your browser.';
+          else if (err.code === 3) msg = 'Location request timed out. Please try again.';
+          alert(msg);
+          reject(err);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    });
+  }, [routeData, setFilters]);
+
+  const handleSearchRoute = useCallback(async (startCoords, endCoords) => {
+    // startCoords or endCoords may be null (only one end is being updated)
+    const currentDest = routeData?.coordinates?.[routeData.coordinates.length - 1];
+    const currentStart = routeData?.coordinates?.[0];
+
+    // [lat, lng] from Nominatim → convert to OSRM [lng, lat]
+    const start = startCoords
+      ? [startCoords[1], startCoords[0]]
+      : currentStart ? [currentStart[1], currentStart[0]] : null;
+    const end = endCoords
+      ? [endCoords[1], endCoords[0]]
+      : currentDest ? [currentDest[1], currentDest[0]] : null;
+
+    if (!start || !end) return;
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.routes?.[0]) {
+        const route = data.routes[0];
+        setRouteData(prev => ({
+          ...prev,
+          coordinates: route.geometry.coordinates.map(c => [c[1], c[0]]),
+          distance: route.distance,
+          duration: route.duration,
+          steps: route.legs?.[0]?.steps || []
+        }));
+        // Fly map to fit the new route
+        if (mapRef.current && route.geometry.coordinates.length > 0) {
+          const latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+          mapRef.current.fitBounds(latlngs, { padding: [40, 40], animate: true });
+        }
+      }
+    } catch (err) {
+      console.error('Search route error:', err);
+    }
+  }, [routeData]);
 
   const circleOptions = useMemo(() => ({
     color: 'var(--primary-color)',
@@ -238,7 +353,8 @@ export default function MapView() {
               onClear={() => { setIsNavigating(false); setRouteData(null); }}
               propertyTitle={routeData.propertyTitle}
               selectedProperty={selectedProperty}
-              isRouting={false}
+              onLocate={handleLocateMe}
+              onSearchRoute={handleSearchRoute}
             />
           ) : (
             <PropertyListPane
@@ -272,7 +388,7 @@ export default function MapView() {
           <MapEventsHandler onMapClick={handleMapClick} />
 
           {searchAnchor && !selectedProperty && (
-            <Marker position={searchAnchor} icon={redIcon}>
+            <Marker position={searchAnchor} icon={blackIcon}>
               <Popup className="premium-discovery-popup">
                 <div className="flex-col gap-3 min-w-[200px]">
                   <p className="label-base !mb-0 text-slate-400">Target Area</p>
@@ -308,7 +424,7 @@ export default function MapView() {
               onClick={() => {
                 setHighlightedId(property._id);
                 setSelectedProperty(property);
-                if (window.innerWidth <= 768) sidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+                // On mobile, the entire page scrolls naturally, so we rely on the card's scrollIntoView below
                 const card = document.getElementById(`property-card-${property._id}`);
                 if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
@@ -323,6 +439,13 @@ export default function MapView() {
             <span>Discover All Properties</span>
           </button> */}
           <MapSearchBar onSearch={handleLocationSelect} />
+          <button 
+            onClick={() => setIsFilterOpen(true)} 
+            className="search-filter-quick-btn shadow-premium"
+            title="Open Filters"
+          >
+            <Filter size={20} />
+          </button>
         </div>
 
         <div className="map-overlay-zoom-controls">
@@ -343,13 +466,6 @@ export default function MapView() {
             <div className="zoom-divider" />
             <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
             <div className="zoom-divider" />
-            <button 
-              onClick={() => setIsFilterOpen(true)} 
-              className="zoom-btn filter-action-btn" 
-              title="Open Filters"
-            >
-              <Filter size={18} />
-            </button>
           </div>
         </div>
       </main>
