@@ -23,7 +23,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error && error.response && (error.response.status === 401 || error.response.status === 403)) {
       console.warn('[AUTH_INTERCEPTOR] Session invalid or forbidden access. Purging token...');
       localStorage.removeItem('token');
       // Optional: window.location.href = '/login'; 

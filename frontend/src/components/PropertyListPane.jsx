@@ -40,16 +40,16 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
         {/* Action Center - Global Search */}
         <div className="sidebar-action-center mb-8">
-           <button 
-             onClick={onSearchArea}
-             className="btn btn-cta w-full !h-12 !rounded-xl shadow-premium animate-pulse-slow"
-           >
-             <Search size={16} className="mr-2" />
-             Discover All Properties
-           </button>
-           <p className="text-[10px] text-center text-sidebar-muted mt-2 font-medium">
-             Search within current map viewport
-           </p>
+          <button
+            onClick={onSearchArea}
+            className="btn btn-cta w-full !h-12 !rounded-xl shadow-premium animate-pulse-slow"
+          >
+            <Search size={16} className="mr-2" />
+            Discover All Properties
+          </button>
+          <p className="text-[10px] text-center text-sidebar-muted mt-2 font-medium">
+            Search within current map viewport
+          </p>
         </div>
 
         {/* City Discovery Section */}
