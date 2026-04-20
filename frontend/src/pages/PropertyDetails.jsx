@@ -70,18 +70,38 @@ export default function PropertyDetails() {
   };
 
   const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/property/${property?._id}`;
     const shareData = {
       title: property?.title || 'Property from Maprent',
       text: `Check out this property: ${property?.title}`,
-      url: window.location.href
+      url: shareUrl
     };
 
     try {
-      if (navigator.share) {
+      if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        // Use native share only on mobile
         await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
+      } else if (navigator.clipboard && window.isSecureContext) {
+        // Modern clipboard API
+        await navigator.clipboard.writeText(shareUrl);
         alert('Property link copied to clipboard!');
+      } else {
+        // Legacy fallback
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert('Property link copied to clipboard!');
+        } catch (err) {
+          console.error('Fallback copy failed', err);
+        }
+        document.body.removeChild(textArea);
       }
     } catch (err) {
       console.error('Share error:', err);
