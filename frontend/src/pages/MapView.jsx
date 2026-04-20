@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers } from 'lucide-react';
+import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers, LayoutGrid, Target, RotateCcw } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { usePropertyStore } from '../store/usePropertyStore';
@@ -162,13 +162,30 @@ export default function MapView() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewStyle, setViewStyle] = useState('streets');
+  const [isGridView, setIsGridView] = useState(false);
   const { properties, filters, loading, setFilter, setFilters } = usePropertyStore();
   const { user } = useAuthStore();
   const mapRef = useRef(null);
   const sidebarRef = useRef(null);
+  const [currentBounds, setCurrentBounds] = useState(null);
   const [searchAnchor, setSearchAnchor] = useState(null);
 
-  const handleLocationSelect = useCallback((coords) => {
+  // Hook to track map bounds for search bias
+  const MapBoundsTracker = () => {
+    const map = useMap();
+    useEffect(() => {
+      const updateBounds = () => {
+        const b = map.getBounds();
+        setCurrentBounds(`${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`);
+      };
+      map.on('moveend', updateBounds);
+      updateBounds(); // Initial set
+      return () => map.off('moveend', updateBounds);
+    }, [map]);
+    return null;
+  };
+
+  const handleLocationSelect = useCallback((coords, name) => {
     if (mapRef.current && Array.isArray(coords)) {
       mapRef.current.flyTo(coords, 14, { duration: 1.5 });
     }
@@ -246,6 +263,27 @@ export default function MapView() {
       lng: null
     });
   };
+
+  const handleRadiusSearch = () => {
+    if (!mapRef.current) return;
+    const center = mapRef.current.getCenter();
+    setFilters({
+      lat: center.lat,
+      lng: center.lng,
+      bounds: null,
+      radius: filters.radius || 5
+    });
+    setSearchAnchor([center.lat, center.lng]);
+  };
+
+  // 1. Discover all properties by default on mount
+  useEffect(() => {
+    // Small delay to ensure map is ready
+    const timer = setTimeout(() => {
+      handleSearchArea();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
   useEffect(() => {
     if (filters.lat && filters.lng) {
       setSearchAnchor([filters.lat, filters.lng]);
@@ -360,19 +398,20 @@ export default function MapView() {
   }), []);
 
   return (
-    <div className="map-dashboard-layout animate-fade-in">
-      <aside className="sidebar-discovery-pane">
-        <div className="sidebar-header-glow">
-          {/* <div className="flex-row items-center gap-3 mb-6">
-            <div className="brand-icon-box !w-8 !h-8 !bg-accent-blue/10">
-              <MapIcon size={18} className="text-accent-blue" />
-            </div>
-            <h1 className="brand-name luxury-title text-white">OCCUPRA</h1>
-          </div> */}
-          {/* <p className="text-[10px] text-slate-400 -mt-5 mb-6 font-medium tracking-wide uppercase">Find your perfect space, your way.</p> */}
-          {/* <div className="sidebar-search-wrap">
-            <MapSearchBar onSearch={handleLocationSelect} />
-          </div> */}
+    <div className={`map-dashboard-layout animate-fade-in ${isGridView ? 'is-grid-active' : ''}`}>
+      <aside className={`sidebar-discovery-pane ${isGridView ? 'full-grid-view' : ''}`}>
+        <div className="sidebar-header-glow flex-between">
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-6 bg-primary-color rounded-full" />
+             <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
+          </div>
+          <button 
+            onClick={() => setIsGridView(!isGridView)}
+            className={`btn btn-secondary !p-2 rounded-xl ${isGridView ? 'is-active' : ''}`}
+            title={isGridView ? "Switch to Sidebar" : "Switch to Grid View"}
+          >
+            <LayoutGrid size={18} />
+          </button>
         </div>
 
         <div className="sidebar-content-scroll custom-scrollbar" onScroll={handleSidebarScroll} ref={sidebarRef}>
@@ -418,6 +457,7 @@ export default function MapView() {
             maxNativeZoom={TILE_PROVIDERS[viewStyle].maxNativeZoom}
             maxZoom={TILE_PROVIDERS[viewStyle].maxZoom}
           />
+          <MapBoundsTracker />
           <MapEventsHandler onMapClick={handleMapClick} />
           <RadiusCursorHandler searchAnchor={searchAnchor} radius={filters.radius} />
 
@@ -472,7 +512,7 @@ export default function MapView() {
             <Search size={14} />
             <span>Discover All Properties</span>
           </button> */}
-          <MapSearchBar onSearch={handleLocationSelect} />
+          <MapSearchBar onSearch={handleLocationSelect} currentBounds={currentBounds} />
           <button
             onClick={() => setIsFilterOpen(true)}
             className="search-filter-quick-btn shadow-premium"
@@ -496,6 +536,27 @@ export default function MapView() {
               <LocateFixed size={18} />
             </button>
             <div className="zoom-divider" />
+            <button onClick={handleRadiusSearch} className="zoom-btn" title="Radius Search (Center)">
+              <Target size={18} />
+            </button>
+            <div className="zoom-divider" />
+            {(filters.lat || filters.lng) && (
+              <>
+                <button 
+                  onClick={() => {
+                    setFilters({ lat: null, lng: null, bounds: null });
+                    setSearchAnchor(null);
+                    // Re-trigger global discovery
+                    handleSearchArea();
+                  }} 
+                  className="zoom-btn text-error-color" 
+                  title="Clear Radius Search"
+                >
+                  <RotateCcw size={18} />
+                </button>
+                <div className="zoom-divider" />
+              </>
+            )}
             <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
             <div className="zoom-divider" />
             <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>

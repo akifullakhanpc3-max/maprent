@@ -6,11 +6,11 @@
   --bg-hover: #F1F5F9;
   --bg-soft: #F1F5F9;
 
-  /* Sidebar & Navigation (Deep Navy #0D1B3E) */
-  --sidebar-bg: #0D1B3E;
-  --sidebar-active: #162955;
-  --sidebar-text: #FFFFFF;
-  --sidebar-muted: #94A3B8;
+  /* Sidebar & Navigation (Lightened Context) */
+  --sidebar-bg: #F8FAFC;
+  --sidebar-active: #EFF6FF;
+  --sidebar-text: #0F172A;
+  --sidebar-muted: #64748B;
 
   --border-subtle: #E2E8F0;
   --border-medium: #CBD5E1;

@@ -52,12 +52,7 @@ export const usePropertyStore = create((set, get) => ({
   fetchProperties: async () => {
     const { bounds, minPrice, maxPrice, bhkType, city, radius, lat, lng, amenities, allowedFor, floorType } = get().filters;
     
-    // We need either bounds OR (lat/lng/radius) to fetch.
-    if (!bounds && !(lat && lng)) {
-      set({ properties: [] }); 
-      return;
-    }
-
+    // Fetch properties - allow discovery mode even without strict location pinning
     set({ loading: true });
     try {
       const res = await api.get('/properties', {
