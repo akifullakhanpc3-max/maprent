@@ -40,7 +40,7 @@ function MapFixer() {
   return null;
 }
 
-function LocationMarker({ position, setPosition, onLocationFound }) {
+function MapEventsHandler({ setPosition, onLocationFound }) {
   const map = useMap();
   useMapEvents({
     click(e) {
@@ -50,15 +50,23 @@ function LocationMarker({ position, setPosition, onLocationFound }) {
       map.flyTo(coords, map.getZoom()); // Subtle feedback
     },
   });
+  return null;
+}
 
+function LocationMarker({ position, setPosition, onLocationFound }) {
   return position === null ? null : (
-    <Marker position={position} icon={locationIcon} draggable={true} eventHandlers={{
-      dragend: (e) => {
-        const coords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
-        setPosition(coords);
-        if (onLocationFound) onLocationFound(coords);
-      }
-    }} />
+    <Marker 
+      position={position} 
+      icon={locationIcon} 
+      draggable={true} 
+      eventHandlers={{
+        dragend: (e) => {
+          const coords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
+          setPosition(coords);
+          if (onLocationFound) onLocationFound(coords);
+        }
+      }} 
+    />
   );
 }
 
@@ -154,7 +162,23 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       setPosition(initialCoords);
       reverseGeocode(initialCoords);
     } else {
-      setPosition(null); // No pin by default for new properties
+      // Auto-locate user for new listings
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = [pos.coords.latitude, pos.coords.longitude];
+            setPosition(coords);
+            reverseGeocode(coords);
+            if (mapRef.current) mapRef.current.flyTo(coords, 14);
+          },
+          () => {
+            // Fallback: Bangalore center
+            const fallback = [12.9716, 77.5946];
+            setPosition(null); 
+            if (mapRef.current) mapRef.current.setView(fallback, 12);
+          }
+        );
+      }
     }
   }, [existingProperty, initialCoords]);
 
@@ -292,13 +316,18 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
 
                   <div className="relative border-t border-slate-100" style={{ height: '320px' }}>
                     <MapContainer
-                      center={position || [28.6139, 77.2090]}
-                      zoom={position ? 15 : 5}
-                      className="w-full h-full z-0"
+                      center={position || [12.9716, 77.5946]}
+                      zoom={position ? 15 : 12}
+                      className="w-full h-full cursor-crosshair z-10"
                       ref={mapRef}
                     >
+                      <div className="map-instruction-badge">
+                        <MapPin size={12} />
+                        <span>Click map to drop pin</span>
+                      </div>
                       <MapFixer />
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <MapEventsHandler setPosition={setPosition} onLocationFound={reverseGeocode} />
                       <LocationMarker position={position} setPosition={setPosition} onLocationFound={reverseGeocode} />
                     </MapContainer>
                   </div>

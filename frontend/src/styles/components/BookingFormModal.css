@@ -257,3 +257,63 @@ textarea.input-base {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* Map Enhancements */
+.cursor-crosshair .leaflet-container {
+  cursor: crosshair !important;
+}
+
+.map-instruction-badge {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: white;
+  padding: 6px 14px;
+  border-radius: 100px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  white-space: nowrap;
+}
+
+/* Premium Pulse Pin for Search/Location (Shared from MapView) */
+.search-anchor-wrapper {
+  background: none;
+  border: none;
+}
+
+.search-anchor-pulse {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.4);
+  position: relative;
+  animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-anchor-dot {
+  background: #2563eb;
+  width: 12px;
+  height: 12px;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}

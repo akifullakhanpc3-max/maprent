@@ -339,6 +339,23 @@
   position: relative;
   transform-origin: bottom center;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-bhk-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #94a3b8; /* Slate-400 */
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding-right: 6px;
+  text-transform: uppercase;
+}
+
+.price-pin-wrapper.is-active .pin-bhk-tag {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .price-pin-tail {

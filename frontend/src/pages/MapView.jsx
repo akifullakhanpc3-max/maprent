@@ -119,7 +119,7 @@ function MapEventsHandler({ onMapClick }) {
 }
 
 // Price Pin Icon Generator
-const createPriceIcon = (price, isActive = false) => {
+const createPriceIcon = (price, bhkType, isActive = false) => {
   let formattedPrice = 'N/A';
   if (price !== undefined && price !== null && price > 0) {
     if (price >= 100000) {
@@ -130,16 +130,21 @@ const createPriceIcon = (price, isActive = false) => {
       formattedPrice = `₹${price}`;
     }
   }
+
+  // Show full BHK type (e.g., "2 BHK" or "2BHK")
+  const displayBhk = bhkType || '';
+
   return L.divIcon({
     className: 'custom-price-pin',
     html: `
       <div class="price-pin-wrapper ${isActive ? 'is-active' : ''}">
+        ${displayBhk ? `<span class="pin-bhk-tag">${displayBhk}</span>` : ''}
         <span class="price-text">${formattedPrice}</span>
         <div class="price-pin-tail"></div>
       </div>
     `,
-    iconSize: [50, 38],
-    iconAnchor: [25, 38],
+    iconSize: [80, 38], // Increased width for full BHK tag
+    iconAnchor: [40, 38],
   });
 };
 
@@ -148,7 +153,7 @@ const PriceMarker = React.memo(({ property, isActive, onClick }) => {
   return (
     <Marker
       position={[property.location.coordinates[1], property.location.coordinates[0]]}
-      icon={createPriceIcon(property.price, isActive)}
+      icon={createPriceIcon(property.price, property.bhkType, isActive)}
       eventHandlers={{ click: onClick }}
       zIndexOffset={isActive ? 1000 : 0}
     />

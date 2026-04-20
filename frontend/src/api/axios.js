@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Use environment variable if available, fallback to local backend for development
+// Use local backend for development to avoid CORS and 404s until deployment
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050';
 
 const api = axios.create({

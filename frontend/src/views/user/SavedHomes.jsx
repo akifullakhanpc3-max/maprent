@@ -4,11 +4,13 @@ import { Heart, MapPin, Search, ArrowRight, Home, Loader2, Landmark, Clock, Navi
 import api, { BASE_URL } from '../../api/axios';
 import { useAuthStore } from '../../store/useAuthStore';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
+import PropertyDetailsOverlay from '../../components/PropertyDetailsOverlay';
 import '../../styles/views/Dashboards.css';
 
 export default function SavedHomes() {
   const [savedProperties, setSavedProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const { toggleWishlist } = useAuthStore();
   const navigate = useNavigate();
 
@@ -33,6 +35,7 @@ export default function SavedHomes() {
     const success = await toggleWishlist(propertyId);
     if (success) {
       setSavedProperties(prev => prev.filter(p => p._id !== propertyId));
+      if (selectedProperty?._id === propertyId) setSelectedProperty(null);
     }
   };
 
@@ -47,15 +50,15 @@ export default function SavedHomes() {
   return (
     <div className="flex-col gap-8 animate-fade-in">
       {/* Header Panel */}
-      <header className="properties-header-premium !bg-slate-900 !border-none text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-           <Heart size={120} />
+      <header className="properties-header-premium">
+        <div className="header-watermark">
+           <Heart size={180} fill="currentColor" />
         </div>
         
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-end md:items-center gap-6 w-full">
+        <div className="header-content-stack">
            <div className="flex-col gap-2">
-             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-rose-600 rounded-xl flex-center shadow-lg shadow-rose-500/20">
+             <div className="title-pill-row">
+               <div className="header-icon-box-rose">
                   <Heart size={20} className="text-white" fill="currentColor" />
                </div>
                <h1 className="text-2xl font-black tracking-tighter">Your Saved Gallery</h1>
@@ -63,7 +66,7 @@ export default function SavedHomes() {
              <p className="text-slate-400 text-sm font-medium">Manage your shortlisted assets and potential acquisitions</p>
            </div>
 
-           <div className="flex bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md items-center gap-4">
+           <div className="header-stats-pill">
               <div className="flex-col">
                  <span className="text-xs font-bold text-rose-400 uppercase tracking-widest">{savedProperties.length}</span>
                  <span className="text-[10px] font-bold text-slate-500 uppercase">Shortlisted</span>
@@ -98,8 +101,9 @@ export default function SavedHomes() {
            {savedProperties.map((property) => (
              <div 
                key={property._id} 
+               key={property._id} 
                className="console-card !p-0 group hover:border-rose-200 transition-all cursor-pointer overflow-hidden"
-               onClick={() => navigate(`/property/${property._id}`)}
+               onClick={() => setSelectedProperty(property)}
              >
                 {/* Image Section */}
                 <div className="h-48 relative overflow-hidden">
@@ -160,6 +164,18 @@ export default function SavedHomes() {
              </div>
            ))}
         </div>
+      )}
+
+      {/* Property Details Overlay */}
+      {selectedProperty && (
+        <PropertyDetailsOverlay 
+          property={selectedProperty}
+          onClose={() => setSelectedProperty(null)}
+          onShowRoute={() => {
+            setSelectedProperty(null);
+            navigate('/'); // Redirect to map for route visualization
+          }}
+        />
       )}
     </div>
   );
