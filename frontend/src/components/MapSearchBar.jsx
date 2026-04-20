@@ -12,6 +12,7 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
   const [correction, setCorrection] = useState(null);
   const { setFilters } = usePropertyStore();
   const searchRef = useRef(null);
+  const skipNextFetch = useRef(false);
 
   // --- 🧠 1. Smart Intent Extraction (NLP-Lite) ---
   const extractIntent = (input) => {
@@ -97,7 +98,13 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (query) fetchSmartSuggestions(query);
+      if (query) {
+        if (skipNextFetch.current) {
+          skipNextFetch.current = false;
+          return;
+        }
+        fetchSmartSuggestions(query);
+      }
     }, 300); // 300ms Debounce
     return () => clearTimeout(timer);
   }, [query]);
@@ -108,6 +115,8 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       return; 
     }
     
+    
+    skipNextFetch.current = true;
     setQuery(s.name);
     setShowPortal(false);
     
