@@ -309,8 +309,9 @@
 .overlay-side-panel {
   position: relative;
   width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
+  max-width: 480px; 
+  max-height: calc(100vh - 40px); /* Ensure it always fits with padding */
+  min-height: 0; /* Allow flex shrinking */
   /* Centered modal style */
   background: white;
   display: flex;

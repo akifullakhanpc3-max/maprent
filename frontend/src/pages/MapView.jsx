@@ -131,20 +131,20 @@ const createPriceIcon = (price, bhkType, isActive = false) => {
     }
   }
 
-  // Show full BHK type (e.g., "2 BHK" or "2BHK")
-  const displayBhk = bhkType || '';
+  // Shorten BHK for pin (e.g., "2 BHK" -> "2B")
+  const shortBhk = bhkType ? bhkType.replace(/\s*BHK/i, 'B') : '';
 
   return L.divIcon({
     className: 'custom-price-pin',
     html: `
       <div class="price-pin-wrapper ${isActive ? 'is-active' : ''}">
-        ${displayBhk ? `<span class="pin-bhk-tag">${displayBhk}</span>` : ''}
+        ${shortBhk ? `<span class="pin-bhk-tag">${shortBhk}</span>` : ''}
         <span class="price-text">${formattedPrice}</span>
         <div class="price-pin-tail"></div>
       </div>
     `,
-    iconSize: [80, 38], // Increased width for full BHK tag
-    iconAnchor: [40, 38],
+    iconSize: [64, 38], // Increased width slightly for BHK tag
+    iconAnchor: [32, 38],
   });
 };
 
@@ -407,10 +407,10 @@ export default function MapView() {
       <aside className={`sidebar-discovery-pane ${isGridView ? 'full-grid-view' : ''}`}>
         <div className="sidebar-header-glow flex-between">
           <div className="flex items-center gap-2">
-             <div className="w-2 h-6 bg-primary-color rounded-full" />
-             <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
+            <div className="w-2 h-6 bg-primary-color rounded-full" />
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
           </div>
-          <button 
+          <button
             onClick={() => setIsGridView(!isGridView)}
             className={`btn btn-secondary !p-2 rounded-xl ${isGridView ? 'is-active' : ''}`}
             title={isGridView ? "Switch to Sidebar" : "Switch to Grid View"}
@@ -547,14 +547,14 @@ export default function MapView() {
             <div className="zoom-divider" />
             {(filters.lat || filters.lng) && (
               <>
-                <button 
+                <button
                   onClick={() => {
                     setFilters({ lat: null, lng: null, bounds: null });
                     setSearchAnchor(null);
                     // Re-trigger global discovery
                     handleSearchArea();
-                  }} 
-                  className="zoom-btn text-error-color" 
+                  }}
+                  className="zoom-btn text-error-color"
                   title="Clear Radius Search"
                 >
                   <RotateCcw size={18} />
