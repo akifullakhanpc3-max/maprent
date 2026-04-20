@@ -553,15 +553,18 @@ export default function MapView() {
               className="zoom-btn"
               title="Toggle Base Map"
             >
-              <Layers size={18} />
+              <Layers size={14} />
+              <span className="zoom-label">{viewStyle === 'streets' ? 'Sat' : 'Map'}</span>
             </button>
             <div className="zoom-divider" />
             <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
-              <LocateFixed size={18} />
+              <LocateFixed size={14} />
+              <span className="zoom-label">Me</span>
             </button>
             <div className="zoom-divider" />
             <button onClick={handleRadiusSearch} className="zoom-btn" title="Radius Search (Center)">
-              <Target size={18} />
+              <Target size={14} />
+              <span className="zoom-label">Radius</span>
             </button>
             <div className="zoom-divider" />
             {(filters.lat || filters.lng) && (
@@ -576,14 +579,21 @@ export default function MapView() {
                   className="zoom-btn text-error-color"
                   title="Clear Radius Search"
                 >
-                  <RotateCcw size={18} />
+                  <RotateCcw size={14} />
+                  <span className="zoom-label">Clear</span>
                 </button>
                 <div className="zoom-divider" />
               </>
             )}
-            <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">＋</button>
+            <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">
+              <span className="text-sm">＋</span>
+              <span className="zoom-label">In</span>
+            </button>
             <div className="zoom-divider" />
-            <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">－</button>
+            <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">
+              <span className="text-sm">－</span>
+              <span className="zoom-label">Out</span>
+            </button>
             <div className="zoom-divider" />
           </div>
         </div>

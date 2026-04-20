@@ -3,12 +3,11 @@
 .map-dashboard-layout {
   display: flex;
   width: 100vw;
-  height: 100vh;
-  height: 100dvh;
+  height: 100%;
+  /* Inherit height from parent (calc(100vh - 80px)) */
   background-color: var(--sidebar-bg);
   overflow: hidden;
   position: relative;
-
 }
 
 /* 📱 Mobile Specific Logic: Map Relative/Static, Page Scrolls Naturally */
@@ -143,6 +142,10 @@
     min-height: 450px;
     order: -1;
     flex: none;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    /* Above the property list but below overlays */
   }
 }
 
@@ -156,10 +159,11 @@
 /* Floating Controls Layering */
 .map-overlay-center-top {
   position: absolute;
-  top: var(--s-6);
+  top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 2000;
+  /* Higher priority */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,9 +239,10 @@
 
 .map-overlay-zoom-controls {
   position: absolute;
-  top: var(--s-6);
-  right: var(--s-6);
-  z-index: 1000;
+  top: 24px;
+  right: 24px;
+  z-index: 2005;
+  /* Always above search bar if they collide */
 }
 
 .zoom-controls-stack {
@@ -271,15 +276,30 @@
 }
 
 .zoom-btn {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  gap: 4px;
   color: var(--text-main);
   background: white;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.zoom-label {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.zoom-btn:hover .zoom-label {
+  color: var(--primary-color);
 }
 
 .zoom-btn:hover {
