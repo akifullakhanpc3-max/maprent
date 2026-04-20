@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers, Target, RotateCcw } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
@@ -167,12 +168,38 @@ export default function MapView() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewStyle, setViewStyle] = useState('streets');
-  const { properties, filters, loading, setFilter, setFilters } = usePropertyStore();
+  const { properties, filters, loading, setFilter, setFilters, fetchPropertyById } = usePropertyStore();
   const { user } = useAuthStore();
+  const { search } = useLocation();
   const mapRef = useRef(null);
   const sidebarRef = useRef(null);
   const [currentBounds, setCurrentBounds] = useState(null);
   const [searchAnchor, setSearchAnchor] = useState(null);
+
+  // 0. Handle Deep Linking from Shared Links
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const propertyId = params.get('id');
+    
+    if (propertyId) {
+      const loadDeepLink = async () => {
+        const prop = await fetchPropertyById(propertyId);
+        if (prop) {
+          setSelectedProperty(prop);
+          setHighlightedId(prop._id);
+          // Standardize fly-to for deep-linked properties
+          if (prop.location?.coordinates) {
+            const [lng, lat] = prop.location.coordinates;
+            // Delay slightly to ensure map container is fully initialized
+            setTimeout(() => {
+              mapRef.current?.flyTo([lat, lng], 15, { duration: 2 });
+            }, 500);
+          }
+        }
+      };
+      loadDeepLink();
+    }
+  }, [search, fetchPropertyById]);
 
   // Hook to track map bounds for search bias
   const MapBoundsTracker = () => {

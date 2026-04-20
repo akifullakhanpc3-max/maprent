@@ -24,7 +24,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/property/${property._id}`;
+    const shareUrl = `${window.location.origin}/?id=${property._id}`;
     const shareData = {
       title: property.title || 'Property from Maprent',
       text: `Check out this property: ${property.title}`,
