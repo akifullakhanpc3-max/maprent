@@ -3,6 +3,7 @@ import { X, MapPin, Grid, CheckCircle2, Share2, Heart, ShieldCheck, Zap, Clock, 
 import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import api, { BASE_URL } from '../api/axios';
+import { useAuthStore } from '../store/useAuthStore';
 import '../styles/components/PropertyDetailsCard.css'
 
 export default function PropertyDetailsOverlay({ property, onClose, onShowRoute }) {
@@ -11,7 +12,15 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
   const [reportReason, setReportReason] = useState('Spam');
   const [reportDetails, setReportDetails] = useState('');
   const [reportStatus, setReportStatus] = useState({ loading: false, success: false, error: '' });
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  
+  const { user, toggleWishlist } = useAuthStore();
+  const isWishlisted = user?.savedProperties?.includes(property?._id);
+
+  const handleWishlistToggle = async (e) => {
+    e.stopPropagation();
+    if (!user) return alert('Please login to save properties');
+    await toggleWishlist(property._id);
+  };
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -53,7 +62,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
           </button>
           <div className="header-actions">
             <button
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              onClick={handleWishlistToggle}
               className={`header-icon-btn ${isWishlisted ? 'liked' : ''}`}
             >
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
@@ -69,7 +78,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
           <div className="overlay-hero-image-box">
             {property.images?.[0] ? (
               <ImageWithSkeleton
-                src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`}
+                src={property.images?.[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`) : ''}
                 alt={property.title}
                 className="overlay-full-image"
               />

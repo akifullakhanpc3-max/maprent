@@ -258,4 +258,47 @@ router.put('/reset-password/:token', async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/auth/wishlist
+ * @desc    Get user's saved properties
+ * @access  Private
+ */
+router.get('/wishlist', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate({
+      path: 'savedProperties',
+      match: { isActive: true } // Only show properties that are still active
+    });
+    res.json(user.savedProperties);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+/**
+ * @route   PUT /api/auth/wishlist/:id
+ * @desc    Toggle property in wishlist
+ * @access  Private
+ */
+router.put('/wishlist/:id', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const propertyId = req.params.id;
+
+    const index = user.savedProperties.indexOf(propertyId);
+    if (index === -1) {
+      user.savedProperties.push(propertyId);
+    } else {
+      user.savedProperties.splice(index, 1);
+    }
+
+    await user.save();
+    res.json(user.savedProperties);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

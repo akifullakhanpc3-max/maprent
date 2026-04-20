@@ -84,7 +84,9 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       }
 
       setSuggestions(results);
-      if (assistantResult.isCorrection) setCorrection(assistantResult.bestMatch.name);
+      if (assistantResult.isCorrection && assistantResult.bestMatch) {
+        setCorrection(assistantResult.bestMatch.name);
+      }
 
     } catch (err) {
       console.error('Scalable Search Error:', err);

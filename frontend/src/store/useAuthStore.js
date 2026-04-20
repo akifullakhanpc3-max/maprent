@@ -53,5 +53,19 @@ export const useAuthStore = create((set, get) => ({
   logout: () => {
     localStorage.removeItem('token');
     set({ user: null, token: null, isAuthenticated: false });
+  },
+
+  toggleWishlist: async (propertyId) => {
+    try {
+      const res = await api.put(`/auth/wishlist/${propertyId}`);
+      // Update local user state with new wishlist IDs
+      set(state => ({
+        user: { ...state.user, savedProperties: res.data }
+      }));
+      return true;
+    } catch (err) {
+      console.error('Wishlist sync failed:', err);
+      return false;
+    }
   }
 }));

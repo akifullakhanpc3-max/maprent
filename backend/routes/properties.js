@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
   try {
     const { bounds, minPrice, maxPrice, bhkType, city, radius, lat, lng, amenities, floor } = req.query;
 
-    let query = { status: 'approved' };
+    let query = { status: 'approved', isActive: true };
 
     // Basic filters
     if (minPrice || maxPrice) {
@@ -116,6 +116,12 @@ router.get('/:id', async (req, res) => {
   try {
     const property = await Property.findById(req.params.id).populate('ownerId', 'name email');
     if (!property) return res.status(404).json({ msg: 'Property not found' });
+    
+    // Check if property is active (or if it belongs to the requester)
+    if (!property.isActive) {
+      return res.status(404).json({ msg: 'Property is currently delisted' });
+    }
+
     res.json(property);
   } catch (err) {
     if (err.kind === 'ObjectId') return res.status(404).json({ msg: 'Property not found' });

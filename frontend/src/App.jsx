@@ -21,6 +21,7 @@ import PropertyDetails from './pages/PropertyDetails';
 import UserDashboard from './views/user/UserDashboard';
 import ExploreProperties from './pages/MapView'; // Alias MapView for User Explore
 import MyBookings from './views/user/MyBookings';
+import SavedHomes from './views/user/SavedHomes';
 
 // Owner Panel Views
 import OwnerDashboard from './views/owner/OwnerDashboard';
@@ -83,6 +84,7 @@ function App() {
           <Route path="dashboard" element={<UserDashboard />} />
           <Route path="explore" element={<div style={{ height: 'calc(100vh - 120px)' }}><ExploreProperties /></div>} />
           <Route path="bookings" element={<MyBookings />} />
+          <Route path="saved" element={<SavedHomes />} />
           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/user/dashboard" replace />} />
         </Route>

@@ -208,19 +208,19 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
           lng: position[1]
         });
       } else {
-        const payload = new FormData();
+        const listingFormData = new FormData();
         Object.keys(formData).forEach(key => {
           if (key === 'amenities' || key === 'allowedFor' || key === 'advancedFeatures') {
-            payload.append(key, JSON.stringify(formData[key]));
+            listingFormData.append(key, JSON.stringify(formData[key]));
           } else {
-            payload.append(key, formData[key]);
+            listingFormData.append(key, formData[key]);
           }
         });
-        payload.append('lat', position[0]);
-        payload.append('lng', position[1]);
-        images.forEach(img => payload.append('images', img));
+        listingFormData.append('lat', position[0]);
+        listingFormData.append('lng', position[1]);
+        images.forEach(img => listingFormData.append('images', img));
 
-        await api.post('/properties', payload, {
+        await api.post('/properties', listingFormData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }

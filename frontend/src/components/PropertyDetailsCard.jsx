@@ -1,25 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Share2, Heart, X, Maximize, Clock, Phone, ExternalLink } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
+import { useAuthStore } from '../store/useAuthStore';
 import '../styles/components/PropertyDetailsCard.css';
 
 const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { user, toggleWishlist } = useAuthStore();
+  const isWishlisted = user?.savedProperties?.includes(property?._id);
 
   if (!property) return null;
+
+  const handleWishlistToggle = async (e) => {
+    e.stopPropagation();
+    if (!user) return alert('Please login to save properties');
+    await toggleWishlist(property._id);
+  };
 
   const getDaysAgo = (date, id) => {
     let created;
     if (date) {
       created = new Date(date);
     } else if (id && typeof id === 'string' && id.length === 24) {
-      // Fallback: Extract timestamp from MongoDB ObjectId
       const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
       created = new Date(timestamp);
     }
-
     if (!created || isNaN(created.getTime())) return 'Recently';
-
     const now = new Date();
     const diffTime = Math.abs(now - created);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -27,23 +32,17 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
     return `Listed ${diffDays}d ago`;
   };
 
-  if (!property) return null;
-
   const phoneNum = property.phone || '910000000000';
 
   return (
     <div className="property-details-card">
-      {/* 1. Title & Price Integrated Header */}
       <div className="card-header-stack">
         <div className="card-title-row">
           <h3 className="card-property-title">{property.title}</h3>
           <div className="header-actions-group">
             <button
               className={`action-pill-btn ${isWishlisted ? 'liked' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsWishlisted(!isWishlisted);
-              }}
+              onClick={handleWishlistToggle}
             >
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
@@ -61,12 +60,10 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
         </div>
       </div>
 
-
-      {/* 2. Image Section */}
       <div className="property-image-hero">
         {property.images?.[0] ? (
           <img
-            src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`}
+            src={property.images?.[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`) : ''}
             alt={property.title}
             className="hero-img-element"
           />
@@ -78,7 +75,6 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
         )}
       </div>
 
-      {/* 3. Price Breakdown Section */}
       <div className="detail-breakdown-section">
         <div className="breakdown-item-row">
           <span className="row-label">Rent</span>
@@ -96,7 +92,6 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
         </div>
       </div>
 
-      {/* 4. Tags Section */}
       <div className="pill-tags-container">
         <span className="tag-pill color-purple">{property.bhkType || "2 BHK"}</span>
         <span className="tag-pill color-orange">{property.furnishing || "Unfurnished"}</span>
@@ -108,20 +103,17 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
         <span className="tag-pill color-dark">{getDaysAgo(property.createdAt, property._id)}</span>
       </div>
 
-      {/* 5. Property Info Section */}
       <div className="property-footer-meta">
         <div className="meta-spec-item">
           <Maximize size={16} />
           <span>{property.sqft || '860'} sq.ft</span>
         </div>
         <div className="meta-spec-item">
-          <MapPin size={16} />
-          <span>{property.city || 'Bangalore'}</span>
+          <Phone size={16} />
+          <span>{property.phone || 'Contact Owner'}</span>
         </div>
       </div>
 
-
-      {/* 6. Action Buttons */}
       <div className="card-cta-group">
         <button
           className="cta-btn primary-cta"
@@ -149,4 +141,3 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
 };
 
 export default PropertyDetailsCard;
-

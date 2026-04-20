@@ -41,7 +41,12 @@ const userSchema = new mongoose.Schema({
   isBlocked: {
     type: Boolean,
     default: false,
-  }
+  },
+  savedProperties: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Property',
+    default: []
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
