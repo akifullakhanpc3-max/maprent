@@ -131,8 +131,8 @@ const createPriceIcon = (price, bhkType, isActive = false) => {
     }
   }
 
-  // Shorten BHK for pin (e.g., "2 BHK" -> "2B")
-  const shortBhk = bhkType ? bhkType.replace(/\s*BHK/i, 'B') : '';
+  // Standardize BHK for pin (e.g., "2 BHK")
+  const shortBhk = bhkType ? bhkType.toUpperCase() : '';
 
   return L.divIcon({
     className: 'custom-price-pin',
