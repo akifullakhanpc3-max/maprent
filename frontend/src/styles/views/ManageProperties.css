@@ -85,145 +85,149 @@
   box-shadow: 0 0 0 4px rgba(30, 77, 183, 0.08);
 }
 
-/* Property List Card */
+
+/* Property List Card - Transformed to Grid */
 .property-list-stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: var(--s-6);
+}
+
+@media (min-width: 640px) {
+  .property-list-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .property-list-stack {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .property-list-card {
   display: flex;
-  flex-direction: column; /* Stack by default on mobile */
-  gap: var(--s-4);
-  padding: var(--s-4);
+  flex-direction: column;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  transition: all var(--trans-base);
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-}
-
-@media (min-width: 768px) {
-  .property-list-card {
-    flex-direction: row; /* Side-by-side on tablet/desktop */
-    align-items: center;
-    gap: var(--s-6);
-  }
+  height: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .property-list-card:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-8px);
+  border-color: var(--primary-color);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .card-image-wrapper {
   width: 100%;
-  height: 200px;
-  border-radius: var(--radius-md);
+  aspect-ratio: 16 / 10;
+  height: auto; /* Allow aspect-ratio to control height */
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-  border: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-@media (min-width: 768px) {
+/* OVERRIDE for any fixed mobile logic that squashed images */
+@media (max-width: 767.98px) {
   .card-image-wrapper {
-    width: 180px;
-    height: 110px;
+    height: auto !important;
   }
 }
 
 .card-image-overlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 12px;
+  left: 12px;
   z-index: 10;
 }
 
 .card-details-stack {
   flex: 1;
-  min-width: 0;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .card-meta-row {
   display: flex;
   align-items: center;
   gap: var(--s-3);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .property-title-premium {
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 900;
   color: var(--text-main);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .property-info-grid {
-  display: flex;
-  flex-wrap: wrap;      /* Allow wrapping */
-  align-items: center;
-  gap: var(--s-4) var(--s-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-subtle);
 }
 
 .info-item-premium {
   display: flex;
-  align-items: center;
-  gap: var(--s-1);
+  flex-direction: column;
+  gap: 2px;
 }
 
 .info-label-premium {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 800;
   color: var(--text-low);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-top: 2px;
 }
 
 .info-value-premium {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
-  color: var(--accent-blue);
+  color: var(--text-main);
 }
 
-/* Action Panel */
+/* Action Panel - Repositioned to Bottom for Grid Cards */
 .card-actions-panel {
   display: flex;
   align-items: center;
-  gap: var(--s-3);
-  padding-top: var(--s-3);
-  border-top: 1px solid var(--border-subtle);
   justify-content: flex-end;
-}
-
-@media (min-width: 768px) {
-  .card-actions-panel {
-    padding-top: 0;
-    padding-left: var(--s-6);
-    border-top: none;
-    border-left: 1px solid var(--border-subtle);
-  }
+  gap: 10px;
+  padding: 12px 1.25rem;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .action-btn-dashboard {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--trans-fast);
+  transition: all 0.2s ease;
   border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
+  background: white;
   color: var(--text-muted);
 }
 
