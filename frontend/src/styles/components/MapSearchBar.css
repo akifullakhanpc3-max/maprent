@@ -167,12 +167,16 @@
   flex-direction: column;
   gap: 2px;
   flex: 1;
+  min-width: 0; /* Critical for truncation in flex containers */
 }
 
 .suggestion-main-title {
   font-size: 14px;
   font-weight: 700;
   color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 🔍 Match Highlight */
@@ -189,7 +193,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 250px;
+  width: 100%;
 }
 
 .suggestion-go-icon {
@@ -225,5 +229,5 @@
   }
   .search-input-field { font-size: 14px; }
   .suggestions-portal { max-height: 320px; }
-  .suggestion-sub-addr { max-width: 180px; }
+  .suggestion-sub-addr { width: 100%; }
 }

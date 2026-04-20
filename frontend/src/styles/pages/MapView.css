@@ -3,8 +3,7 @@
 .map-dashboard-layout {
   display: flex;
   width: 100vw;
-  height: 100%;
-  /* Inherit height from parent (calc(100vh - 80px)) */
+  height: 100%; /* Fill exactly the parent wrapper calc(100vh - 80px) */
   background-color: var(--sidebar-bg);
   overflow: hidden;
   position: relative;
@@ -14,9 +13,8 @@
 @media (max-width: 768px) {
   .map-dashboard-layout {
     flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
+    height: 100%;
+    overflow: hidden;
   }
 }
 
@@ -48,11 +46,14 @@
 @media (max-width: 768px) {
   .sidebar-discovery-pane {
     width: 100%;
-    height: 50vh;
-    min-height: 400px;
+    flex: 1;
+    min-height: 0;
     border-right: none;
     border-top: 1px solid var(--border-subtle);
     background: var(--sidebar-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     z-index: 10;
   }
 
@@ -73,6 +74,10 @@
 @media (max-width: 768px) {
   .sidebar-header-glow {
     padding: var(--s-4) var(--s-3);
+    margin-top: -2px; /* Pull header up to bridge the layout gap */
+    background: white;
+    position: relative;
+    z-index: 20;
   }
 }
 
@@ -85,6 +90,7 @@
 .sidebar-content-scroll {
   flex: 1;
   overflow-y: auto;
+  min-height: 0; /* Ensures flex child can shrink/scroll */
   margin-top: 3px;
   padding: 0 var(--s-4);
   display: flex;
@@ -94,9 +100,10 @@
 
 @media (max-width: 768px) {
   .sidebar-content-scroll {
-    overflow-y: visible;
-    height: auto;
-    flex: none;
+    overflow-y: auto;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
   }
 }
 
@@ -132,7 +139,7 @@
   flex: 1;
   height: 100%;
   position: relative;
-  background: #f1f5f9;
+  background: white; /* Neutralize any dark underlying layers */
   transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -154,23 +161,47 @@
 .luxury-leaflet-map {
   width: 100%;
   height: 100%;
+  background: white;
+}
+
+/* Force Leaflet to acknowledge full container height */
+.luxury-leaflet-map .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background: #fdfdfd !important;
+  outline: none;
+}
+
+/* Eliminate Leaflet attribution dark background & gap */
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  border-top-left-radius: 8px;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Floating Controls Layering */
 .map-overlay-center-top {
-  position: absolute;
-  top: 24px;
-  left: 50%;
+  position: fixed;
+  top: calc(80px + 24px);
+  left: calc(350px + (100vw - 350px) / 2);
   transform: translateX(-50%);
-  z-index: 2000;
-  /* Higher priority */
+  z-index: 5500; /* Higher than Sidebar but lower than full details */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   width: 100%;
   max-width: 600px;
+  min-width: 450px;
   padding: 0 var(--s-4);
+  pointer-events: none;
+}
+
+.map-overlay-center-top > * {
+  pointer-events: auto;
 }
 
 .search-area-btn {
@@ -238,11 +269,10 @@
 }
 
 .map-overlay-zoom-controls {
-  position: absolute;
-  top: 24px;
+  position: fixed;
+  top: calc(80px + 24px);
   right: 24px;
-  z-index: 2005;
-  /* Always above search bar if they collide */
+  z-index: 5505;
 }
 
 .zoom-controls-stack {
@@ -256,11 +286,16 @@
 }
 
 @media (max-width: 1024px) {
+  .map-overlay-center-top {
+    left: 50%;
+    width: 100%;
+    top: calc(80px + 16px);
+  }
+
   .map-overlay-zoom-controls {
     top: auto;
-    bottom: var(--s-6);
-    /* Now sitting directly at the bottom on tablets and mobile */
-    right: var(--s-6);
+    bottom: 24px;
+    right: 24px;
   }
 
   .zoom-controls-stack {
