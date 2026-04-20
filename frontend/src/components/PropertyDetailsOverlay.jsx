@@ -9,6 +9,7 @@ import '../styles/components/PropertyDetailsCard.css'
 export default function PropertyDetailsOverlay({ property, onClose, onShowRoute }) {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showFullScreen, setShowFullScreen] = useState(false);
   const [reportReason, setReportReason] = useState('Spam');
   const [reportDetails, setReportDetails] = useState('');
   const [reportStatus, setReportStatus] = useState({ loading: false, success: false, error: '' });
@@ -96,6 +97,14 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                 <span className="badge-item badge-gold">Pinned</span>
               )}
             </div>
+
+            <button 
+              className="image-maximize-btn"
+              onClick={() => setShowFullScreen(true)}
+              title="View Full Screen"
+            >
+              <Maximize size={18} />
+            </button>
           </div>
 
 
@@ -214,42 +223,42 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
             <div className="overlay-branding-footer">
               <p>PROPERTY DETAILS SYSTEM</p>
             </div>
-          </div>
-        </div>
 
-        {/* Action Interaction Hub */}
-        <div className="overlay-action-footer">
-          <div className="footer-contact-grid">
-            <button
-              onClick={() => window.location.href = `tel:+91${phoneNum}`}
-              className="footer-btn btn-call"
-            >
-              <Phone size={18} />
-              CALL OWNER
-            </button>
-            <button
-              onClick={() => window.open(`https://wa.me/91${whatsappNum}`, '_blank')}
-              className="footer-btn btn-whatsapp"
-            >
-              <MessageSquare size={18} />
-              WHATSAPP
-            </button>
-          </div>
+            {/* Action Interaction Hub - Moved inside scrollable area as requested */}
+            <div className="overlay-action-footer">
+              <div className="footer-contact-grid">
+                <button
+                  onClick={() => window.location.href = `tel:+91${property?.ownerPhone || '9999999999'}`}
+                  className="footer-btn btn-call"
+                >
+                  <Phone size={18} />
+                  CALL OWNER
+                </button>
+                <button
+                  onClick={() => window.open(`https://wa.me/91${property?.ownerPhone || '9999999999'}`, '_blank')}
+                  className="footer-btn btn-whatsapp"
+                >
+                  <MessageSquare size={18} />
+                  WHATSAPP
+                </button>
+              </div>
 
-          <div className="footer-cta-stack">
-            <button
-              onClick={() => onShowRoute(property)}
-              className="footer-link-btn"
-            >
-              <Navigation2 size={16} />
-              VIEW ON MAP ROUTE
-            </button>
-            <button
-              onClick={() => setShowBookingModal(true)}
-              className="footer-btn-main"
-            >
-              Contact for Visit
-            </button>
+              <div className="footer-cta-stack">
+                <button
+                  onClick={() => onShowRoute(property)}
+                  className="footer-link-btn"
+                >
+                  <Navigation2 size={16} />
+                  VIEW ON MAP ROUTE
+                </button>
+                <button
+                  onClick={() => setShowBookingModal(true)}
+                  className="footer-btn-main"
+                >
+                  Contact for Visit
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -308,6 +317,22 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Full Screen Image Lightbox */}
+      {showFullScreen && (
+        <div className="fullscreen-lightbox-overlay animate-fade-in" onClick={() => setShowFullScreen(false)}>
+          <button className="lightbox-close" onClick={() => setShowFullScreen(false)}>
+            <X size={32} />
+          </button>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={property.images?.[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`) : ''} 
+              alt={property.title}
+              className="lightbox-img animate-scale-in"
+            />
           </div>
         </div>
       )}
