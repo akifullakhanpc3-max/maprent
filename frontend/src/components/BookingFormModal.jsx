@@ -25,6 +25,14 @@ export default function BookingFormModal({ isOpen, onClose, propertyId, property
       setSuccess('');
     }
   }, [isOpen]);
+  
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

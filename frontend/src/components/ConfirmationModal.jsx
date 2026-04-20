@@ -1,7 +1,16 @@
+import React, { useEffect } from 'react';
 import { X, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import '../styles/components/BookingFormModal.css'; // Reusing modal layout styles
 
 export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, confirmText = "Confirm", type = "danger" }) {
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const isDanger = type === 'danger';

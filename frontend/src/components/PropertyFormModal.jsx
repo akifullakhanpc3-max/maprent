@@ -181,6 +181,14 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
       }
     }
   }, [existingProperty, initialCoords]);
+  
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

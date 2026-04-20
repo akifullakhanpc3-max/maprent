@@ -25,10 +25,23 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        if (showFullScreen) {
+          setShowFullScreen(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleEsc);
     };
-  }, []);
+  }, [showFullScreen, onClose]);
 
   if (!property) return null;
 
