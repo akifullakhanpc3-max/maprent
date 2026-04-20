@@ -22,8 +22,24 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
 
   if (!property) return null;
 
-  const phoneNum = property.phone || '910000000000';
-  const whatsappNum = property.whatsapp || phoneNum;
+  const getDaysAgo = (date, id) => {
+    let created;
+    if (date) {
+      created = new Date(date);
+    } else if (id && typeof id === 'string' && id.length === 24) {
+      // Fallback: Extract timestamp from MongoDB ObjectId
+      const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
+      created = new Date(timestamp);
+    }
+
+    if (!created || isNaN(created.getTime())) return 'Recently';
+
+    const now = new Date();
+    const diffTime = Math.abs(now - created);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Listed Today';
+    return `Listed ${diffDays}d ago`;
+  };
 
   return (
     <div className="overlay-root-container">
@@ -66,11 +82,13 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
             <div className="overlay-image-badges">
               <span className="badge-item badge-dark">{property.bhkType} Unit</span>
               <span className="badge-item badge-green">Available</span>
+              <span className="badge-item badge-blue">{getDaysAgo(property.createdAt, property._id)}</span>
               {property.isPinned && (
                 <span className="badge-item badge-gold">Pinned</span>
               )}
             </div>
           </div>
+
 
           <div className="overlay-main-body">
             {/* Identity & Location */}
@@ -86,7 +104,20 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                 <span className="price-value">{property.price ? '₹' + property.price.toLocaleString() : 'N/A'}</span>
                 <span className="price-label">Monthly Rent</span>
               </div>
+
+              {/* Tags Section (Synced with Card) */}
+              <div className="pill-tags-container overlay-tags-margin">
+                <span className="tag-pill color-purple">{property.bhkType || "2 BHK"}</span>
+                <span className="tag-pill color-orange">{property.furnishing || "Unfurnished"}</span>
+                <span className="tag-pill color-blue">
+                  {property.maintenance ? "Maintenance Extra" : "Incl. Maintenance"}
+                </span>
+                <span className="tag-pill color-gray">{property.propertyType || "Not Gated"}</span>
+                <span className="tag-pill color-green">{property.tenantPreferred || "Family"}</span>
+                <span className="tag-pill color-dark">{getDaysAgo(property.createdAt, property._id)}</span>
+              </div>
             </div>
+
 
             {/* Price Hero Section (Secondary Details) */}
             <div className="price-hero-card">

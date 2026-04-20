@@ -8,6 +8,27 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
 
   if (!property) return null;
 
+  const getDaysAgo = (date, id) => {
+    let created;
+    if (date) {
+      created = new Date(date);
+    } else if (id && typeof id === 'string' && id.length === 24) {
+      // Fallback: Extract timestamp from MongoDB ObjectId
+      const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
+      created = new Date(timestamp);
+    }
+
+    if (!created || isNaN(created.getTime())) return 'Recently';
+
+    const now = new Date();
+    const diffTime = Math.abs(now - created);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Listed Today';
+    return `Listed ${diffDays}d ago`;
+  };
+
+  if (!property) return null;
+
   const phoneNum = property.phone || '910000000000';
 
   return (
@@ -84,6 +105,7 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
         </span>
         <span className="tag-pill color-gray">{property.propertyType || "Not Gated"}</span>
         <span className="tag-pill color-green">{property.tenantPreferred || "Family"}</span>
+        <span className="tag-pill color-dark">{getDaysAgo(property.createdAt, property._id)}</span>
       </div>
 
       {/* 5. Property Info Section */}
@@ -93,10 +115,11 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
           <span>{property.sqft || '860'} sq.ft</span>
         </div>
         <div className="meta-spec-item">
-          <Clock size={16} />
-          <span>Pinned 9d ago</span>
+          <MapPin size={16} />
+          <span>{property.city || 'Bangalore'}</span>
         </div>
       </div>
+
 
       {/* 6. Action Buttons */}
       <div className="card-cta-group">
