@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers, LayoutGrid, Target, RotateCcw } from 'lucide-react';
+import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers, Target, RotateCcw } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { usePropertyStore } from '../store/usePropertyStore';
@@ -167,7 +167,6 @@ export default function MapView() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewStyle, setViewStyle] = useState('streets');
-  const [isGridView, setIsGridView] = useState(false);
   const { properties, filters, loading, setFilter, setFilters } = usePropertyStore();
   const { user } = useAuthStore();
   const mapRef = useRef(null);
@@ -403,20 +402,13 @@ export default function MapView() {
   }), []);
 
   return (
-    <div className={`map-dashboard-layout animate-fade-in ${isGridView ? 'is-grid-active' : ''}`}>
-      <aside className={`sidebar-discovery-pane ${isGridView ? 'full-grid-view' : ''}`}>
+    <div className="map-dashboard-layout animate-fade-in">
+      <aside className="sidebar-discovery-pane">
         <div className="sidebar-header-glow flex-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-6 bg-primary-color rounded-full" />
             <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
           </div>
-          <button
-            onClick={() => setIsGridView(!isGridView)}
-            className={`btn btn-secondary !p-2 rounded-xl ${isGridView ? 'is-active' : ''}`}
-            title={isGridView ? "Switch to Sidebar" : "Switch to Grid View"}
-          >
-            <LayoutGrid size={18} />
-          </button>
         </div>
 
         <div className="sidebar-content-scroll custom-scrollbar" onScroll={handleSidebarScroll} ref={sidebarRef}>

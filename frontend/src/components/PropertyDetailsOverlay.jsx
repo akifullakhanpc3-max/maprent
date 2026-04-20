@@ -23,6 +23,25 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
     await toggleWishlist(property._id);
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: property.title || 'Property from Maprent',
+      text: `Check out this property: ${property.title}`,
+      url: window.location.href + (window.location.href.includes('map') ? `?id=${property._id}` : `/${property._id}`)
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Property link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share error:', err);
+    }
+  };
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     
@@ -81,7 +100,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
             >
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
-            <button className="header-icon-btn">
+            <button className="header-icon-btn" onClick={handleShare}>
               <Share2 size={18} />
             </button>
           </div>

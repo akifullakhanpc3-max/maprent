@@ -69,6 +69,25 @@ export default function PropertyDetails() {
     }, 800);
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: property?.title || 'Property from Maprent',
+      text: `Check out this property: ${property?.title}`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Property link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Share error:', err);
+    }
+  };
+
   // Compute map URL once — uses coordinates for precision, falls back to city+title search.
   // Never returns '#' so the link is always functional.
   const mapUrl = (() => {
@@ -122,7 +141,7 @@ export default function PropertyDetails() {
             </button>
 
             <div className="flex items-center gap-3">
-              <button className="btn btn-secondary !h-10 !w-10 rounded-xl" title="Share Listing">
+              <button className="btn btn-secondary !h-10 !w-10 rounded-xl" title="Share Listing" onClick={handleShare}>
                 <Share2 size={16} />
               </button>
               <button

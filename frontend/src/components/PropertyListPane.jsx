@@ -95,21 +95,25 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
               </div>
             </div>
 
-            {/* Radius Filter */}
-            <div className="filter-group">
-              <label className="group-label">Search Proximity</label>
-              <div className="pills-grid">
-                {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
-                  <button
-                    key={val}
-                    onClick={() => setFilter('radius', val)}
-                    className={`discovery-pill ${filters.radius === val ? 'is-active' : ''}`}
-                  >
-                    {val < 1 ? `${val * 1000}m` : `${val}km`}
-                  </button>
-                ))}
+            {/* Radius Filter - Only shown when proximity search is active */}
+            {filters.lat && filters.lng && (
+              <div className="filter-group animate-fade-in">
+                <div className="flex-between">
+                  <label className="group-label">Search Proximity</label>
+                </div>
+                <div className="pills-grid">
+                  {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
+                    <button
+                      key={val}
+                      onClick={() => setFilter('radius', val)}
+                      className={`discovery-pill ${filters.radius === val ? 'is-active' : ''}`}
+                    >
+                      {val < 1 ? `${val * 1000}m` : `${val}km`}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
