@@ -1,0 +1,47 @@
+/* Premium Animated Map Cursor Styling */
+.custom-map-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 999999;
+  will-change: transform;
+}
+
+.cursor-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              filter 0.2s ease;
+}
+
+/* Default state (Hover over Map) */
+.state-default .cursor-inner {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+/* Active state (Drag/Grabbing) */
+.state-active .cursor-inner {
+  transform: scale(0.9);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) brightness(1.2);
+}
+
+/* Interactive state (Over buttons/markers) */
+.state-pointer .cursor-inner {
+  transform: scale(1.18);
+  filter: drop-shadow(0 6px 18px rgba(37, 99, 235, 0.4));
+}
+
+/** 
+ * Smooth Entrance Animation 
+ */
+@keyframes cursor-emerge {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.custom-map-cursor.scale-in {
+  animation: cursor-emerge 0.3s ease-out;
+}

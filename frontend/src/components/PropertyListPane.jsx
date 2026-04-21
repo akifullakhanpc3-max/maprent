@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation, Phone, MessageSquare, ExternalLink, Maximize, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation, Phone, MessageSquare, ExternalLink, Maximize, Building2, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../api/axios';
 import BookingFormModal from './BookingFormModal';
@@ -9,12 +9,12 @@ import ImageWithSkeleton from './ImageWithSkeleton';
 import DiscoverCities from './DiscoverCities';
 import '../styles/components/PropertyListPane.css';
 
-export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute, onSearchArea }) {
+export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute, onSearchArea, onSearchRadius, onResetFilters }) {
   const navigate = useNavigate();
   const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  
+
   const getDaysAgo = (date, id) => {
     let created;
     if (date) {
@@ -52,113 +52,95 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
   return (
     <div className="property-list-pane">
-      <div className="sidebar-content-scroll custom-scrollbar !pt-6">
+      <div className="sidebar-content-scroll custom-scrollbar !pt-3">
 
         {/* Action Center - Global Search */}
-        <div className="sidebar-action-center mb-8">
-          <button
-            onClick={onSearchArea}
-            className="btn btn-cta w-full !h-12 !rounded-xl shadow-premium animate-pulse-slow"
-          >
-            <Search size={16} className="mr-2" />
-            Discover All Properties
-          </button>
-          <p className="text-[10px] text-center text-sidebar-muted mt-2 font-medium">
-            Search within current map viewport
+        <div className="sidebar-action-center mb-5">
+          <div className="discovery-actions-row glass-elevated">
+            <button
+              onClick={onSearchArea}
+              className="action-btn search-full-btn"
+              data-tooltip="Find properties within the current map view"
+              title="Search by Area"
+            >
+              <Grid size={15} strokeWidth={2.2} />
+              <span>Search by Area</span>
+            </button>
+            
+            <button
+              onClick={onSearchRadius}
+              className="action-btn search-radius-btn"
+              data-tooltip="Search properties within a selected radius from center"
+              title="Search by Radius"
+            >
+              <div className="btn-shimmer"></div>
+              <Navigation size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
+              <span style={{ position: 'relative', zIndex: 2 }}>Search by Radius</span>
+            </button>
+
+            <button
+              onClick={onResetFilters}
+              className="action-btn reset-action-btn"
+              data-tooltip="Clear all filters and reset the map view"
+              title="Reset Filters"
+            >
+              <RotateCcw size={15} strokeWidth={2.2} />
+              <span>Reset Filters</span>
+            </button>
+          </div>
+          <p className="discovery-help-text">
+            Select a search mode to update results in real-time
           </p>
         </div>
 
         {/* City Discovery Section */}
         <DiscoverCities onSelect={(coords) => onShowRoute({ location: { coordinates: coords } }, true)} />
 
-        {/* Quick Discovery Filters - Advanced Polished UI */}
-        <div className="sidebar-filter-root animate-fade-in">
-          <div className="filter-section-header">
-            <h3 className="section-title">Refine Search</h3>
-            <div className="section-divider"></div>
-          </div>
-
-          <div className="discovery-filters-stack">
-            {/* BHK Filter */}
-            <div className="filter-group">
-              <label className="group-label">BHK Configuration</label>
-              <div className="pills-grid">
-                {['All', '1BHK', '2BHK', '3BHK'].map(type => (
-                  <button
-                    key={type}
-                    onClick={() => setFilter('bhkType', type)}
-                    className={`discovery-pill ${filters.bhkType === type ? 'is-active' : ''}`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
+        {/* Proximity Search - Active State Only */}
+        {filters.lat && filters.lng && (
+          <div className="sidebar-proximity-refine animate-fade-in">
+            <div className="filter-section-header !mb-3">
+              <h3 className="section-title">Search Proximity</h3>
+              <div className="section-divider"></div>
             </div>
-
-            {/* Radius Filter - Only shown when proximity search is active */}
-            {filters.lat && filters.lng && (
-              <div className="filter-group animate-fade-in">
-                <div className="flex-between">
-                  <label className="group-label">Search Proximity</label>
-                </div>
-                <div className="pills-grid">
-                  {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
-                    <button
-                      key={val}
-                      onClick={() => setFilter('radius', val)}
-                      className={`discovery-pill ${filters.radius === val ? 'is-active' : ''}`}
-                    >
-                      {val < 1 ? `${val * 1000}m` : `${val}km`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="pills-grid !mt-0 !mb-6">
+              {[0.5, 1, 2, 5, 10, 20, 50].map(val => (
+                <button
+                  key={val}
+                  onClick={() => setFilter('radius', val)}
+                  className={`discovery-pill ${filters.radius === val ? 'is-active' : ''}`}
+                >
+                  {val < 1 ? `${val * 1000}m` : `${val}km`}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
 
         {/* Stats Insights - Dashboard Style */}
         <div className="sidebar-stats-header">
           <h3 className="section-title">Market Insight</h3>
-          <span className="live-indicator">LIVE</span>
+          <div className="live-indicator">LIVE</div>
         </div>
-        
-        <div className="stats-insight-grid">
-          <div className="insight-card">
-            <div className="insight-icon-box blue">
-              <Building2 size={18} />
-            </div>
-            <div className="insight-content">
-              <span className="insight-val">{stats.total}</span>
-              <span className="insight-label">Total Listings</span>
-            </div>
+
+        <div className="premium-stats-bar">
+          <div className="stat-item main">
+            <span className="stat-val">{stats.total}</span>
+            <span className="stat-label">Available</span>
           </div>
-          <div className="insight-card">
-            <div className="insight-icon-box purple">
-              <Grid size={18} />
-            </div>
-            <div className="insight-content">
-              <span className="insight-val">{stats.bhk1}</span>
-              <span className="insight-label">1BHK Assets</span>
-            </div>
+          <div className="stat-separator"></div>
+          <div className="stat-item">
+            <span className="stat-val">{stats.bhk1}</span>
+            <span className="stat-label">1BHK</span>
           </div>
-          <div className="insight-card">
-            <div className="insight-icon-box orange">
-              <Grid size={18} />
-            </div>
-            <div className="insight-content">
-              <span className="insight-val">{stats.bhk2}</span>
-              <span className="insight-label">2BHK Assets</span>
-            </div>
+          <div className="stat-item">
+            <span className="stat-val">{stats.bhk2}</span>
+            <span className="stat-label">2BHK</span>
           </div>
-          <div className="insight-card">
-            <div className="insight-icon-box green">
-              <Grid size={18} />
-            </div>
-            <div className="insight-content">
-              <span className="insight-val">{stats.bhk3}</span>
-              <span className="insight-label">3BHK Assets</span>
-            </div>
+          <div className="stat-item">
+            <span className="stat-val">{stats.bhk3}</span>
+            <span className="stat-label">3BHK</span>
           </div>
         </div>
 
@@ -175,13 +157,13 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
             </div>
             <h3 className="empty-title">No Properties Found</h3>
             <p className="empty-desc">
-              We couldn't find any matching listings in this area. Try expanding your radius or changing BHK intent.
+              We couldn't find any matching listings in this area. Try expanding your search radius.
             </p>
-            <button 
-              onClick={() => setFilters({ bhkType: 'All', radius: 5 })}
+            <button
+              onClick={() => setFilters({ radius: 5 })}
               className="btn-reset-filters"
             >
-              Reset All Filters
+              Reset Filters
             </button>
           </div>
         ) : (
@@ -202,7 +184,6 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                   ) : (
                     <div className="flex-center h-full bg-slate-50"><Grid size={24} className="text-slate-300" /></div>
                   )}
-                  <div className="card-badge-top">{property.bhkType}</div>
                 </div>
 
                 <div className="card-content-host">

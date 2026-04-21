@@ -72,11 +72,11 @@ function App() {
       <Routes>
         {/* PUBLIC SYSTEM ROUTES */}
         <Route path="/" element={<><Navbar /><div className="app-map-view-wrapper"><MapView /></div></>} />
-        <Route path="/about" element={<><Navbar /><div style={{ paddingTop: '80px' }}><About /></div></>} />
-        <Route path="/login" element={<><Navbar /><div style={{ paddingTop: '80px' }}><Login /></div></>} />
-        <Route path="/register" element={<><Navbar /><div style={{ paddingTop: '80px' }}><Register /></div></>} />
-        <Route path="/forgot-password" element={<><Navbar /><div style={{ paddingTop: '80px' }}><ForgotPassword /></div></>} />
-        <Route path="/reset-password/:token" element={<><Navbar /><div style={{ paddingTop: '80px' }}><ResetPassword /></div></>} />
+        <Route path="/about" element={<><Navbar /><div style={{ paddingTop: '60px' }}><About /></div></>} />
+        <Route path="/login" element={<><Navbar /><div style={{ paddingTop: '60px' }}><Login /></div></>} />
+        <Route path="/register" element={<><Navbar /><div style={{ paddingTop: '60px' }}><Register /></div></>} />
+        <Route path="/forgot-password" element={<><Navbar /><div style={{ paddingTop: '60px' }}><ForgotPassword /></div></>} />
+        <Route path="/reset-password/:token" element={<><Navbar /><div style={{ paddingTop: '60px' }}><ResetPassword /></div></>} />
         <Route path="/property/:id" element={<PropertyDetails />} />
         <Route path="/api-test" element={<ApiDiagnostic />} />
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -84,7 +84,7 @@ function App() {
         {/* TENANT PORTAL (User Role) */}
         <Route path="/user" element={<UserLayout />}>
           <Route path="dashboard" element={<UserDashboard />} />
-          <Route path="explore" element={<div style={{ height: 'calc(100vh - 120px)' }}><ExploreProperties /></div>} />
+          <Route path="explore" element={<div style={{ height: 'calc(100vh - 100px)' }}><ExploreProperties /></div>} />
           <Route path="bookings" element={<MyBookings />} />
           <Route path="saved" element={<SavedHomes />} />
           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />

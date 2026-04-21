@@ -68,10 +68,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-3 hidden-mobile">
-              <Link to="/login" className="btn btn-ghost !px-4 !h-9">
+              <Link to="/login" className="btn btn-ghost !px-3">
                 Sign In
               </Link>
-              <Link to="/register" className="btn btn-primary !px-5 !h-9">
+              <Link to="/register" className="btn btn-primary !px-4">
                 Sign Up
               </Link>
             </div>
