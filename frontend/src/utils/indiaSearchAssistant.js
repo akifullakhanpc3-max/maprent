@@ -76,26 +76,39 @@ export const findClosestIndianLocation = (query) => {
   if (!query || query.length < 3) return { bestMatch: null, suggestions: [] };
 
   const normQuery = normalize(query);
+  // --- 🧠 Scoring Logic ---
   let scoredMatches = MAJOR_INDIAN_LOCATIONS.map(loc => {
-    // 1. Direct Search on Keywords
+    const normName = normalize(loc.name);
+    
+    // 1. Prefix Match (Highest Priority)
+    const startsWith = normName.startsWith(normQuery);
+    
+    // 2. Keyword/Partial Match
     const keywordMatches = loc.keywords.some(k => normalize(k).includes(normQuery));
     
-    // 2. Fuzzy Score
-    const dist = getLevenshteinDistance(normQuery, normalize(loc.name));
+    // 3. Fuzzy Score
+    const dist = getLevenshteinDistance(normQuery, normName);
     
     // Calculate Score (lower is better)
     let score = dist;
-    if (keywordMatches) score -= 2; // Priority boost for keyword matches
-    if (loc.type === 'city') score -= 1; // Slight priority boost for major cities
+    if (startsWith) score -= 10; // Massive boost for prefixes
+    if (keywordMatches) score -= 2; 
+    if (loc.type === 'city') score -= 1;
 
-    return { ...loc, score };
+    return { ...loc, score, startsWith };
   });
 
   // Sort by score
   scoredMatches.sort((a, b) => a.score - b.score);
 
   const best = scoredMatches[0];
-  const isCorrectionNeeded = best.score > 0 && normalize(query) !== normalize(best.name);
+  
+  // Correction is ONLY needed if:
+  // 1. It's not a direct prefix match
+  // 2. The score is decent but not 0
+  const isCorrectionNeeded = best.score > 0 && 
+                             !best.startsWith && 
+                             normalize(query) !== normalize(best.name);
 
   // Fallback Logic: Return top 3 closest items
   return {

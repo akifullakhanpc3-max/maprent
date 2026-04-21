@@ -84,7 +84,13 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
         }));
       }
 
-      setSuggestions(results);
+      // d. Hybridize: Prepend local results if they match query well, otherwise use API
+      setSuggestions(prev => {
+        const apiIds = new Set(results.map(r => r.id));
+        const filteredLocal = prev.filter(p => !apiIds.has(p.id));
+        return [...results, ...filteredLocal].slice(0, 8);
+      });
+
       if (assistantResult.isCorrection && assistantResult.bestMatch) {
         setCorrection(assistantResult.bestMatch.name);
       }
@@ -97,6 +103,31 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
   };
 
   useEffect(() => {
+    if (!query || query.length < 3) {
+      setSuggestions([]);
+      setCorrection(null);
+      setShowPortal(false);
+      return;
+    }
+
+    // --- 🚀 INSTANT LOCAL SEARCH (Sync) ---
+    const localResult = findClosestIndianLocation(query);
+    if (localResult.bestMatch || localResult.suggestions.length > 0) {
+      setShowPortal(true);
+      setCorrection(localResult.isCorrection ? localResult.bestMatch.name : null);
+      
+      const localFormatted = localResult.suggestions.map((s, idx) => ({
+        id: `local-${idx}`,
+        name: s.name,
+        address: s.city ? `${s.name}, ${s.city}` : 'Major Indian City',
+        type: s.type,
+        coords: s.coords || null,
+        source: 'local'
+      }));
+      setSuggestions(localFormatted);
+    }
+
+    // --- ⏳ DEBOUNCED API SEARCH (Async) ---
     const timer = setTimeout(() => {
       if (query) {
         if (skipNextFetch.current) {
@@ -105,7 +136,7 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
         }
         fetchSmartSuggestions(query);
       }
-    }, 300); // 300ms Debounce
+    }, 500); // 500ms Debounce for API to reduce load
     return () => clearTimeout(timer);
   }, [query]);
 

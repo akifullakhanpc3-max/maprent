@@ -70,7 +70,7 @@ function App() {
       <StatusOverlay />
       <Routes>
         {/* PUBLIC SYSTEM ROUTES */}
-        <Route path="/" element={<><Navbar /><div style={{ height: 'calc(100vh - 80px)', marginTop: '80px', overflow: 'hidden' }}><MapView /></div></>} />
+        <Route path="/" element={<><Navbar /><div className="app-map-view-wrapper"><MapView /></div></>} />
         <Route path="/about" element={<><Navbar /><div style={{ paddingTop: '80px' }}><About /></div></>} />
         <Route path="/login" element={<><Navbar /><div style={{ paddingTop: '80px' }}><Login /></div></>} />
         <Route path="/register" element={<><Navbar /><div style={{ paddingTop: '80px' }}><Register /></div></>} />

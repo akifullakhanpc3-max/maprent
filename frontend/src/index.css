@@ -129,6 +129,19 @@ svg:not(.leaflet-container svg) {
   display: block;
 }
 
+.app-map-view-wrapper {
+  height: calc(100vh - 80px);
+  margin-top: 80px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .app-map-view-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+}
+
 body {
   font-family: var(--font-main);
   background-color: var(--bg-main);

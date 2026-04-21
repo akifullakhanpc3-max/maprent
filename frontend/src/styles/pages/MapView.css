@@ -13,8 +13,8 @@
 @media (max-width: 768px) {
   .map-dashboard-layout {
     flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+    height: auto; /* Allow natural page height expansion */
+    overflow: visible; /* Allow page-level scrolling */
   }
 }
 
@@ -46,12 +46,12 @@
 @media (max-width: 768px) {
   .sidebar-discovery-pane {
     width: 100%;
-    flex: 1;
-    min-height: 0;
+    flex: none;
+    height: auto;
     border-right: none;
     border-top: 1px solid var(--border-subtle);
     background: var(--sidebar-bg);
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     z-index: 10;
@@ -145,14 +145,12 @@
 
 @media (max-width: 768px) {
   .map-main-viewport {
-    height: 450px;
-    min-height: 450px;
+    height: 480px;
+    min-height: 480px;
     order: -1;
     flex: none;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    /* Above the property list but below overlays */
+    position: relative; /* Natural scroll: map moves with page */
+    z-index: 1;
   }
 }
 
@@ -188,7 +186,7 @@
   top: calc(80px + 24px);
   left: calc(350px + (100vw - 350px) / 2);
   transform: translateX(-50%);
-  z-index: 5500; /* Higher than Sidebar but lower than full details */
+  z-index: 5500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,6 +196,16 @@
   min-width: 450px;
   padding: 0 var(--s-4);
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .map-overlay-center-top {
+    position: absolute; /* Anchor to the map viewport container */
+    top: 16px;
+    left: 50%;
+    min-width: 0; /* Reset desktop minimum width */
+    width: calc(100% - 16px);
+  }
 }
 
 .map-overlay-center-top > * {
@@ -273,6 +281,15 @@
   top: calc(80px + 24px);
   right: 24px;
   z-index: 5505;
+}
+
+@media (max-width: 768px) {
+  .map-overlay-zoom-controls {
+    position: absolute; /* Stay with map */
+    top: auto;
+    bottom: 24px;
+    right: 12px;
+  }
 }
 
 .zoom-controls-stack {
