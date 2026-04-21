@@ -228,6 +228,21 @@
     padding: 0 12px;
   }
   .search-input-field { font-size: 14px; }
-  .suggestions-portal { max-height: 320px; }
-  .suggestion-sub-addr { width: 100%; }
+  
+  .suggestions-portal { 
+    max-height: 400px !important; 
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  }
+  
+  .suggestions-scrollable { 
+    flex: 1;
+    padding: 12px;
+  }
+  
+  .suggestion-btn-item {
+    padding: 16px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    border-radius: 0;
+  }
 }

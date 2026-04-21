@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, MapPin, X, ArrowRight, Loader2, Sparkles, Landmark, Zap } from 'lucide-react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { findClosestIndianLocation, getCachedSearch, saveSearchToCache } from '../utils/indiaSearchAssistant';
@@ -10,7 +11,7 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPortal, setShowPortal] = useState(false);
   const [correction, setCorrection] = useState(null);
-  const { setFilters } = usePropertyStore();
+  const { filters, setFilters } = usePropertyStore();
   const searchRef = useRef(null);
   const skipNextFetch = useRef(false);
 
@@ -59,7 +60,10 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       if (currentBounds) url += `&viewbox=${currentBounds}&bounded=0`;
 
       const response = await fetch(url);
+      if (!response.ok) throw new Error(`Search API failed with status: ${response.status}`);
+      
       const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('Search API returned invalid data format');
 
       // c. Formatting and Ranking
       let results = data.map(item => ({
@@ -73,7 +77,7 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       }));
 
       // d. Fallback: If API yields zero, use Assistant's top suggestions
-      if (results.length === 0 && assistantResult.suggestions.length > 0) {
+      if (results.length === 0 && assistantResult.suggestions && assistantResult.suggestions.length > 0) {
         results = assistantResult.suggestions.map((s, idx) => ({
            id: `fallback-${idx}`,
            name: s.name,
@@ -86,8 +90,9 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
 
       // d. Hybridize: Prepend local results if they match query well, otherwise use API
       setSuggestions(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
         const apiIds = new Set(results.map(r => r.id));
-        const filteredLocal = prev.filter(p => !apiIds.has(p.id));
+        const filteredLocal = safePrev.filter(p => !apiIds.has(p.id));
         return [...results, ...filteredLocal].slice(0, 8);
       });
 
@@ -96,7 +101,18 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       }
 
     } catch (err) {
-      console.error('Scalable Search Error:', err);
+      console.error('Scalable Search Error (Hardened):', err);
+      // Fallback to local suggestions on error to keep UI stable
+      if (assistantResult.suggestions) {
+         setSuggestions(assistantResult.suggestions.map((s, idx) => ({
+            id: `error-fallback-${idx}`,
+            name: s.name,
+            address: s.city ? `${s.name}, ${s.city}` : 'Major Indian City',
+            type: s.type,
+            coords: s.coords || null,
+            source: 'local'
+         })));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -107,6 +123,11 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
       setSuggestions([]);
       setCorrection(null);
       setShowPortal(false);
+      return;
+    }
+
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
       return;
     }
 
@@ -130,10 +151,6 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
     // --- ⏳ DEBOUNCED API SEARCH (Async) ---
     const timer = setTimeout(() => {
       if (query) {
-        if (skipNextFetch.current) {
-          skipNextFetch.current = false;
-          return;
-        }
         fetchSmartSuggestions(query);
       }
     }, 500); // 500ms Debounce for API to reduce load
@@ -143,6 +160,11 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
   const selectSuggestion = (s) => {
     if (s.source === 'assistant') {
       setQuery(s.name);
+      // Automatically trigger search for the city if coords exist or if it's a known city
+      if (s.coords) {
+        if (onSearch) onSearch(s.coords, s.name);
+        setShowPortal(false);
+      }
       return; 
     }
     
@@ -191,8 +213,25 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
         )}
       </div>
 
-      {showPortal && (
-        <div className="suggestions-portal animate-fade-in animate-slide-up">
+      {showPortal && createPortal(
+        <div 
+          className="suggestions-portal animate-fade-in animate-slide-up"
+          style={window.innerWidth > 768 ? {
+            position: 'fixed',
+            top: `${searchRef.current?.getBoundingClientRect().bottom + 10}px`,
+            left: `${searchRef.current?.getBoundingClientRect().left}px`,
+            width: `${searchRef.current?.getBoundingClientRect().width}px`,
+            zIndex: 9999
+          } : {
+            position: 'fixed',
+            top: `${searchRef.current?.getBoundingClientRect().bottom + 8}px`,
+            left: '12px',
+            right: '12px',
+            width: 'calc(100% - 24px)',
+            zIndex: 9999,
+            borderRadius: '12px'
+          }}
+        >
           {correction && (
              <div className="smart-correction-banner">
                <Zap size={14} className="text-amber-500 fill-amber-500" />
@@ -206,7 +245,14 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
 
           <div className="suggestions-scrollable custom-scrollbar">
             {suggestions.map((s) => (
-              <button key={s.id} onClick={() => selectSuggestion(s)} className="suggestion-btn-item">
+              <button 
+                key={s.id} 
+                onPointerDown={(e) => { 
+                  e.preventDefault(); 
+                  selectSuggestion(s); 
+                }} 
+                className="suggestion-btn-item"
+              >
                 <div className="suggestion-location-icon">
                   {s.type === 'area' ? <Landmark size={16} /> : <MapPin size={16} />}
                 </div>
@@ -224,7 +270,8 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
               <div className="p-8 text-center text-slate-400 text-sm">No results found for this area.</div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

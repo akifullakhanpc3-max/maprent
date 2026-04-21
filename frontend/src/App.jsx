@@ -16,6 +16,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import About from './pages/About';
 import PropertyDetails from './pages/PropertyDetails';
+import ApiDiagnostic from './pages/ApiDiagnostic';
 
 // User Panel Views
 import UserDashboard from './views/user/UserDashboard';
@@ -77,6 +78,7 @@ function App() {
         <Route path="/forgot-password" element={<><Navbar /><div style={{ paddingTop: '80px' }}><ForgotPassword /></div></>} />
         <Route path="/reset-password/:token" element={<><Navbar /><div style={{ paddingTop: '80px' }}><ResetPassword /></div></>} />
         <Route path="/property/:id" element={<PropertyDetails />} />
+        <Route path="/api-test" element={<ApiDiagnostic />} />
         <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* TENANT PORTAL (User Role) */}

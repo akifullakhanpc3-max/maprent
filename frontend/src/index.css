@@ -85,48 +85,32 @@
   margin: 0;
   padding: 0;
   overflow-wrap: break-word;
-  /* Global text overflow protection */
 }
 
-/* Allow Map elements (Leaflet) to bypass fluidity resets */
-*:not(.leaflet-container *) {
+/* Standard fluid media rules, excluding Google Maps overlay containers */
+img:not(.gm-style img):not(.luxury-leaflet-map img),
+video,
+iframe,
+object,
+embed {
   max-width: 100%;
+  display: block;
 }
 
-html,
-body {
+html, body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  /* Absolute safeguard against horizontal scroll */
   height: 100%;
   min-height: 100dvh;
 }
 
-/* Global Interactive Cursors */
-a,
-button,
-[role="button"],
-.cursor-pointer,
-.btn,
-.tab-chip-item {
+a, button, [role="button"], .cursor-pointer, .btn, .tab-chip-item {
   cursor: pointer;
 }
 
-/* Global Reset for Text Fields */
-input,
-textarea {
+input, textarea {
   cursor: text;
-}
-
-/* Global Responsive Media Reset - EXCLUDING Map Tiles */
-img:not(.leaflet-container img),
-video,
-canvas,
-svg:not(.leaflet-container svg) {
-  max-width: 100%;
-  height: auto;
-  display: block;
 }
 
 .app-map-view-wrapper {

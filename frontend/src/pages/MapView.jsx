@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MapPin, Search, Navigation, Filter, X, ChevronRight, Navigation2, Map as MapIcon, LocateFixed, Layers, Target, RotateCcw } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polyline, useMap, Circle } from 'react-leaflet';
-import L from 'leaflet';
+import {
+  Filter, LocateFixed, Layers, Target, RotateCcw
+} from 'lucide-react';
+import {
+  GoogleMap, useJsApiLoader, OverlayView, Polyline
+} from '@react-google-maps/api';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import MapSearchBar from '../components/MapSearchBar';
@@ -10,426 +13,433 @@ import FilterPanel from '../components/FilterPanel';
 import PropertyListPane from '../components/PropertyListPane';
 import NavigationPanel from '../components/NavigationPanel';
 import PropertyDetailsOverlay from '../components/PropertyDetailsOverlay';
-import 'leaflet/dist/leaflet.css';
 import '../styles/pages/MapView.css';
 
-// Tile Providers for road visualization
-// Professional-Grade Tile Providers (Google Maps–like Density)
-const TILE_PROVIDERS = {
-  streets: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxNativeZoom: 18,
-    maxZoom: 20
-  },
-  satellite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community',
-    maxNativeZoom: 18,
-    maxZoom: 20
-  }
-};
+// ─── Config ───────────────────────────────────────────────────────────────────
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCzbhpysaCAMjDeCnEXtytksmfel3itwlM';
+const LIBRARIES = ['places', 'geometry'];
+const DEFAULT_CENTER = { lat: 12.2958, lng: 76.6394 }; // Mysore
 
-// Leaflet radius auto-fitter
-function AutoFitCircle({ lat, lng, radius }) {
-  const map = useMap();
-  useEffect(() => {
-    if (radius && lat && lng) {
-      const latLng = L.latLng([lat, lng]);
-      const bounds = latLng.toBounds(radius * 1000);
-      const currentBounds = map.getBounds();
-      if (!currentBounds.contains(bounds)) {
-        map.fitBounds(bounds, { padding: [20, 20], animate: true });
-      }
-    }
-  }, [lat, lng, radius, map]);
-  return null;
-}
+// Clean, minimal map style — keeps roads visible without cluttering markers
+const MAP_STYLES = [
+  { featureType: 'all',       elementType: 'labels.text.fill', stylers: [{ color: '#475569' }] },
+  { featureType: 'water',     elementType: 'all',              stylers: [{ color: '#dbeafe' }] },
+  { featureType: 'landscape', elementType: 'all',              stylers: [{ color: '#f8fafc' }] },
+  { featureType: 'road',      elementType: 'geometry',         stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road.highway', elementType: 'geometry',      stylers: [{ color: '#e2e8f0' }] },
+  { featureType: 'road.arterial', elementType: 'geometry',     stylers: [{ color: '#f1f5f9' }] },
+  { featureType: 'poi',       stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit',   stylers: [{ visibility: 'off' }] },
+];
 
-// Fix typical Leaflet icon issue in React
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Custom Premium Pulse Icon for Search Anchor
-const redIcon = L.divIcon({
-  className: 'search-anchor-wrapper',
-  html: `
-    <div class="search-anchor-pulse is-primary">
-      <div class="search-anchor-dot is-primary"></div>
-    </div>
-  `,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
-
-// Dynamic cursor logic for radius boundary detection
-function RadiusCursorHandler({ searchAnchor, radius }) {
-  const map = useMapEvents({
-    mousemove(e) {
-      if (!searchAnchor || !radius) {
-        map.getContainer().classList.remove('cursor-inside');
-        map.getContainer().classList.add('cursor-outside');
-        return;
-      }
-      const distance = e.latlng.distanceTo(L.latLng(searchAnchor));
-      const isInside = distance <= radius * 1000;
-      const container = map.getContainer();
-
-      if (isInside) {
-        container.classList.add('cursor-inside');
-        container.classList.remove('cursor-outside');
-      } else {
-        container.classList.add('cursor-outside');
-        container.classList.remove('cursor-inside');
-      }
-    },
-    mouseout() {
-      map.getContainer().classList.remove('cursor-inside', 'cursor-outside');
-    }
-  });
-  return null;
-}
-
-// Component to handle map move/zoom/click events
-function MapEventsHandler({ onMapClick }) {
-  const { setFilter, filters } = usePropertyStore();
-  const moveEndTimeout = useRef(null);
-
-  const map = useMapEvents({
-    moveend() {
-      if (moveEndTimeout.current) clearTimeout(moveEndTimeout.current);
-
-      moveEndTimeout.current = setTimeout(() => {
-        const bounds = map.getBounds();
-        const stringBounds = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
-        if (filters.bounds !== stringBounds) {
-          setFilter('bounds', stringBounds);
-        }
-      }, 400);
-    },
-    click(e) {
-      if (onMapClick) onMapClick([e.latlng.lat, e.latlng.lng]);
-    }
-  });
-
-  return null;
-}
-
-// Price Pin Icon Generator
-const createPriceIcon = (price, bhkType, isActive = false) => {
-  let formattedPrice = 'N/A';
-  if (price !== undefined && price !== null && price > 0) {
-    if (price >= 100000) {
-      formattedPrice = `₹${(price / 100000).toFixed(1)}L`;
-    } else if (price >= 1000) {
-      formattedPrice = `₹${(price / 1000).toFixed(0)}k`;
-    } else {
-      formattedPrice = `₹${price}`;
-    }
-  }
-
-  // Standardize BHK for pin (e.g., "2 BHK")
-  const shortBhk = bhkType ? bhkType.toUpperCase() : '';
-
-  return L.divIcon({
-    className: 'custom-price-pin',
-    html: `
-      <div class="price-pin-wrapper ${isActive ? 'is-active' : ''}">
-        ${shortBhk ? `<span class="pin-bhk-tag">${shortBhk}</span>` : ''}
-        <span class="price-text">${formattedPrice}</span>
-        <div class="price-pin-tail"></div>
-      </div>
-    `,
-    iconSize: [64, 38], // Increased width slightly for BHK tag
-    iconAnchor: [32, 38],
-  });
-};
-
-// Custom Price Marker Component
-const PriceMarker = React.memo(({ property, isActive, onClick }) => {
-  return (
-    <Marker
-      position={[property.location.coordinates[1], property.location.coordinates[0]]}
-      icon={createPriceIcon(property.price, property.bhkType, isActive)}
-      eventHandlers={{ click: onClick }}
-      zIndexOffset={isActive ? 1000 : 0}
-    />
-  );
-}, (prev, next) => prev.property._id === next.property._id && prev.isActive === next.isActive);
-
+// ─── Main Component ────────────────────────────────────────────────────────────
 export default function MapView() {
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [highlightedId, setHighlightedId] = useState(null);
-  const [routeData, setRouteData] = useState(null);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [viewStyle, setViewStyle] = useState('streets');
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries: LIBRARIES,
+  });
+
   const { properties, filters, loading, setFilter, setFilters, fetchPropertyById } = usePropertyStore();
   const { user } = useAuthStore();
   const { search } = useLocation();
-  const mapRef = useRef(null);
-  const sidebarRef = useRef(null);
-  const [currentBounds, setCurrentBounds] = useState(null);
-  const [searchAnchor, setSearchAnchor] = useState(null);
 
-  // 0. Handle Deep Linking from Shared Links
+  // ── Map instance ──
+  const [map, setMap] = useState(null);
+
+  // ── UI state ──
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [highlightedId, setHighlightedId]       = useState(null);
+  const [routeData, setRouteData]               = useState(null);
+  const [isNavigating, setIsNavigating]         = useState(false);
+  const [isFilterOpen, setIsFilterOpen]         = useState(false);
+  const [mapType, setMapType]                   = useState('roadmap');
+  const [currentBounds, setCurrentBounds]       = useState(null);
+
+  // ── Radius / search anchor ──
+  const [searchAnchor, setSearchAnchor] = useState(DEFAULT_CENTER);
+  const [mapCenter] = useState(DEFAULT_CENTER);
+
+  // ── Circle refs (native Google Maps objects) ──
+  const glowCircleRef = useRef(null);
+  const mainCircleRef = useRef(null);
+  const draggableMarkerRef = useRef(null);
+  const animFrameRef   = useRef(null);
+  const idleTimer      = useRef(null);
+
+  // ── Local slider (smooth drag without store spam) ──
+  const [localRadius, setLocalRadius] = useState(filters.radius || 5);
+  const sliderTimer = useRef(null);
+  useEffect(() => { setLocalRadius(filters.radius || 5); }, [filters.radius]);
+
+  // ─── Map Load ─────────────────────────────────────────────────────────────
+  const onLoad = useCallback((m) => {
+    setMap(m);
+    // Start in radius mode at default city
+    setFilters({ lat: DEFAULT_CENTER.lat, lng: DEFAULT_CENTER.lng, bounds: null, radius: 5 });
+  }, [setFilters]);
+
+  const onUnmount = useCallback(() => setMap(null), []);
+
+  // ─── Map options (memoised) ───────────────────────────────────────────────
+  const mapOptions = useMemo(() => ({
+    styles: MAP_STYLES,
+    disableDefaultUI: true,
+    mapTypeId: mapType,
+    gestureHandling: 'greedy',
+    maxZoom: 19,
+    minZoom: 3,
+  }), [mapType]);
+
+  // ─── Polyline options ─────────────────────────────────────────────────────
+  const polylineOptions = useMemo(() => ({
+    strokeColor: '#2563eb',
+    strokeOpacity: 0.85,
+    strokeWeight: 6,
+  }), []);
+
+  // ─── Draw / update radius circles ─────────────────────────────────────────
+  const drawCircles = useCallback(() => {
+    if (!map || !window.google) return;
+
+    const radiusM = (Number(filters.radius) || 5) * 1000;
+    const center  = searchAnchor;
+
+    // ── Glow (outer) ──
+    const glowOpts = {
+      map,
+      center,
+      radius: radiusM,
+      strokeColor:   '#60a5fa',
+      strokeOpacity: 0.5,
+      strokeWeight:  10,
+      fillOpacity:   0,
+      clickable:     false,
+      zIndex:        100,
+    };
+
+    // ── Main (inner) ──
+    const mainOpts = {
+      map,
+      center,
+      radius: radiusM,
+      strokeColor:   '#1d4ed8',
+      strokeOpacity: 1,
+      strokeWeight:  3,
+      fillColor:     '#3b82f6',
+      fillOpacity:   0.18,
+      clickable:     true,
+      editable:      true,
+      draggable:     true,
+      zIndex:        101,
+    };
+
+    if (!glowCircleRef.current) {
+      glowCircleRef.current = new window.google.maps.Circle(glowOpts);
+      
+      const newMain = new window.google.maps.Circle(mainOpts);
+      mainCircleRef.current = newMain;
+
+      // Update store when user drags to reposition
+      newMain.addListener('dragend', () => {
+        const pos = newMain.getCenter();
+        setSearchAnchor({ lat: pos.lat(), lng: pos.lng() });
+        setFilters({ lat: pos.lat(), lng: pos.lng(), bounds: null, radius: filters.radius || 5 });
+      });
+
+      // Update store and glow when user resizes the radius via the outline handle
+      newMain.addListener('radius_changed', () => {
+        const newRadiusM = newMain.getRadius();
+        if (glowCircleRef.current) glowCircleRef.current.setRadius(newRadiusM);
+        
+        // Debounce store commit
+        if (sliderTimer.current) clearTimeout(sliderTimer.current);
+        sliderTimer.current = setTimeout(() => {
+          setFilter('radius', newRadiusM / 1000);
+        }, 300);
+      });
+      
+    } else {
+      glowCircleRef.current.setOptions(glowOpts);
+      mainCircleRef.current.setOptions(mainOpts);
+    }
+  }, [map, searchAnchor, filters.radius]);
+
+  // ─── Animated ripple on glow circle ──────────────────────────────────────
+  const startRipple = useCallback(() => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (!glowCircleRef.current) return;
+
+    // Use current radius from main circle if dragging
+    const baseRadius = mainCircleRef.current?.getRadius() || ((Number(filters.radius) || 5) * 1000);
+    let start = performance.now();
+    const CYCLE = 2800;
+
+    const tick = (ts) => {
+      if (!glowCircleRef.current || !mainCircleRef.current) return;
+      let elapsed = ts - start;
+      if (elapsed > CYCLE) { start = ts; elapsed = 0; }
+
+      const progress = elapsed / CYCLE;
+      const ease     = 1 - Math.pow(1 - progress, 3);
+      
+      const currentBase = mainCircleRef.current.getRadius();
+
+      glowCircleRef.current.setRadius(currentBase + currentBase * 0.15 * ease);
+      glowCircleRef.current.setOptions({
+        strokeOpacity: 0.5 * (1 - progress),
+        strokeWeight:  Math.max(1, 10 * (1 - progress)),
+        // keep glow center synced with main center
+        center: mainCircleRef.current.getCenter()
+      });
+
+      animFrameRef.current = requestAnimationFrame(tick);
+    };
+
+    animFrameRef.current = requestAnimationFrame(tick);
+  }, [filters.radius]);
+
+  // ─── Fit map to circle bounds ─────────────────────────────────────────────
+  const fitToRadius = useCallback(() => {
+    if (!map || !window.google || !searchAnchor || !filters.radius) return;
+    const radiusM = (Number(filters.radius) || 5) * 1000;
+    const circle  = new window.google.maps.Circle({ center: searchAnchor, radius: radiusM });
+    map.fitBounds(circle.getBounds(), { top: 60, bottom: 60, left: 60, right: 60 });
+  }, [map, searchAnchor, filters.radius]);
+
+  // ─── Update circles whenever anchor / radius / map changes ───────────────
   useEffect(() => {
-    const params = new URLSearchParams(search);
-    const propertyId = params.get('id');
-    
-    if (propertyId) {
-      const loadDeepLink = async () => {
-        const prop = await fetchPropertyById(propertyId);
-        if (prop) {
-          setSelectedProperty(prop);
-          setHighlightedId(prop._id);
-          // Standardize fly-to for deep-linked properties
-          if (prop.location?.coordinates) {
-            const [lng, lat] = prop.location.coordinates;
-            // Delay slightly to ensure map container is fully initialized
-            setTimeout(() => {
-              mapRef.current?.flyTo([lat, lng], 15, { duration: 2 });
-            }, 500);
-          }
-        }
-      };
-      loadDeepLink();
-    }
-  }, [search, fetchPropertyById]);
+    if (!map || !window.google) return;
 
-  // Hook to track map bounds for search bias
-  const MapBoundsTracker = () => {
-    const map = useMap();
-    useEffect(() => {
-      const updateBounds = () => {
-        const b = map.getBounds();
-        setCurrentBounds(`${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`);
-      };
-      map.on('moveend', updateBounds);
-      updateBounds(); // Initial set
-      return () => map.off('moveend', updateBounds);
-    }, [map]);
-    return null;
-  };
-
-  const handleLocationSelect = useCallback((coords, name) => {
-    if (mapRef.current && Array.isArray(coords)) {
-      mapRef.current.flyTo(coords, 14, { duration: 1.5 });
+    if (searchAnchor && filters.radius && filters.lat && filters.lng) {
+      drawCircles();
+      startRipple();
+    } else {
+      // Remove circles
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (glowCircleRef.current) { glowCircleRef.current.setMap(null); glowCircleRef.current = null; }
+      if (mainCircleRef.current) { mainCircleRef.current.setMap(null); mainCircleRef.current = null; }
     }
+
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [map, searchAnchor, filters.radius, filters.lat, filters.lng, drawCircles, startRipple]);
+
+  // ─── Cleanup on unmount ───────────────────────────────────────────────────
+  useEffect(() => () => {
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (glowCircleRef.current) glowCircleRef.current.setMap(null);
+    if (mainCircleRef.current) mainCircleRef.current.setMap(null);
+    if (draggableMarkerRef.current) draggableMarkerRef.current.setMap(null);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    if (sliderTimer.current) clearTimeout(sliderTimer.current);
   }, []);
 
-  const handleSidebarScroll = (e) => {
-    // Legacy height reactive logic removed for fixed 100vh layout
-  };
+  // ─── Idle handler (debounced bounds update) ───────────────────────────────
+  const handleMapIdle = useCallback(() => {
+    if (!map) return;
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      const bounds = map.getBounds();
+      if (!bounds) return;
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      const str = `${sw.lng()},${sw.lat()},${ne.lng()},${ne.lat()}`;
+      setCurrentBounds(str);
+      if (!filters.lat || !filters.lng) setFilter('bounds', str);
+    }, 500);
+  }, [map, filters.lat, filters.lng, setFilter]);
 
-  const handleMapClick = useCallback((coords) => {
+  // ─── Deep link support ────────────────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const id = params.get('id');
+    if (id) {
+      fetchPropertyById(id).then(prop => {
+        if (prop?.location?.coordinates) {
+          setSelectedProperty(prop);
+          setHighlightedId(prop._id);
+          const [lng, lat] = prop.location.coordinates;
+          if (map) { map.panTo({ lat, lng }); map.setZoom(16); }
+        }
+      });
+    }
+  }, [search, fetchPropertyById, map]);
+
+  // ─── Event handlers ───────────────────────────────────────────────────────
+  const handleLocationSelect = useCallback((coords) => {
+    if (!map || !Array.isArray(coords)) return;
+    const [lat, lng] = coords;
+    map.panTo({ lat, lng });
+    map.setZoom(14);
+    setSearchAnchor({ lat, lng });
+    setFilters({ lat, lng, bounds: null, radius: filters.radius || 5 });
+  }, [map, filters.radius, setFilters]);
+
+  const handleMapClick = useCallback((e) => {
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
     setSelectedProperty(null);
     setHighlightedId(null);
     setIsNavigating(false);
     setRouteData(null);
-    setSearchAnchor(coords);
-    setFilters({ lat: coords[0], lng: coords[1] });
-  }, [setFilters]);
+    const pos = { lat, lng };
+    setSearchAnchor(pos);
+    setFilters({ lat, lng, bounds: null, radius: filters.radius || 5 });
+  }, [filters.radius, setFilters]);
+
+  const handleLocateMe = useCallback(() => {
+    if (!navigator.geolocation) return alert('Geolocation not supported.');
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      const pos = { lat: coords.latitude, lng: coords.longitude };
+      if (map) { map.panTo(pos); map.setZoom(15); }
+      setSearchAnchor(pos);
+      setFilters({ lat: pos.lat, lng: pos.lng, bounds: null });
+    }, () => alert('Unable to retrieve location.'));
+  }, [map, setFilters]);
+
+  const handleRadiusSearch = useCallback(() => {
+    if (!map) return;
+    const c   = map.getCenter();
+    const pos = { lat: c.lat(), lng: c.lng() };
+    setFilters({ lat: pos.lat, lng: pos.lng, bounds: null, radius: filters.radius || 5 });
+    setSearchAnchor(pos);
+  }, [map, filters.radius, setFilters]);
+
+  const handleSearchArea = useCallback(() => {
+    if (!map) return;
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    setFilters({ bounds: `${sw.lng()},${sw.lat()},${ne.lng()},${ne.lat()}`, lat: null, lng: null });
+  }, [map, setFilters]);
 
   const handleShowRoute = useCallback(async (property) => {
-    if (!mapRef.current) return;
-
-    // Guard: if property has no coordinates, fall back to Google Maps directions
+    if (!map) return;
     const coords = property?.location?.coordinates;
-    if (!Array.isArray(coords) || coords[0] == null || coords[1] == null) {
-      const destination = property.city || property.title || 'property';
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`,
-        '_blank'
-      );
+    if (!Array.isArray(coords) || coords[0] == null) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.title)}`, '_blank');
       return;
     }
-
-    const center = mapRef.current.getCenter();
-    const start = [center.lng, center.lat];
-    const end = [coords[0], coords[1]]; // GeoJSON: [lng, lat]
-
+    const center = map.getCenter();
+    const url    = `https://router.project-osrm.org/route/v1/driving/${center.lng()},${center.lat()};${coords[0]},${coords[1]}?overview=full&geometries=geojson&steps=true`;
     try {
-      // Correct OSRM public endpoint: route/v1 (not base/v1)
-      const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await fetch(url).then(r => r.json());
       if (data.routes?.[0]) {
         const route = data.routes[0];
         setRouteData({
-          coordinates: route.geometry.coordinates.map(coord => [coord[1], coord[0]]),
+          coordinates:   route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] })),
           propertyTitle: property.title,
-          distance: route.distance,
-          duration: route.duration,
-          steps: route.legs?.[0]?.steps || []
+          distance:      route.distance,
+          duration:      route.duration,
+          steps:         route.legs?.[0]?.steps || [],
         });
         setIsNavigating(true);
-      } else {
-        // OSRM returned no route — fall back to Google Maps
-        window.open(
-          `https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`,
-          '_blank'
-        );
       }
-    } catch (err) {
-      console.error('Routing error:', err);
-      // Network failure — fall back to Google Maps
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`,
-        '_blank'
-      );
+    } catch {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`, '_blank');
     }
-  }, []);
-
-  const handleSearchArea = () => {
-    if (!mapRef.current) return;
-    const bounds = mapRef.current.getBounds();
-    setFilters({
-      bounds: `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`,
-      lat: null,
-      lng: null
-    });
-  };
-
-  const handleRadiusSearch = () => {
-    if (!mapRef.current) return;
-    const center = mapRef.current.getCenter();
-    setFilters({
-      lat: center.lat,
-      lng: center.lng,
-      bounds: null,
-      radius: filters.radius || 5
-    });
-    setSearchAnchor([center.lat, center.lng]);
-  };
-
-  // 1. Discover all properties by default on mount
-  useEffect(() => {
-    // Small delay to ensure map is ready
-    const timer = setTimeout(() => {
-      handleSearchArea();
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-  useEffect(() => {
-    if (filters.lat && filters.lng) {
-      setSearchAnchor([filters.lat, filters.lng]);
-    } else {
-      setSearchAnchor(null);
-    }
-  }, [filters.lat, filters.lng]);
-
-  const handleLocateMe = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        const err = new Error('Geolocation not supported by this browser.');
-        alert(err.message);
-        reject(err);
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude: lat, longitude: lng } = pos.coords;
-          const userCoords = [lat, lng];
-
-          // 1. Move the map
-          if (mapRef.current) {
-            mapRef.current.flyTo(userCoords, 15, { duration: 1.5 });
-          }
-
-          // 2. Update Discovery Context (Filters + Anchor)
-          setSearchAnchor(userCoords);
-          setFilters({ lat, lng, bounds: null }); // Clear bounds to prioritize radius search
-
-          // 3. Re-run route from user location to current property destination (if navigating)
-          if (routeData?.coordinates?.length) {
-            const dest = routeData.coordinates[routeData.coordinates.length - 1];
-            const startStr = `${lng},${lat}`;
-            const endStr = `${dest[1]},${dest[0]}`; // convert back from [lat,lng] to [lng,lat] for OSRM
-            fetch(`https://router.project-osrm.org/route/v1/driving/${startStr};${endStr}?overview=full&geometries=geojson&steps=true`)
-              .then(r => r.json())
-              .then(data => {
-                if (data.routes?.[0]) {
-                  const route = data.routes[0];
-                  setRouteData(prev => ({
-                    ...prev,
-                    coordinates: route.geometry.coordinates.map(c => [c[1], c[0]]),
-                    distance: route.distance,
-                    duration: route.duration,
-                    steps: route.legs?.[0]?.steps || []
-                  }));
-                }
-              })
-              .catch(console.error);
-          }
-          resolve(userCoords);
-        },
-        (err) => {
-          let msg = 'Unable to retrieve your location.';
-          if (err.code === 1) msg = 'Location access denied. Please enable permissions in your browser.';
-          else if (err.code === 3) msg = 'Location request timed out. Please try again.';
-          alert(msg);
-          reject(err);
-        },
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    });
-  }, [routeData, setFilters]);
+  }, [map]);
 
   const handleSearchRoute = useCallback(async (startCoords, endCoords) => {
-    // startCoords or endCoords may be null (only one end is being updated)
-    const currentDest = routeData?.coordinates?.[routeData.coordinates.length - 1];
+    const currentDest  = routeData?.coordinates?.[routeData.coordinates.length - 1];
     const currentStart = routeData?.coordinates?.[0];
-
-    // [lat, lng] from Nominatim → convert to OSRM [lng, lat]
     const start = startCoords
       ? [startCoords[1], startCoords[0]]
-      : currentStart ? [currentStart[1], currentStart[0]] : null;
+      : currentStart ? [currentStart.lng, currentStart.lat] : null;
     const end = endCoords
       ? [endCoords[1], endCoords[0]]
-      : currentDest ? [currentDest[1], currentDest[0]] : null;
-
+      : currentDest ? [currentDest.lng, currentDest.lat] : null;
     if (!start || !end) return;
-
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true`
+      ).then(r => r.json());
       if (data.routes?.[0]) {
         const route = data.routes[0];
-        setRouteData(prev => ({
-          ...prev,
-          coordinates: route.geometry.coordinates.map(c => [c[1], c[0]]),
-          distance: route.distance,
-          duration: route.duration,
-          steps: route.legs?.[0]?.steps || []
-        }));
-        // Fly map to fit the new route
-        if (mapRef.current && route.geometry.coordinates.length > 0) {
-          const latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
-          mapRef.current.fitBounds(latlngs, { padding: [40, 40], animate: true });
+        const path  = route.geometry.coordinates.map(c => ({ lat: c[1], lng: c[0] }));
+        setRouteData(prev => ({ ...prev, coordinates: path, distance: route.distance, duration: route.duration, steps: route.legs?.[0]?.steps || [] }));
+        if (map && path.length) {
+          const b = new window.google.maps.LatLngBounds();
+          path.forEach(p => b.extend(p));
+          map.fitBounds(b);
         }
       }
-    } catch (err) {
-      console.error('Search route error:', err);
+    } catch (err) { console.error(err); }
+  }, [map, routeData]);
+
+  // ─── Slider handler ───────────────────────────────────────────────────────
+  const handleSliderChange = useCallback((e) => {
+    const val = parseFloat(e.target.value);
+    setLocalRadius(val);
+    if (sliderTimer.current) clearTimeout(sliderTimer.current);
+    sliderTimer.current = setTimeout(() => {
+      setFilter('radius', val);
+      // Fit after store updates
+      setTimeout(fitToRadius, 50);
+    }, 200);
+  }, [setFilter, fitToRadius]);
+
+  // ─── Price markers (OverlayView) ──────────────────────────────────────────
+  const renderPriceMarker = (property) => {
+    const isActive = highlightedId === property._id || selectedProperty?._id === property._id;
+    const [lng, lat] = property.location.coordinates;
+    const price = property.price;
+    let formattedPrice = 'N/A';
+    if (price > 0) {
+      formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
+                     : price >= 1000   ? `₹${(price / 1000).toFixed(0)}k`
+                     : `₹${price}`;
     }
-  }, [routeData]);
+    return (
+      <OverlayView
+        key={property._id}
+        position={{ lat, lng }}
+        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      >
+        <div
+          className={`price-pin-wrapper ${isActive ? 'is-active' : ''}`}
+          style={{ cursor: 'pointer', transform: 'translate(-50%, -100%)' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setHighlightedId(property._id);
+            setSelectedProperty(property);
+            const card = document.getElementById(`property-card-${property._id}`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        >
+          {property.bhkType && <span className="pin-bhk-tag">{property.bhkType.toUpperCase()}</span>}
+          <span className="price-text">{formattedPrice}</span>
+          <div className="price-pin-tail" />
+        </div>
+      </OverlayView>
+    );
+  };
 
-  const circleOptions = useMemo(() => ({
-    color: '#2563eb',      // Aggressive Primary Blue
-    weight: 3,             // Thicker line for visibility
-    opacity: 0.8,          // High visibility stroke
-    fillColor: '#2563eb',
-    fillOpacity: 0.12,     // Visible but transparent fill
-    stroke: true           // Explicitly enable stroke
-  }), []);
+  const memoizedMarkers = useMemo(
+    () => properties.map(renderPriceMarker),
+    [properties, highlightedId, selectedProperty?._id]
+  );
 
+  // ─── Loading state ────────────────────────────────────────────────────────
+  if (!isLoaded) return (
+    <div className="flex items-center justify-center h-full bg-slate-50">
+      <div className="flex flex-col items-center gap-4 text-slate-400">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary-color rounded-full animate-spin" />
+        <span className="text-xs font-black uppercase tracking-tighter">Initializing Maps Engine</span>
+      </div>
+    </div>
+  );
+
+  // ─── Slider display ────────────────────────────────────────────────────────
+  const fillPct = ((localRadius - 0.5) / (50 - 0.5)) * 100;
+  const displayVal = localRadius < 1
+    ? `${Math.round(localRadius * 1000)}m`
+    : `${localRadius % 1 === 0 ? localRadius : localRadius.toFixed(1)}km`;
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="map-dashboard-layout animate-fade-in">
+      {/* ── Sidebar ── */}
       <aside className="sidebar-discovery-pane">
         <div className="sidebar-header-glow flex-between">
           <div className="flex items-center gap-2">
@@ -438,7 +448,7 @@ export default function MapView() {
           </div>
         </div>
 
-        <div className="sidebar-content-scroll custom-scrollbar" onScroll={handleSidebarScroll} ref={sidebarRef}>
+        <div className="sidebar-content-scroll custom-scrollbar">
           {isNavigating ? (
             <NavigationPanel
               routeData={routeData}
@@ -461,81 +471,29 @@ export default function MapView() {
         </div>
       </aside>
 
+      {/* ── Map ── */}
       <main className="map-main-viewport">
-        <MapContainer
-          center={[12.2958, 76.6394]}
+        <GoogleMap
+          mapContainerClassName="luxury-leaflet-map"
+          center={mapCenter}
           zoom={12}
-          className="luxury-leaflet-map"
-          ref={mapRef}
-          zoomControl={false}
-          minZoom={3}
-          maxZoom={20}
-          zoomAnimation={true}
-          fadeAnimation={true}
-          markerZoomAnimation={true}
-          updateWhenIdle={true}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          onIdle={handleMapIdle}
+          onClick={handleMapClick}
+          options={mapOptions}
         >
-          <TileLayer
-            attribution={TILE_PROVIDERS[viewStyle].attribution}
-            url={TILE_PROVIDERS[viewStyle].url}
-            maxNativeZoom={TILE_PROVIDERS[viewStyle].maxNativeZoom}
-            maxZoom={TILE_PROVIDERS[viewStyle].maxZoom}
-          />
-          <MapBoundsTracker />
-          <MapEventsHandler onMapClick={handleMapClick} />
-          <RadiusCursorHandler searchAnchor={searchAnchor} radius={filters.radius} />
-
-          {searchAnchor && !selectedProperty && (
-            <Marker position={searchAnchor} icon={redIcon}>
-              <Popup className="premium-discovery-popup">
-                <div className="flex-col gap-3 min-w-[200px]">
-                  <p className="label-base !mb-0 text-slate-400">Target Area</p>
-                  <button
-                    onClick={() => setFilters({ lat: null, lng: null })}
-                    className="btn btn-ghost !border-slate-200 !text-xs w-full"
-                  >
-                    Clear Selection
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
+          {/* Route polyline */}
+          {routeData && (
+            <Polyline path={routeData.coordinates} options={polylineOptions} />
           )}
 
-          {(filters.radius && searchAnchor) && (
-            <>
-              <Circle
-                center={searchAnchor}
-                radius={filters.radius * 1000}
-                pathOptions={circleOptions}
-              />
-              <AutoFitCircle lat={searchAnchor[0]} lng={searchAnchor[1]} radius={filters.radius} />
-            </>
-          )}
+          {/* Price pins */}
+          {memoizedMarkers}
+        </GoogleMap>
 
-          {routeData && <Polyline positions={routeData.coordinates} color="var(--primary-color)" weight={5} opacity={0.8} />}
-
-          {useMemo(() => properties.map(property => (
-            <PriceMarker
-              key={property._id}
-              property={property}
-              isActive={highlightedId === property._id || selectedProperty?._id === property._id}
-              onClick={() => {
-                setHighlightedId(property._id);
-                setSelectedProperty(property);
-                // On mobile, the entire page scrolls naturally, so we rely on the card's scrollIntoView below
-                const card = document.getElementById(`property-card-${property._id}`);
-                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-            />
-          )), [properties, highlightedId, selectedProperty])}
-        </MapContainer>
-
-        {/* Floating Controls */}
+        {/* ── Top search bar + filter button ── */}
         <div className="map-overlay-center-top">
-          {/* <button onClick={handleSearchArea} className="search-area-btn shadow-premium">
-            <Search size={14} />
-            <span>Discover All Properties</span>
-          </button> */}
           <MapSearchBar onSearch={handleLocationSelect} currentBounds={currentBounds} />
           <button
             onClick={() => setIsFilterOpen(true)}
@@ -546,15 +504,18 @@ export default function MapView() {
           </button>
         </div>
 
+
+
+        {/* ── Zoom / control strip ── */}
         <div className="map-overlay-zoom-controls">
           <div className="zoom-controls-stack shadow-premium">
             <button
-              onClick={() => setViewStyle(prev => prev === 'streets' ? 'satellite' : 'streets')}
+              onClick={() => setMapType(prev => prev === 'roadmap' ? 'satellite' : 'roadmap')}
               className="zoom-btn"
-              title="Toggle Base Map"
+              title="Toggle map type"
             >
               <Layers size={14} />
-              <span className="zoom-label">{viewStyle === 'streets' ? 'Sat' : 'Map'}</span>
+              <span className="zoom-label">{mapType === 'roadmap' ? 'Sat' : 'Map'}</span>
             </button>
             <div className="zoom-divider" />
             <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
@@ -562,7 +523,7 @@ export default function MapView() {
               <span className="zoom-label">Me</span>
             </button>
             <div className="zoom-divider" />
-            <button onClick={handleRadiusSearch} className="zoom-btn" title="Radius Search (Center)">
+            <button onClick={handleRadiusSearch} className="zoom-btn" title="Radius Search on Center">
               <Target size={14} />
               <span className="zoom-label">Radius</span>
             </button>
@@ -573,11 +534,10 @@ export default function MapView() {
                   onClick={() => {
                     setFilters({ lat: null, lng: null, bounds: null });
                     setSearchAnchor(null);
-                    // Re-trigger global discovery
-                    handleSearchArea();
+                    setTimeout(handleSearchArea, 100);
                   }}
                   className="zoom-btn text-error-color"
-                  title="Clear Radius Search"
+                  title="Clear Radius"
                 >
                   <RotateCcw size={14} />
                   <span className="zoom-label">Clear</span>
@@ -585,30 +545,28 @@ export default function MapView() {
                 <div className="zoom-divider" />
               </>
             )}
-            <button onClick={() => mapRef.current?.zoomIn()} className="zoom-btn">
+            <button onClick={() => map?.setZoom((map.getZoom() || 12) + 1)} className="zoom-btn">
               <span className="text-sm">＋</span>
               <span className="zoom-label">In</span>
             </button>
             <div className="zoom-divider" />
-            <button onClick={() => mapRef.current?.zoomOut()} className="zoom-btn">
+            <button onClick={() => map?.setZoom((map.getZoom() || 12) - 1)} className="zoom-btn">
               <span className="text-sm">－</span>
               <span className="zoom-label">Out</span>
             </button>
-            <div className="zoom-divider" />
           </div>
         </div>
       </main>
 
+      {/* ── Filter panel ── */}
       <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
 
+      {/* ── Property details overlay ── */}
       {selectedProperty && (
         <PropertyDetailsOverlay
           property={selectedProperty}
           onClose={() => setSelectedProperty(null)}
-          onShowRoute={(p) => {
-            setSelectedProperty(null);
-            handleShowRoute(p);
-          }}
+          onShowRoute={(p) => { setSelectedProperty(null); handleShowRoute(p); }}
         />
       )}
     </div>

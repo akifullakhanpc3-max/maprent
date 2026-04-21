@@ -13,8 +13,10 @@
 @media (max-width: 768px) {
   .map-dashboard-layout {
     flex-direction: column;
-    height: auto; /* Allow natural page height expansion */
-    overflow: visible; /* Allow page-level scrolling */
+    height: auto; /* Allow natural scroll for sidebar below map */
+    min-height: 100vh;
+    overflow-y: auto; /* Enable page scroll */
+    margin-top: 80px; /* Aligned with Navbar height */
   }
 }
 
@@ -45,16 +47,17 @@
 
 @media (max-width: 768px) {
   .sidebar-discovery-pane {
+    display: flex; /* Show sidebar on mobile */
     width: 100%;
     flex: none;
     height: auto;
+    min-height: 50vh; /* Ensure it has some presence */
     border-right: none;
     border-top: 1px solid var(--border-subtle);
     background: var(--sidebar-bg);
     overflow: visible;
-    display: flex;
-    flex-direction: column;
     z-index: 10;
+    order: 2; /* Below the map */
   }
 
   .sidebar-discovery-pane.full-grid-view {
@@ -73,11 +76,25 @@
 
 @media (max-width: 768px) {
   .sidebar-header-glow {
-    padding: var(--s-4) var(--s-3);
-    margin-top: -2px; /* Pull header up to bridge the layout gap */
+    padding: var(--s-6) var(--s-4) var(--s-4);
+    margin-top: 0;
     background: white;
     position: relative;
     z-index: 20;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
+  }
+
+  .sidebar-header-glow::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
   }
 }
 
@@ -139,18 +156,19 @@
   flex: 1;
   height: 100%;
   position: relative;
-  background: white; /* Neutralize any dark underlying layers */
+  background: white;
   transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden; /* Prevent internal map leakage */
 }
 
 @media (max-width: 768px) {
   .map-main-viewport {
-    height: 480px;
-    min-height: 480px;
-    order: -1;
+    height: 50vh; /* Fixed height for map on mobile */
+    min-height: 350px;
+    order: 1; /* Map on top */
     flex: none;
-    position: relative; /* Natural scroll: map moves with page */
-    z-index: 1;
+    position: relative;
+    z-index: 5;
   }
 }
 
@@ -200,10 +218,10 @@
 
 @media (max-width: 768px) {
   .map-overlay-center-top {
-    position: absolute; /* Anchor to the map viewport container */
-    top: 16px;
+    position: absolute;
+    top: 8px; /* Reduced from 16px to minimize gap to Navbar */
     left: 50%;
-    min-width: 0; /* Reset desktop minimum width */
+    min-width: 0;
     width: calc(100% - 16px);
   }
 }
@@ -303,10 +321,23 @@
 }
 
 @media (max-width: 1024px) {
-  .map-overlay-center-top {
-    left: 50%;
-    width: 100%;
-    top: calc(80px + 16px);
+  @media (min-width: 769px) {
+    .map-overlay-center-top {
+      left: 50%;
+      width: 100%;
+      top: calc(80px + 16px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .map-overlay-center-top {
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      position: absolute;
+      z-index: 1000;
+    }
   }
 
   .map-overlay-zoom-controls {
@@ -367,6 +398,13 @@
   background: var(--primary-hover);
 }
 
+@media (max-width: 768px) {
+  .zoom-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 .zoom-divider {
   width: 1px;
   /* Vertical divider for Desktop horizontal layout */
@@ -409,18 +447,26 @@
 }
 
 .price-pin-wrapper {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 6px 12px;
-  box-shadow: var(--shadow-md);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: #0f172a;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px; /* Better pill shape */
+  padding: 5px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   transform-origin: bottom center;
-  margin-bottom: 6px;
-  display: flex;
+  margin-bottom: 8px;
+  display: inline-flex !important;
+  flex-direction: row !important;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1;
+  width: max-content !important;
+  max-width: none !important; /* Critical to bypass global resets */
+  min-width: unset !important;
+  white-space: nowrap !important;
+  will-change: transform; /* GPU Acceleration */
 }
 
 .pin-bhk-tag {
@@ -431,6 +477,8 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   padding-right: 6px;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .price-pin-wrapper.is-active .pin-bhk-tag {
@@ -440,15 +488,15 @@
 
 .price-pin-tail {
   position: absolute;
-  bottom: -6px;
+  bottom: -7px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid #1e293b;
-  transition: border-top-color 0.2s ease;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #0f172a;
+  transition: border-top-color 0.3s ease;
 }
 
 .price-text {
@@ -457,6 +505,7 @@
   font-weight: 800;
   color: #fff;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .price-pin-wrapper:hover {
@@ -473,9 +522,10 @@
 
 .price-pin-wrapper.is-active {
   background: var(--primary-color);
-  border-color: var(--primary-color);
-  transform: scale(1.15);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+  border-color: #ffffff;
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
+  z-index: 2000 !important;
 }
 
 .price-pin-wrapper.is-active .price-text {
@@ -1024,4 +1074,142 @@
   flex: 1;
   height: 1px;
   background: var(--border-subtle);
+}
+
+/* Floating Radius Overlay — old layout kept for reference, replaced by pill */
+.map-overlay-radius-slider {
+  display: none; /* hidden — superseded by .map-radius-pill */
+}
+
+/* ── Compact Radius Pill (floats on map surface) ── */
+.map-radius-pill {
+  position: absolute;
+  /* Sits just below the search bar, on the map surface */
+  top: calc(80px + 24px + 62px + 12px); /* navbar + gap + searchbar height + gap */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5500;
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  /* Dark glassmorphic pill */
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 8px 14px 8px 12px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  pointer-events: auto;
+  min-width: 260px;
+  max-width: 380px;
+  width: max-content;
+}
+
+@media (max-width: 768px) {
+  .map-radius-pill {
+    top: auto;
+    bottom: 90px;
+    min-width: 240px;
+  }
+}
+
+/* Left section: icon + value */
+.mrp-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mrp-icon {
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.mrp-value {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  min-width: 38px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slim inline slider */
+.mrp-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mrp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.35), 0 2px 8px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mrp-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 5px rgba(29, 78, 216, 0.25), 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.mrp-slider:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+.mrp-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.35);
+  cursor: pointer;
+}
+
+.mrp-slider::-moz-range-track {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+
+/* Clear button */
+.mrp-clear {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.mrp-clear:hover {
+  background: rgba(239, 68, 68, 0.28);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  transform: scale(1.08);
 }
