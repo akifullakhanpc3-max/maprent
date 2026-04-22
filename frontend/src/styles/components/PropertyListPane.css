@@ -136,8 +136,8 @@
 .discovery-actions-row.glass-elevated {
   display: flex;
   align-items: center;
-  gap: 8px; /* Optimized gap for fit */
-  padding: 10px;
+  gap: 3px; /* Tighter gap for better label fit */
+  padding: 10px 3px; /* Minimal padding for maximum button area */
   background: rgba(15, 23, 42, 0.75); /* Dark Glass Theme */
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
@@ -163,13 +163,13 @@
     flex-direction: column; /* Icon over Text for better narrowing */
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 10px 2px; /* Tighter padding for longer labels */
+    gap: 4px;
+    padding: 10px 0px;
     border-radius: 12px;
-    font-size: 10px; /* Fitting "Search by Radius" */
+    font-size: 8px; /* Further reduced to strictly prevent truncation */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: -0.02em; /* Tighter letter spacing */
     color: #e5e7eb;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -227,7 +227,7 @@
     width: 100%;
     text-align: center;
     overflow: hidden;
-    text-overflow: clip;
+    text-overflow: ellipsis; /* Professional ellipsis instead of hard clip */
   }
 
   /* Icons */
@@ -244,23 +244,26 @@
     transform: scale(1.1);
   }
 
-  /* ───────── Search Area (Neutral) ───────── */
+  /* ───────── Search Area (Primary Focus) ───────── */
   .search-full-btn {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important; /* Force primary focus */
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.5);
+    z-index: 2;
   }
 
-  /* ───────── Radius Search (Primary Focus) ───────── */
-  .search-radius-btn {
-    background: linear-gradient(135deg, #1d4ed8, #4f46e5); /* Higher Contrast Dark Primary */
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
-    z-index: 1;
-  }
-
-  .search-radius-btn:hover {
+  .search-full-btn:hover {
     box-shadow: 0 12px 28px rgba(29, 78, 216, 0.6);
     filter: brightness(1.15);
+  }
+
+  /* ───────── Radius Search (Secondary Mode) ───────── */
+  .search-radius-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #e5e7eb !important;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: none !important;
   }
 
   /* Shimmer */
@@ -269,7 +272,7 @@
     inset: 0;
     border-radius: inherit;
     overflow: hidden;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
   }
 

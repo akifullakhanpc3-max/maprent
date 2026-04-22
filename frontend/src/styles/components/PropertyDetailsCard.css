@@ -53,7 +53,8 @@
 .card-header-stack {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Tighter vertical stack */
+  gap: 8px;
+  /* Tighter vertical stack */
 }
 
 .card-title-row {
@@ -306,31 +307,73 @@
   backdrop-filter: blur(8px);
 }
 
+.overlay-master-container {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 950px;
+  height: calc(100vh - 40px);
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.overlay-side-panel,
+.overlay-map-panel {
+  pointer-events: auto;
+}
+
 .overlay-side-panel {
   position: relative;
   width: 100%;
-  max-width: 480px; 
-  max-height: calc(100vh - 40px); /* Ensure it always fits with padding */
-  min-height: 0; /* Allow flex shrinking */
-  /* Centered modal style */
+  max-width: 440px;
+  height: 100%;
   background: white;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-premium);
-  border-radius: 32px;
-  /* Large rounded corners */
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25), 0 18px 36px -18px rgba(0, 0, 0, 0.3);
+  border-radius: 28px;
   overflow: hidden;
-  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes slideUpFade {
+.overlay-map-panel {
+  flex: 1;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 28px;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: none; /* Hidden on mobile */
+  animation: modalPopUpDelay 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (min-width: 1024px) {
+  .overlay-map-panel {
+    display: block;
+  }
+}
+
+@keyframes modalPopUpDelay {
   from {
-    transform: translateY(30px);
+    transform: scale(0.95) translateX(30px);
     opacity: 0;
   }
-
   to {
-    transform: translateY(0);
+    transform: scale(1) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopUp {
+  from {
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
@@ -338,36 +381,40 @@
 
 /* Sticky Header */
 .overlay-sticky-header {
-  padding: 12px 16px;
-  /* Reduced from 16px 24px */
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-light);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  z-index: 10;
+  border-bottom: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
+  backdrop-filter: blur(8px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
 .header-close-btn,
 .header-icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: #1e293b;
   cursor: pointer;
   transition: var(--transition-smooth);
 }
 
 .header-close-btn:hover,
 .header-icon-btn:hover {
-  background: var(--bg-soft-gray);
-  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
 }
 
 .header-icon-btn.liked {
@@ -388,12 +435,12 @@
 
 .overlay-hero-image-box {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   height: auto;
   position: relative;
-  background: var(--bg-soft-gray);
+  background: #f1f5f9;
   line-height: 0;
-  overflow: hidden; /* Fix accidental scrollbars */
+  overflow: hidden;
 }
 
 .overlay-full-image {
@@ -539,22 +586,33 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Main Body Content */
 .overlay-main-body {
-  padding: 0 12px 10px;
-  /* Further reduced bottom margin */
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 
@@ -580,44 +638,46 @@
 }
 
 .main-property-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 900;
+  color: #0f172a;
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .main-price-display {
   display: flex;
   flex-direction: column;
-  margin-top: 4px; /* Minimal margin below title */
+  margin-top: 4px;
+  /* Minimal margin below title */
 }
 
 .price-value {
   font-size: 32px;
-  font-weight: 800;
-  color: var(--text-main);
+  font-weight: 950;
+  color: #0f172a;
   line-height: 1;
 }
 
 .price-label {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 900;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 2px;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
 }
 
 /* Price Hero Card */
 .price-hero-card {
-  background: var(--bg-soft-gray);
-  border: 1px solid var(--border-light);
-  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
   padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .price-stack {
@@ -985,4 +1045,43 @@
   .price-divider-v {
     display: none;
   }
+}
+
+.mini-map-section {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+@media (min-width: 1024px) {
+  .mini-map-section {
+    display: none; /* Only show in-line map on mobile */
+  }
+}
+
+.mini-map-container {
+  width: 100%;
+  height: 300px; /* Explicit height is critical for Leaflet */
+  min-height: 250px;
+  background: #f1f5f9;
+  position: relative;
+  z-index: 1;
+}
+
+.overlay-map-panel .mini-map-container {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Ensure Leaflet controls are always visible inside the modal */
+.leaflet-control-container {
+  z-index: 2000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }

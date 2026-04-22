@@ -60,11 +60,12 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
             <button
               onClick={onSearchArea}
               className="action-btn search-full-btn"
-              data-tooltip="Find properties within the current map view"
+              data-tooltip="Find properties within the current map view (Default)"
               title="Search by Area"
             >
-              <Grid size={15} strokeWidth={2.2} />
-              <span>Search by Area</span>
+              <div className="btn-shimmer"></div>
+              <Grid size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
+              <span style={{ position: 'relative', zIndex: 2 }}>Search by Area</span>
             </button>
             
             <button
@@ -73,9 +74,8 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
               data-tooltip="Search properties within a selected radius from center"
               title="Search by Radius"
             >
-              <div className="btn-shimmer"></div>
-              <Navigation size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
-              <span style={{ position: 'relative', zIndex: 2 }}>Search by Radius</span>
+              <Navigation size={15} strokeWidth={2.2} />
+              <span>Search by Radius</span>
             </button>
 
             <button

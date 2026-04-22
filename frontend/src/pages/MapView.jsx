@@ -198,6 +198,7 @@ export default function MapView() {
     }
   }, [filters.radius, searchAnchor, fitToRadius]);
 
+
   // ─── Event handlers ───────────────────────────────────────────────────────
   const handleLocationSelect = useCallback((coords) => {
     if (!map || !Array.isArray(coords)) return;
@@ -305,6 +306,13 @@ export default function MapView() {
     setSearchAnchor(null);
     setTimeout(handleSearchArea, 100);
   }, [setFilters, handleSearchArea]);
+
+  // Run Search By Area on initial load
+  useEffect(() => {
+    if (map) {
+      handleSearchArea();
+    }
+  }, [map, handleSearchArea]);
 
   // ─── Icons ──────────────────────────────────────────────────────────────────
   const resetAnchorIcon = useMemo(() => L.divIcon({
