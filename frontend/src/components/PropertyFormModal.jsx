@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../api/axios';
 import { usePropertyStore } from '../store/usePropertyStore';
-import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart } from 'lucide-react';
+import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart, Phone, MessageCircle } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
 import MapSearchBar from './MapSearchBar';
 import '../styles/components/BookingFormModal.css'; // Reusing modal core styles
@@ -101,6 +101,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
 
   const [position, setPosition] = useState(null);
   const [isCustomHeadline, setIsCustomHeadline] = useState(false);
+  const [isSameAsPhone, setIsSameAsPhone] = useState(false);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -180,6 +181,10 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         );
       }
     }
+    
+    if (existingProperty && existingProperty.phone === existingProperty.whatsapp) {
+      setIsSameAsPhone(true);
+    }
   }, [existingProperty, initialCoords]);
   
   useEffect(() => {
@@ -192,10 +197,24 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => {
+      const next = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      };
+      // Auto-sync whatsapp if toggle is on
+      if (name === 'phone' && isSameAsPhone) {
+        next.whatsapp = value;
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSameAsPhone = (checked) => {
+    setIsSameAsPhone(checked);
+    if (checked) {
+      setFormData(prev => ({ ...prev, whatsapp: prev.phone }));
+    }
   };
 
   const handleAmenityToggle = (amenity) => {
@@ -230,6 +249,10 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     e.preventDefault();
     if (!position) return setError('Please select a location on the map.');
     if (formData.allowedFor.length === 0) return setError('Please select at least one Allowed Tenant Type.');
+    
+    // Phone validation
+    if (formData.phone.length !== 10) return setError('Phone number must be exactly 10 digits.');
+    if (formData.whatsapp.length !== 10) return setError('WhatsApp number must be exactly 10 digits.');
     setLoading(true);
 
     try {
@@ -397,11 +420,11 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                         />
                       </div>
                       <div className="flex-col gap-2">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Security Deposit (₹) *</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Security Deposit (₹)</label>
                         <input
-                          type="number" name="securityDeposit" required min="0"
+                          type="number" name="securityDeposit" min="0"
                           value={formData.securityDeposit} onChange={handleChange}
-                          className="input-base !h-10" placeholder="e.g. 50000"
+                          className="input-base !h-10" placeholder="e.g. 50000 (Optional)"
                         />
                       </div>
                       <div className="flex-col gap-2">
@@ -428,7 +451,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                   <div className="flex-row gap-4">
                     <div className="flex-1 flex-col gap-2">
                       <label className="label-base">Topology</label>
-                      <select name="bhkType" value={formData.bhkType} onChange={handleChange} className="input-base">
+                      <select name="bhkType" required value={formData.bhkType} onChange={handleChange} className="input-base">
                         <option value="1BHK">1BHK</option>
                         <option value="2BHK">2BHK</option>
                         <option value="3BHK">3BHK</option>
@@ -471,7 +494,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     </div>
                     <div className="flex-col gap-2">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Food Preference</label>
-                      <select name="foodPreference" value={formData.foodPreference} onChange={handleChange} className="input-base !h-10">
+                      <select name="foodPreference" required value={formData.foodPreference} onChange={handleChange} className="input-base !h-10">
                         <option value="Any">Any Habits</option>
                         <option value="Veg">Pure Veg</option>
                         <option value="Non-Veg">Non-Veg Allowed</option>
@@ -479,7 +502,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     </div>
                     <div className="flex-col gap-2">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Property Type</label>
-                      <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="input-base !h-10">
+                      <select name="propertyType" required value={formData.propertyType} onChange={handleChange} className="input-base !h-10">
                         <option value="Non-Gated">Non-Gated</option>
                         <option value="Gated Community">Gated Community</option>
                       </select>
@@ -531,7 +554,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                       {[
                         { label: 'Bachelors', icon: User },
                         { label: 'Family', icon: Users },
-                        { label: 'Couples', icon: Heart }
+                        { label: 'Unmarried Couples', icon: Heart }
                       ].map(option => {
                         const active = formData.allowedFor.includes(option.label);
                         const Icon = option.icon;
@@ -570,14 +593,50 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                     </div>
                   </div>
 
-                  <div className="flex-row gap-4">
-                    <div className="flex-1 flex-col gap-2">
-                      <label className="label-base">Phone Line</label>
-                      <input name="phone" required value={formData.phone} onChange={handleChange} className="input-base" placeholder="+91..." />
-                    </div>
-                    <div className="flex-1 flex-col gap-2">
-                      <label className="label-base">WhatsApp</label>
-                      <input name="whatsapp" required value={formData.whatsapp} onChange={handleChange} className="input-base" placeholder="+91..." />
+                  <div className="flex-col gap-4">
+                    <div className="flex gap-4">
+                      <div className="flex-1 flex-col gap-2">
+                        <label className="label-base">Phone Line (10 Digits)</label>
+                        <div className="input-with-icon">
+                          <div className="input-icon">
+                            <Phone size={14} />
+                          </div>
+                          <input 
+                            name="phone" required 
+                            maxLength="10"
+                            pattern="[0-9]{10}"
+                            value={formData.phone} onChange={handleChange} 
+                            className="input-base" placeholder="9876543210" 
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1 flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="label-base">WhatsApp</label>
+                          <label className="flex items-center gap-1 cursor-pointer">
+                            <input 
+                              type="checkbox"
+                              checked={isSameAsPhone}
+                              onChange={(e) => handleToggleSameAsPhone(e.target.checked)}
+                              className="w-3 h-3 accent-indigo-600"
+                            />
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">Same as Phone</span>
+                          </label>
+                        </div>
+                        <div className="input-with-icon">
+                          <div className="input-icon" style={{ color: isSameAsPhone ? '#cbd5e1' : '#10b981' }}>
+                            <MessageCircle size={14} />
+                          </div>
+                          <input 
+                            name="whatsapp" required 
+                            maxLength="10"
+                            pattern="[0-9]{10}"
+                            disabled={isSameAsPhone}
+                            value={formData.whatsapp} onChange={handleChange} 
+                            className="input-base" placeholder="9876543210" 
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

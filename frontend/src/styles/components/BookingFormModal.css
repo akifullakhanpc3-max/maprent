@@ -165,9 +165,14 @@
 .input-icon {
   position: absolute;
   left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #94a3b8;
   pointer-events: none;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .input-base {

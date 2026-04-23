@@ -21,6 +21,7 @@ import PropertyListPane from '../components/PropertyListPane';
 import BookingFormModal from '../components/BookingFormModal';
 import PropertyDetailsOverlay from '../components/PropertyDetailsOverlay';
 import MapCursor from '../components/MapCursor';
+import NavigationPanel from '../components/NavigationPanel';
 import '../styles/pages/MapView.css';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -180,8 +181,16 @@ export default function MapView() {
     setLocalRadius(filters.radius || 5); 
     if (filters.lat && filters.lng) {
       setSearchAnchor([filters.lat, filters.lng]);
+    } else {
+      setSearchAnchor(null); // Cleanup circle when switching to Area mode
+      // If we're resetting filters, clear navigation and selection too
+      if (!filters.city || filters.city === 'All') {
+        setIsNavigating(false);
+        setRouteData(null);
+        setSelectedProperty(null);
+      }
     }
-  }, [filters.radius, filters.lat, filters.lng]);
+  }, [filters.radius, filters.lat, filters.lng, filters.city]);
 
   // ─── Fit map to circle bounds ─────────────────────────────────────────────
   const fitToRadius = useCallback(() => {
@@ -191,12 +200,6 @@ export default function MapView() {
     map.fitBounds(bounds, { padding: [60, 60] });
   }, [map, searchAnchor, filters.radius]);
 
-  // Auto-fit when radius or anchor changes
-  useEffect(() => {
-    if (filters.lat && filters.lng && filters.radius) {
-      fitToRadius();
-    }
-  }, [filters.radius, searchAnchor, fitToRadius]);
 
 
   // ─── Event handlers ───────────────────────────────────────────────────────
@@ -218,12 +221,23 @@ export default function MapView() {
   }, [map, setFilters]);
 
   const handleLocateMe = useCallback(() => {
-    if (!navigator.geolocation) return alert('Geolocation not supported.');
-    navigator.geolocation.getCurrentPosition(({ coords }) => {
-      const pos = [coords.latitude, coords.longitude];
-      if (map) { map.panTo(pos); map.setZoom(15); }
-      setFilters({ lat: pos[0], lng: pos[1], bounds: null });
-    }, () => alert('Unable to retrieve location.'));
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported.');
+        return reject('No geolocation');
+      }
+      navigator.geolocation.getCurrentPosition(({ coords }) => {
+        const pos = [coords.latitude, coords.longitude];
+        if (map) { map.panTo(pos); map.setZoom(15); }
+        // Only update discovery filters if we're not currently in navigation mode
+        // Or actually, let's keep it consistent.
+        setFilters({ lat: pos[0], lng: pos[1], bounds: null });
+        resolve(pos);
+      }, (err) => {
+        alert('Unable to retrieve location.');
+        reject(err);
+      });
+    });
   }, [map, setFilters]);
 
   const handleRadiusSearch = useCallback(() => {
@@ -279,11 +293,11 @@ export default function MapView() {
     const currentDest  = routeData?.coordinates?.[routeData.coordinates.length - 1];
     const currentStart = routeData?.coordinates?.[0];
     const start = startCoords
-      ? [startCoords[1], startCoords[0]]
-      : currentStart ? [currentStart[1], currentStart[0]] : null;
-    const end = endCoords
-      ? [endCoords[1], endCoords[0]]
-      : currentDest ? [currentDest[1], currentDest[0]] : null;
+      ? [startCoords[0], startCoords[1]] // [lat, lng]
+      : currentStart ? [currentStart[0], currentStart[1]] : null;
+    const end = endCoords 
+      ? [endCoords[0], endCoords[1]] // [lat, lng]
+      : currentDest ? [currentDest[0], currentDest[1]] : null;
     if (!start || !end) return;
     try {
       const data = await fetch(

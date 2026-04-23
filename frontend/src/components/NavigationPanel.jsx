@@ -13,13 +13,22 @@ export default function NavigationPanel({ routeData, onClear, propertyTitle, onS
     if (propertyTitle) setEndQuery(propertyTitle);
   }, [propertyTitle]);
 
+  // Automatically trigger "My Location" on mount
+  useEffect(() => {
+    handleLocateMe();
+  }, []); // Run once on mount
+
   const handleLocateMe = async () => {
     setIsLocating(true);
     try {
-      await onLocate();
-      setStartQuery('Your Current Location');
-      setSearchResults(prev => ({ ...prev, start: [] }));
-      setActiveSearch(null); // Stop searching mode
+      const coords = await onLocate();
+      if (coords) {
+        setStartQuery('Your Current Location');
+        setSearchResults(prev => ({ ...prev, start: [] }));
+        setActiveSearch(null); 
+        // Trigger route search with new start location
+        onSearchRoute(coords, null);
+      }
     } catch (err) {
       console.error('Locate error:', err);
     } finally {
@@ -195,8 +204,10 @@ export default function NavigationPanel({ routeData, onClear, propertyTitle, onS
                <div className="flex gap-3 mt-6">
                 <button 
                   onClick={() => {
+                      if (!routeData?.coordinates?.length) return;
                       const start = routeData.coordinates[0];
                       const end = routeData.coordinates[routeData.coordinates.length - 1];
+                      // Google Maps expects lat,lng
                       const url = `https://www.google.com/maps/dir/?api=1&origin=${start[0]},${start[1]}&destination=${end[0]},${end[1]}&travelmode=driving`;
                       window.open(url, '_blank');
                   }}

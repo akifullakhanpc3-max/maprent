@@ -166,10 +166,10 @@
     gap: 4px;
     padding: 10px 0px;
     border-radius: 12px;
-    font-size: 8px; /* Further reduced to strictly prevent truncation */
+    font-size: 8.5px; /* Slightly larger but optimized */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: -0.02em; /* Tighter letter spacing */
+    letter-spacing: -0.01em; /* Optimized letter spacing */
     color: #e5e7eb;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -244,13 +244,18 @@
     transform: scale(1.1);
   }
 
-  /* ───────── Search Area (Primary Focus) ───────── */
-  .search-full-btn {
-    background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important; /* Force primary focus */
+  /* ───────── Active Search Mode Style ───────── */
+  .action-btn.is-active {
+    background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 14px rgba(29, 78, 216, 0.5);
     z-index: 2;
+  }
+
+  /* ───────── Search Area (Neutral Base) ───────── */
+  .search-full-btn {
+    background: rgba(255, 255, 255, 0.04);
   }
 
   .search-full-btn:hover {

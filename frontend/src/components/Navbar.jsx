@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePropertyStore } from '../store/usePropertyStore';
 import { Map, LayoutDashboard, LogOut, Menu, X, Info, ChevronRight } from 'lucide-react';
 import MapSearchBar from './MapSearchBar';
 import '../styles/components/Navbar.css';
@@ -40,7 +41,14 @@ export default function Navbar() {
       <div className="navbar-container">
 
         {/* Left: Brand */}
-        <Link to="/" className="brand-link" onClick={closeMenu}>
+        <Link 
+          to="/" 
+          className="brand-link" 
+          onClick={() => {
+            resetFilters();
+            closeMenu();
+          }}
+        >
           {logo ? <img src={logo} alt="Occupra" className="logo-header" /> :
             <span className="auth-brand-text">Occupra</span>}
           {/* <span className="brand-tagline hidden-mobile">Find your perfect space, your way.</span> */}

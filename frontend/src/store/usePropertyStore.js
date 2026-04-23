@@ -49,6 +49,26 @@ export const usePropertyStore = create((set, get) => ({
     set({ fetchTimeout: timeout });
   },
 
+  resetFilters: () => {
+    set({
+      filters: {
+        bounds: null,
+        minPrice: 0,
+        maxPrice: 200000,
+        bhkType: 'All',
+        city: 'All',
+        radius: 5,
+        lat: null,
+        lng: null,
+        amenities: [],
+        allowedFor: [],
+        floorType: 'All',
+        advancedFeatures: [],
+      }
+    });
+    get().fetchProperties();
+  },
+
   fetchProperties: async () => {
     const { bounds, minPrice, maxPrice, bhkType, city, radius, lat, lng, amenities, allowedFor, floorType } = get().filters;
     

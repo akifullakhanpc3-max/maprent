@@ -42,6 +42,10 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
   }, [properties]);
 
 
+  // Active states for search buttons
+  const isRadiusActive = !!(filters.lat && filters.lng);
+  const isAreaActive = !isRadiusActive && !!filters.bounds;
+
   if (loading && properties.length === 0) {
     return (
       <div className="property-list-pane flex-center py-24">
@@ -59,23 +63,24 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
           <div className="discovery-actions-row glass-elevated">
             <button
               onClick={onSearchArea}
-              className="action-btn search-full-btn"
+              className={`action-btn search-full-btn ${isAreaActive ? 'is-active' : ''}`}
               data-tooltip="Find properties within the current map view (Default)"
               title="Search by Area"
             >
-              <div className="btn-shimmer"></div>
+              {isAreaActive && <div className="btn-shimmer"></div>}
               <Grid size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
               <span style={{ position: 'relative', zIndex: 2 }}>Search by Area</span>
             </button>
             
             <button
               onClick={onSearchRadius}
-              className="action-btn search-radius-btn"
+              className={`action-btn search-radius-btn ${isRadiusActive ? 'is-active' : ''}`}
               data-tooltip="Search properties within a selected radius from center"
               title="Search by Radius"
             >
-              <Navigation size={15} strokeWidth={2.2} />
-              <span>Search by Radius</span>
+              {isRadiusActive && <div className="btn-shimmer"></div>}
+              <Navigation size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
+              <span style={{ position: 'relative', zIndex: 2 }}>Search by Radius</span>
             </button>
 
             <button
