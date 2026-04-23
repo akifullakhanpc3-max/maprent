@@ -52,6 +52,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/properties', require('./routes/properties'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/owner', require('./routes/owner'));
 const PORT = process.env.PORT || 5050;
 
 // Global Error Handler for Express

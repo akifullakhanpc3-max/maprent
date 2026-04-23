@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use local backend for development to avoid CORS and 404s until deployment
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://maprent-2.onrender.com';
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
 });
