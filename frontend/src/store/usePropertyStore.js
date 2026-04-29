@@ -12,7 +12,7 @@ export const usePropertyStore = create((set, get) => ({
     maxPrice: 200000,
     bhkType: 'All',
     city: 'All',
-    radius: 5, // km
+    radius: 1, // km
     lat: null,
     lng: null,
     amenities: [],
@@ -57,7 +57,7 @@ export const usePropertyStore = create((set, get) => ({
         maxPrice: 200000,
         bhkType: 'All',
         city: 'All',
-        radius: 5,
+        radius: 1,
         lat: null,
         lng: null,
         amenities: [],

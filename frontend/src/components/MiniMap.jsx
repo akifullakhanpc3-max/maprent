@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { usePropertyStore } from '../store/usePropertyStore';
 
 // Fix for default Leaflet marker icons
 if (L.Icon.Default.prototype._getIconUrl) {
@@ -35,7 +36,55 @@ function MapResizer() {
 const VOYAGER_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
-export default function MiniMap({ lat, lng, zoom = 14, className = "" }) {
+const createPriceIcon = (property, isActive) => {
+  const price = property.price;
+  let formattedPrice = 'N/A';
+  if (price > 0) {
+    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
+                   : price >= 1000   ? `₹${(price / 1000).toFixed(0)}k`
+                   : `₹${price}`;
+  }
+
+  const html = `
+    <div class="price-pin-wrapper ${isActive ? 'is-active' : ''} mini-map-scale">
+      ${property.bhkType ? `<span class="pin-bhk-tag">${property.bhkType.toUpperCase()}</span>` : ''}
+      <span class="price-text">${formattedPrice}</span>
+      <div class="price-pin-tail"></div>
+    </div>
+  `;
+
+  return L.divIcon({
+    className: 'custom-price-pin',
+    html: html,
+    iconSize: [120, 40],
+    iconAnchor: [60, 40]
+  });
+};
+
+export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectProperty }) {
+  const { properties } = usePropertyStore();
+
+  const memoizedMarkers = useMemo(() => {
+    return properties.map(property => {
+      const [pLng, pLat] = property.location.coordinates;
+      // If it's the exact same location as the minimap center, we might skip it or highlight it
+      const isCenter = Math.abs(pLat - lat) < 0.00001 && Math.abs(pLng - lng) < 0.00001;
+      return (
+        <Marker
+          key={property._id}
+          position={[pLat, pLng]}
+          icon={createPriceIcon(property, isCenter)}
+          eventHandlers={onSelectProperty && !isCenter ? {
+            click: (e) => {
+              L.DomEvent.stopPropagation(e);
+              onSelectProperty(property);
+            }
+          } : undefined}
+        />
+      );
+    });
+  }, [properties, lat, lng, onSelectProperty]);
+
   if (!lat || !lng) return null;
 
   return (
@@ -52,7 +101,8 @@ export default function MiniMap({ lat, lng, zoom = 14, className = "" }) {
         className="h-full w-full rounded-2xl"
       >
         <TileLayer url={VOYAGER_URL} attribution={ATTRIBUTION} />
-        <Marker position={[lat, lng]} />
+        {/* Render all property tags */}
+        {memoizedMarkers}
         <MapResizer />
       </MapContainer>
     </div>

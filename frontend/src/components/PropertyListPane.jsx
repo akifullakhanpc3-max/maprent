@@ -149,7 +149,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
           </div>
         </div>
 
-        {loading ? (
+        {loading && properties.length === 0 ? (
           <div className="flex-center flex-col gap-6 py-24">
             <div className="w-10 h-10 border-2 border-primary-color border-t-transparent rounded-full animate-spin"></div>
             <p className="label-base !text-primary-color">Broadcasting Filters...</p>

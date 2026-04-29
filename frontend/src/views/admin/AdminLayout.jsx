@@ -117,9 +117,9 @@ export default function AdminLayout() {
                 Exit Console
               </Link>
               <div className="h-4 w-px bg-border-light" />
-              <button className="btn btn-secondary !p-2 !h-9 !w-9">
+              <Link to="/admin/settings" className="btn btn-secondary !p-2 !h-9 !w-9 flex items-center justify-center">
                 <Settings size={16} />
-              </button>
+              </Link>
            </div>
         </header>
         

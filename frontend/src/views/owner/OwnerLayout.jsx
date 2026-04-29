@@ -106,10 +106,6 @@ export default function OwnerLayout() {
               <Link to="/" className="text-xs font-bold text-muted hover:text-primary transition-colors">
                 Public View
               </Link>
-              <div className="h-4 w-px bg-border-subtle" />
-              <button className="btn btn-secondary !p-0 !h-9 !w-9">
-                <Settings size={16} />
-              </button>
            </div>
         </header>
 

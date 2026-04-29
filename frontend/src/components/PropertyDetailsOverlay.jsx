@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import MiniMap from './MiniMap';
 import '../styles/components/PropertyDetailsCard.css'
 
-export default function PropertyDetailsOverlay({ property, onClose, onShowRoute }) {
+export default function PropertyDetailsOverlay({ property, onClose, onShowRoute, onSelectProperty }) {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFullScreen, setShowFullScreen] = useState(false);
@@ -281,6 +281,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
                 <MiniMap
                   lat={property.location?.coordinates?.[1]}
                   lng={property.location?.coordinates?.[0]}
+                  onSelectProperty={onSelectProperty}
                 />
               </div>
 
@@ -333,6 +334,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute 
           <MiniMap
             lat={property.location?.coordinates?.[1]}
             lng={property.location?.coordinates?.[0]}
+            onSelectProperty={onSelectProperty}
           />
         </div>
       </div>

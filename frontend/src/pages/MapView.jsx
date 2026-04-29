@@ -71,7 +71,7 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
 }
 
 // ─── Animated Radius Circle (Isolated performance) ───────────────────────────
-const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetPosition, resetIcon }) => {
+const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetPosition, resetIcon, centerIcon }) => {
   const [rippleProgress, setRippleProgress] = useState(0);
   
   useEffect(() => {
@@ -114,6 +114,10 @@ const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetP
           interactive: false
         }}
       />
+      {/* Search Center Pin */}
+      <Marker position={searchAnchor} icon={centerIcon} interactive={false} />
+      
+      {/* Reset Controls */}
       <Marker 
         position={resetPosition || searchAnchor} 
         icon={resetIcon} 
@@ -172,13 +176,14 @@ export default function MapView() {
   const [isFilterOpen, setIsFilterOpen]         = useState(false);
   const [currentBounds, setCurrentBounds]       = useState(null);
   const [searchAnchor, setSearchAnchor]         = useState(null);
+  const [userLocation, setUserLocation]         = useState(null);
   
   // ── Local slider (smooth drag without store spam) ──
-  const [localRadius, setLocalRadius] = useState(filters.radius || 5);
+  const [localRadius, setLocalRadius] = useState(filters.radius || 1);
   const sliderTimer = useRef(null);
   
   useEffect(() => { 
-    setLocalRadius(filters.radius || 5); 
+    setLocalRadius(filters.radius || 1); 
     if (filters.lat && filters.lng) {
       setSearchAnchor([filters.lat, filters.lng]);
     } else {
@@ -226,24 +231,41 @@ export default function MapView() {
         alert('Geolocation not supported.');
         return reject('No geolocation');
       }
-      navigator.geolocation.getCurrentPosition(({ coords }) => {
-        const pos = [coords.latitude, coords.longitude];
-        if (map) { map.panTo(pos); map.setZoom(15); }
-        // Only update discovery filters if we're not currently in navigation mode
-        // Or actually, let's keep it consistent.
-        setFilters({ lat: pos[0], lng: pos[1], bounds: null });
-        resolve(pos);
-      }, (err) => {
-        alert('Unable to retrieve location.');
-        reject(err);
-      });
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          const pos = [coords.latitude, coords.longitude];
+          
+          // 1. Update Persistent User Tracking
+          setUserLocation(pos);
+
+          // 2. Update Map - use flyTo for premium feel
+          if (map) {
+            map.flyTo(pos, 16, {
+              duration: 1.5,
+              easeLinearity: 0.25
+            });
+          }
+          
+          // 3. Resolve the position for any consumers (like NavigationPanel)
+          resolve(pos);
+        },
+        (err) => {
+          console.error('[GEOLOCATION_ERROR]', err);
+          const msg = err.code === 1 ? 'Location access denied. Please enable it in browser settings.' 
+                    : 'Unable to retrieve location. Please check your GPS signal.';
+          alert(msg);
+          reject(err);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
     });
-  }, [map, setFilters]);
+  }, [map, setFilters, filters.radius]);
 
   const handleRadiusSearch = useCallback(() => {
     if (!map) return;
     const c = map.getCenter();
-    setFilters({ lat: c.lat, lng: c.lng, bounds: null, radius: filters.radius || 5 });
+    setFilters({ lat: c.lat, lng: c.lng, bounds: null, radius: filters.radius || 1 });
   }, [map, filters.radius, setFilters]);
 
   const handleSearchArea = useCallback(() => {
@@ -257,7 +279,7 @@ export default function MapView() {
   const handleSearchRadius = useCallback(() => {
     if (!map) return;
     const center = map.getCenter();
-    setFilters({ lat: center.lat, lng: center.lng, bounds: null, radius: filters.radius || 5 });
+    setFilters({ lat: center.lat, lng: center.lng, bounds: null, radius: filters.radius || 1 });
   }, [map, filters.radius, setFilters]);
 
   const handleShowRoute = useCallback(async (property) => {
@@ -316,7 +338,7 @@ export default function MapView() {
   }, [map, routeData]);
 
   const handleResetFilters = useCallback(() => {
-    setFilters({ lat: null, lng: null, bounds: null, radius: 5 });
+    setFilters({ lat: null, lng: null, bounds: null, radius: 1 });
     setSearchAnchor(null);
     setTimeout(handleSearchArea, 100);
   }, [setFilters, handleSearchArea]);
@@ -329,6 +351,20 @@ export default function MapView() {
   }, [map, handleSearchArea]);
 
   // ─── Icons ──────────────────────────────────────────────────────────────────
+  const searchCenterIcon = useMemo(() => L.divIcon({
+    className: 'radius-center-pin',
+    html: '<div class="pin-drop-visual"><div class="pin-inner-dot"></div></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 36]
+  }), []);
+
+  const userLocationIcon = useMemo(() => L.divIcon({
+    className: 'user-location-marker',
+    html: '<div class="user-pulse-ring"></div><div class="user-pulse-dot"></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  }), []);
+
   const resetAnchorIcon = useMemo(() => L.divIcon({
     className: 'reset-anchor-marker',
     html: `
@@ -381,6 +417,12 @@ export default function MapView() {
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="map-dashboard-layout animate-fade-in">
+      {/* ── Global Loading Indicator ── */}
+      {loading && (
+        <div className="global-loading-indicator">
+          <div className="loading-progress-line" />
+        </div>
+      )}
       {/* ── Sidebar ── */}
       <aside className="sidebar-discovery-pane">
         <div className="sidebar-header-glow flex-between">
@@ -434,6 +476,11 @@ export default function MapView() {
           />
           <TileLayer url={VOYAGER_URL} attribution={ATTRIBUTION} />
 
+          {/* User Location Marker (Pulsing Dot) */}
+          {userLocation && (
+            <Marker position={userLocation} icon={userLocationIcon} zIndexOffset={1000} />
+          )}
+
           {/* Radius circles (Isolated for performance) */}
           {searchAnchor && filters.radius && (
             <AnimatedRadiusCircle 
@@ -442,6 +489,7 @@ export default function MapView() {
               onReset={handleResetFilters}
               resetPosition={resetPosition}
               resetIcon={resetAnchorIcon}
+              centerIcon={searchCenterIcon}
             />
           )}
 
@@ -498,6 +546,12 @@ export default function MapView() {
           property={selectedProperty}
           onClose={() => setSelectedProperty(null)}
           onShowRoute={(p) => { setSelectedProperty(null); handleShowRoute(p); }}
+          onSelectProperty={(p) => {
+            setHighlightedId(p._id);
+            setSelectedProperty(p);
+            const card = document.getElementById(`property-card-${p._id}`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
         />
       )}
     </div>
