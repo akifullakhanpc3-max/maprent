@@ -56,18 +56,24 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
   useEffect(() => {
     if (!mapInstance) return;
     
-    const handleResize = () => {
+    // ResizeObserver is essential here because CSS transitions (like width/height 0.4s)
+    // mean the container size changes AFTER the window resize event fires.
+    const resizeObserver = new ResizeObserver(() => {
       mapInstance.invalidateSize();
-    };
+    });
     
+    const container = mapInstance.getContainer();
+    if (container) {
+      resizeObserver.observe(container);
+    }
+    
+    // Also bind to window resize as a fallback
+    const handleResize = () => mapInstance.invalidateSize();
     window.addEventListener('resize', handleResize);
     
-    // Fallback: trigger after a short delay in case of layout shifts
-    const timer = setTimeout(handleResize, 100);
-    
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
     };
   }, [mapInstance]);
 
