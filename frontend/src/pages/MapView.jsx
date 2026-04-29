@@ -53,6 +53,24 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
     }
   }, [mapInstance, map, setMap, setFilters]);
 
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    const handleResize = () => {
+      mapInstance.invalidateSize();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Fallback: trigger after a short delay in case of layout shifts
+    const timer = setTimeout(handleResize, 100);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, [mapInstance]);
+
   useMapEvents({
     moveend: () => {
       const bounds = mapInstance.getBounds();

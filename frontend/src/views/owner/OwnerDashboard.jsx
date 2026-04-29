@@ -35,10 +35,10 @@ export default function OwnerDashboard() {
   if (loading) return <LoadingSpinner fullScreen text="Calibrating Dashboard..." />;
 
   return (
-    <div className="flex-col gap-10 animate-fade-in">
+    <div className="flex-col animate-fade-in" style={{ gap: '40px' }}>
       
       {/* Page Header */}
-      <div className="flex-col md:flex-row flex-between items-center gap-6 text-center md:text-left">
+      <div className="flex-col items-center text-center gap-6" style={{ width: '100%' }}>
         <div className="flex-col gap-2">
           <h1 className="text-2xl md:text-3xl font-black tracking-tighter">
             Welcome, {user?.name?.split(' ')[0]}
@@ -49,7 +49,8 @@ export default function OwnerDashboard() {
         </div>
         <Link 
           to="/owner/properties" 
-          className="btn btn-primary w-full md:w-auto"
+          className="btn btn-primary"
+          style={{ width: 'max-content', padding: '0 32px' }}
         >
           <PlusCircle size={18} className="mr-2" />
           Add Listing

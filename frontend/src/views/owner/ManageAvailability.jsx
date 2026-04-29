@@ -118,65 +118,71 @@ export default function ManageAvailability() {
            <p className="text-slate-500 text-sm">Either no assets are listed or search terms didn't match.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <div className="property-list-stack animate-slide-up">
            {filteredProperties.map((property) => (
-             <div key={property._id} className={`console-card flex flex-col sm:flex-row gap-6 p-5 transition-all duration-500 ${!property.isActive ? 'opacity-75 grayscale-[0.5]' : ''}`}>
-                
-                {/* PREVIEW IMAGE */}
-                <div className="w-full sm:w-48 h-40 sm:h-32 rounded-2xl overflow-hidden relative group">
-                   <ImageWithSkeleton 
-                     src={property.images[0]?.startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`}
-                     alt={property.title}
-                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                   />
-                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                   <div className="absolute bottom-3 left-3">
-                      <span className={`status-pill !py-1 !px-2 !text-[8px] ${property.isActive ? 'success' : 'info'}`}>
-                         {property.isActive ? 'ACTIVE' : 'DELISTED'}
+             <div 
+               key={property._id} 
+               className={`property-list-card ${!property.isActive ? 'opacity-90 grayscale-[0.2]' : ''}`}
+             >
+                <div className="card-image-wrapper">
+                  <div className="card-image-overlay">
+                      <span className={`status-pill ${property.isActive ? 'success' : 'info'} text-[9px] font-bold tracking-wider`}>
+                          {property.isActive ? 'LIVE' : 'HIDDEN'}
                       </span>
-                   </div>
+                  </div>
+                  {property.images && property.images.length > 0 ? (
+                     <ImageWithSkeleton 
+                       src={property.images[0].startsWith('http') ? property.images[0] : `${BASE_URL}${property.images[0]}`} 
+                       className="h-full w-full object-cover" 
+                       alt={property.title} 
+                     />
+                  ) : (
+                     <div className="h-full flex-center text-low"><Home size={32} /></div>
+                  )}
                 </div>
-
-                {/* CONTENT AREA */}
-                <div className="flex-1 flex-col justify-between py-1">
-                   <div className="flex-col gap-1">
-                      <h3 className="text-base font-bold text-slate-800 line-clamp-1">{property.title}</h3>
-                      <div className="flex items-center gap-2 text-slate-500">
-                         <MapPin size={12} />
-                         <span className="text-[11px] font-medium">{property.city}</span>
-                      </div>
-                   </div>
-
-                   <div className="flex items-center gap-3 mt-4">
-                      <div className="flex-1 flex-col">
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Market Status</span>
-                         <span className={`text-xs font-black ${property.isActive ? 'text-emerald-500' : 'text-slate-500'}`}>
-                            {property.isActive ? 'OPEN FOR ENQUIRIES' : 'CURRENTLY PRIVATE'}
-                         </span>
-                      </div>
-                      
-                      {/* TOGGLE SWITCH */}
-                      <button 
-                        onClick={() => toggleAvailability(property)}
-                        disabled={updatingId === property._id}
-                        className={`relative w-14 h-7 rounded-full transition-all duration-300 flex items-center p-1 ${
-                           property.isActive ? 'bg-indigo-600' : 'bg-slate-300'
-                        } ${updatingId === property._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:ring-4 hover:ring-indigo-100'}`}
-                      >
-                         <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300 flex-center ${
-                            property.isActive ? 'translate-x-7' : 'translate-x-0'
-                         }`}>
-                            {updatingId === property._id ? (
-                               <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                            ) : property.isActive ? (
-                               <CheckCircle2 size={12} className="text-indigo-600" />
-                            ) : (
-                               <XCircle size={12} className="text-slate-400" />
-                            )}
-                         </div>
-                      </button>
-                   </div>
-                </div>
+                
+                <div className="card-details-stack">
+                    <div className="card-meta-row">
+                        <span className="status-pill info text-[8px] font-black uppercase tracking-[0.15em]">{property.bhkType || 'BHK'}</span>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-low">
+                          <MapPin size={10} /> {property.city || 'GLOBAL NODE'}
+                        </div>
+                    </div>
+                    
+                    <h3 className="property-title-premium truncate">
+                      {property.title}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-slate-200">
+                       <div className="flex-col">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Visibility</span>
+                          <span className={`text-xs font-black ${property.isActive ? 'text-emerald-500' : 'text-slate-500'}`}>
+                             {property.isActive ? 'PUBLIC' : 'PRIVATE'}
+                          </span>
+                       </div>
+                       
+                       {/* TOGGLE SWITCH */}
+                       <button 
+                         onClick={() => toggleAvailability(property)}
+                         disabled={updatingId === property._id}
+                         className={`relative w-12 h-6 rounded-full transition-all duration-300 flex items-center p-1 shrink-0 ${
+                            property.isActive ? 'bg-indigo-600' : 'bg-slate-300'
+                         } ${updatingId === property._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:ring-4 hover:ring-indigo-100'}`}
+                       >
+                          <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300 flex-center ${
+                             property.isActive ? 'translate-x-6' : 'translate-x-0'
+                          }`}>
+                             {updatingId === property._id ? (
+                                <div className="w-2.5 h-2.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                             ) : property.isActive ? (
+                                <CheckCircle2 size={10} className="text-indigo-600" />
+                             ) : (
+                                <XCircle size={10} className="text-slate-400" />
+                             )}
+                          </div>
+                       </button>
+                    </div>
+                 </div>
              </div>
            ))}
         </div>
