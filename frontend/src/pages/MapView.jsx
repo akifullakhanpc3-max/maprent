@@ -13,6 +13,7 @@ import {
   useMapEvents 
 } from 'react-leaflet';
 import L from 'leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import MapSearchBar from '../components/MapSearchBar';
@@ -155,6 +156,23 @@ const createPriceIcon = (property, isActive) => {
     html: html,
     iconSize: [120, 40],
     iconAnchor: [60, 40]
+  });
+};
+
+// ─── Utility: Custom Cluster Icon ─────────────────────────────────────────────
+const createClusterCustomIcon = function (cluster) {
+  const count = cluster.getChildCount();
+  return L.divIcon({
+    html: `
+      <div class="price-pin-wrapper cluster-pin">
+        <span class="pin-bhk-tag">${count}</span>
+        <span class="price-text">PROPERTIES</span>
+        <div class="price-pin-tail"></div>
+      </div>
+    `,
+    className: 'custom-price-pin',
+    iconSize: [120, 40],
+    iconAnchor: [60, 40],
   });
 };
 
@@ -501,8 +519,15 @@ export default function MapView() {
             />
           )}
 
-          {/* Price markers */}
-          {memoizedMarkers}
+          {/* Price markers clustered */}
+          <MarkerClusterGroup
+            chunkedLoading
+            maxClusterRadius={40}
+            showCoverageOnHover={false}
+            iconCreateFunction={createClusterCustomIcon}
+          >
+            {memoizedMarkers}
+          </MarkerClusterGroup>
         </MapContainer>
 
 

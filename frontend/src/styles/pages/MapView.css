@@ -472,6 +472,7 @@
 }
 
 /* Custom Price Pins */
+
 .custom-price-pin {
   display: flex !important;
   align-items: center !important;
@@ -500,7 +501,7 @@
   max-width: none !important; /* Critical to bypass global resets */
   min-width: unset !important;
   white-space: nowrap !important;
-  will-change: transform; /* GPU Acceleration */
+  will-change: transform, opacity; /* GPU Acceleration */
 }
 
 .pin-bhk-tag {

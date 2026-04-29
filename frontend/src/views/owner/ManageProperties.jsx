@@ -109,6 +109,7 @@ export default function ManageProperties() {
            <button 
              onClick={openAddModal}
              className="btn btn-primary"
+             style={{ width: 'max-content', flex: '0 0 auto', padding: '0 24px' }}
            >
              <Plus size={18} />
              <span>List New Asset</span>

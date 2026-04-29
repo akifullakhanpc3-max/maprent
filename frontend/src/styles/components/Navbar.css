@@ -4,16 +4,14 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 60px;
   z-index: 6000;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(255, 255, 255, 0.05);
-  /* Very transparent base */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
+  display: block; /* Removed flex from outer navbar to let container handle layout */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -31,10 +29,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 100%;
-  /* Force it to stay within viewport */
-  margin: 0;
-  padding: 0 var(--s-6);
+  height: 100%;
+  padding: 0 24px;
   box-sizing: border-box;
 }
 
@@ -118,7 +114,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  flex-shrink: 1;
   padding-right: 4px;
   /* Tiny buffer to prevent edge-touching */
 }

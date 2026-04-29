@@ -75,12 +75,12 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 hidden-mobile">
-              <Link to="/login" className="btn btn-ghost !px-3">
-                Sign In
-              </Link>
-              <Link to="/register" className="btn btn-primary !px-4">
+            <div className="flex items-center hidden-mobile" style={{ gap: '8px' }}>
+              <Link to="/register" className="btn btn-primary" style={{ padding: '0 12px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
                 Sign Up
+              </Link>
+              <Link to="/login" className="btn btn-ghost" style={{ padding: '0 8px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
+                Sign In
               </Link>
             </div>
           )}

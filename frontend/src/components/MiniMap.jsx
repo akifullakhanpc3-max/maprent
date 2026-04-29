@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import { usePropertyStore } from '../store/usePropertyStore';
 
 // Fix for default Leaflet marker icons
@@ -61,6 +62,22 @@ const createPriceIcon = (property, isActive) => {
   });
 };
 
+const createClusterCustomIcon = function (cluster) {
+  const count = cluster.getChildCount();
+  return L.divIcon({
+    html: `
+      <div class="price-pin-wrapper cluster-pin">
+        <span class="pin-bhk-tag">${count}</span>
+        <span class="price-text">PROPERTIES</span>
+        <div class="price-pin-tail"></div>
+      </div>
+    `,
+    className: 'custom-price-pin',
+    iconSize: [120, 40],
+    iconAnchor: [60, 40],
+  });
+};
+
 export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectProperty }) {
   const { properties } = usePropertyStore();
 
@@ -102,7 +119,14 @@ export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectP
       >
         <TileLayer url={VOYAGER_URL} attribution={ATTRIBUTION} />
         {/* Render all property tags */}
-        {memoizedMarkers}
+        <MarkerClusterGroup
+            chunkedLoading
+            maxClusterRadius={40}
+            showCoverageOnHover={false}
+            iconCreateFunction={createClusterCustomIcon}
+        >
+          {memoizedMarkers}
+        </MarkerClusterGroup>
         <MapResizer />
       </MapContainer>
     </div>
