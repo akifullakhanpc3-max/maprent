@@ -87,7 +87,6 @@ function App() {
           <Route path="explore" element={<div style={{ height: 'calc(100vh - 100px)' }}><ExploreProperties /></div>} />
           <Route path="bookings" element={<MyBookings />} />
           <Route path="saved" element={<SavedHomes />} />
-          <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/user/dashboard" replace />} />
         </Route>
 
@@ -98,7 +97,6 @@ function App() {
           <Route path="properties/new" element={<ManageProperties />} />
           <Route path="bookings" element={<ManageBookings />} />
           <Route path="availability" element={<ManageAvailability />} />
-          <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/owner/dashboard" replace />} />
         </Route>
 

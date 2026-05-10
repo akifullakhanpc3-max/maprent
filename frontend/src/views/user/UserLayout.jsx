@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Heart, Calendar, LogOut, Menu, X, User, Settings, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Heart, Calendar, LogOut, Menu, X, User, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import '../../styles/views/Dashboards.css';
@@ -15,7 +15,6 @@ export default function UserLayout() {
     { name: 'Dashboard', href: '/user/dashboard', icon: LayoutDashboard },
     { name: 'My Bookings', href: '/user/bookings', icon: Calendar },
     { name: 'Saved Homes', href: '/user/saved', icon: Heart },
-    { name: 'Settings', href: '/user/settings', icon: Settings },
   ];
 
   if (loading) return <LoadingSpinner fullScreen />;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Home, Calendar, LogOut, Menu, X, PlusCircle, Settings, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Home, Calendar, LogOut, Menu, X, PlusCircle, ClipboardList } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import '../../styles/views/Dashboards.css';
@@ -17,7 +17,6 @@ export default function OwnerLayout() {
     { name: 'Add Property', href: '/owner/properties/new', icon: PlusCircle },
     { name: 'Manage Bookings', href: '/owner/bookings', icon: ClipboardList },
     { name: 'Availability', href: '/owner/availability', icon: Calendar },
-    { name: 'Settings', href: '/owner/settings', icon: Settings },
   ];
 
   if (loading) return <LoadingSpinner fullScreen />;
