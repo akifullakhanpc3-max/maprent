@@ -3,7 +3,7 @@
  * Single source of truth for all permission identifiers.
  */
 
-const PERMISSIONS = {
+export const PERMISSIONS = {
   VIEW_ANALYTICS:   'VIEW_ANALYTICS',
   MANAGE_USERS:     'MANAGE_USERS',
   APPROVE_PROPERTY: 'APPROVE_PROPERTY',
@@ -14,13 +14,13 @@ const PERMISSIONS = {
   MANAGE_BOOKINGS:  'MANAGE_BOOKINGS',
 };
 
-const ALL_PERMISSIONS = Object.values(PERMISSIONS);
+export const ALL_PERMISSIONS = Object.values(PERMISSIONS);
 
 /**
  * Default permission sets per role.
  * Used when a user's permissions[] is empty (existing accounts).
  */
-const ROLE_DEFAULTS = {
+export const ROLE_DEFAULTS = {
   master_admin: ALL_PERMISSIONS,
   admin: [
     PERMISSIONS.VIEW_ANALYTICS,
@@ -41,5 +41,3 @@ const ROLE_DEFAULTS = {
     PERMISSIONS.VIEW_ANALYTICS,
   ],
 };
-
-module.exports = { PERMISSIONS, ALL_PERMISSIONS, ROLE_DEFAULTS };

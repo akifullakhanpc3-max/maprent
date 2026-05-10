@@ -1,43 +1,42 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 const auth = async (req, res, next) => {
-  const token = req.header('Authorization');
+  const authHeader = req.header('Authorization');
 
-  if (!token) {
+  if (!authHeader) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
-    const bearer = token.split(' ')[1] || token; // handle 'Bearer TOKEN' or just 'TOKEN'
-    const decoded = jwt.verify(bearer, process.env.JWT_SECRET);
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
     
-    // Safety check: Ensure the payload structure matches expectations
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured on server.');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
     if (!decoded || !decoded.user) {
-      console.warn('[AUTH_RESILIENCE] Malformed token payload detected');
-      return res.status(401).json({ msg: 'Token parsing failed or malformed signal' });
+      return res.status(401).json({ msg: 'Invalid token structure' });
     }
 
-    // Attach decoded user data to request
-    req.user = {
-      id: decoded.user.id,
-      role: decoded.user.role,
-      tenantId: decoded.user.tenantId ? decoded.user.tenantId.toString() : null
-    };
-
-    // Optional Check: Securely verify user exists and is not blocked
-    const user = await User.findById(req.user.id);
+    // Check if user still exists in DB
+    const user = await User.findById(decoded.user.id).select('-passwordHash');
     if (!user) {
-      return res.status(401).json({ msg: 'User profile no longer exists' });
-    }
-    if (user.isBlocked) {
-      return res.status(403).json({ msg: 'Your account has been blocked by an administrator.' });
+      return res.status(401).json({ msg: 'User account no longer exists' });
     }
 
+    if (user.isBlocked) {
+      return res.status(403).json({ msg: 'Your account has been blocked.' });
+    }
+
+    req.user = decoded.user;
     next();
   } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+    console.error('[AUTH_MIDDLEWARE_FAIL]', err.message);
+    res.status(401).json({ msg: 'Token is not valid or has expired' });
   }
 };
 
-module.exports = auth;
+export default auth;

@@ -1,4 +1,4 @@
-const Log = require('../models/Log');
+import Log from '../models/Log.js';
 
 /**
  * Creates a system activity log entry.
@@ -7,7 +7,7 @@ const Log = require('../models/Log');
  * @param {string} action - Action string (e.g. 'USER_LOGIN')
  * @param {object} metadata - Additional info (optional)
  */
-const createLog = async (userId, tenantId, action, metadata = {}) => {
+export const createLog = async (userId, tenantId, action, metadata = {}) => {
   try {
     if (!userId || !tenantId) return; // Don't log if missing context
 
@@ -22,5 +22,3 @@ const createLog = async (userId, tenantId, action, metadata = {}) => {
     console.error('Logging Error:', err.message);
   }
 };
-
-module.exports = { createLog };

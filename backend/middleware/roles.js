@@ -3,7 +3,7 @@
  */
 
 // Only users with role 'user' (Tenants)
-exports.requireUser = (req, res, next) => {
+export const requireUser = (req, res, next) => {
   if (req.user && req.user.role === 'user') {
     next();
   } else {
@@ -12,7 +12,7 @@ exports.requireUser = (req, res, next) => {
 };
 
 // Only users with role 'owner' (Landlords)
-exports.requireOwner = (req, res, next) => {
+export const requireOwner = (req, res, next) => {
   if (req.user && req.user.role === 'owner') {
     next();
   } else {
@@ -21,8 +21,8 @@ exports.requireOwner = (req, res, next) => {
 };
 
 // Only users with role 'admin'
-exports.requireAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+export const requireAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'master_admin')) {
     next();
   } else {
     res.status(403).json({ msg: 'Access denied. Administrator privileges required.' });

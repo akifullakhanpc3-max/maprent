@@ -28,7 +28,9 @@ export default function Login() {
       
       // Send token to our backend
       await firebaseAuth(idToken, role);
-      navigate('/dashboard');
+      // Retrieve updated state to get correct role-based redirect
+      const userRole = useAuthStore.getState().user?.role || role;
+      navigate(`/${userRole}/dashboard`);
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user') {

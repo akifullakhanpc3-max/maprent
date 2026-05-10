@@ -1,4 +1,4 @@
-const { ROLE_DEFAULTS } = require('../utils/permissions');
+import { ROLE_DEFAULTS } from '../utils/permissions.js';
 
 /**
  * checkPermission(...requiredPermissions)
@@ -6,16 +6,13 @@ const { ROLE_DEFAULTS } = require('../utils/permissions');
  * Middleware factory that gates a route behind one or more permissions.
  * - master_admin bypasses all checks (god mode).
  * - Other roles must have ALL specified permissions (explicit or from role defaults).
- * 
- * Usage:
- *   router.delete('/properties/:id', adminAuth, checkPermission('DELETE_PROPERTY'), handler);
  */
 const checkPermission = (...required) => (req, res, next) => {
   try {
     // master_admin bypasses all permission checks
     if (req.user.role === 'master_admin') return next();
 
-    // Effective permissions = explicit user.permissions OR role defaults (for existing accounts)
+    // Effective permissions = explicit user.permissions OR role defaults
     const effectivePerms = (req.user.permissions && req.user.permissions.length > 0)
       ? req.user.permissions
       : (ROLE_DEFAULTS[req.user.role] || []);
@@ -34,4 +31,4 @@ const checkPermission = (...required) => (req, res, next) => {
   }
 };
 
-module.exports = checkPermission;
+export default checkPermission;

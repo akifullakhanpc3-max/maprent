@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -31,13 +31,17 @@ const userSchema = new mongoose.Schema({
   tenantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tenant',
-    required: false, // master_admins might not belong to a specific tenant
+    required: false,
     index: true,
   },
   role: {
     type: String,
     enum: ['user', 'owner', 'admin', 'employee', 'worker', 'master_admin'],
     default: 'user',
+  },
+  avatar: {
+    type: String,
+    required: false,
   },
   permissions: {
     type: [String],
@@ -62,4 +66,5 @@ const userSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+export default User;

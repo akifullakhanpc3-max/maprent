@@ -1,19 +1,24 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const { ROLE_DEFAULTS } = require('../utils/permissions');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import { ROLE_DEFAULTS } from '../utils/permissions.js';
 
 const ADMIN_ROLES = ['admin', 'master_admin', 'employee', 'worker'];
 
 const adminAuth = async (req, res, next) => {
-  const token = req.header('Authorization');
+  const authHeader = req.header('Authorization');
 
-  if (!token) {
+  if (!authHeader) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
-    const bearer = token.split(' ')[1] || token;
-    const decoded = jwt.verify(bearer, process.env.JWT_SECRET);
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+    
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured on server.');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Validate user securely against the database
     const user = await User.findById(decoded.user.id);
@@ -43,4 +48,4 @@ const adminAuth = async (req, res, next) => {
   }
 };
 
-module.exports = adminAuth;
+export default adminAuth;

@@ -32,7 +32,8 @@ export default function Register() {
       
       // Register/Login via Firebase Auth
       await firebaseAuth(idToken, role);
-      navigate(`/${role}/dashboard`);
+      const userRole = useAuthStore.getState().user?.role || role;
+      navigate(`/${userRole}/dashboard`);
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user') {

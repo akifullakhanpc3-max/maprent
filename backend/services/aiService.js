@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**
  * AI Service for Occupra Rental Platform
@@ -24,7 +24,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  * @param {boolean} isFallback - Whether this is a fallback attempt.
  * @param {number} attempt - Current attempt number.
  */
-async function generateWithResilience(prompt, isFallback = false, attempt = 1) {
+export async function generateWithResilience(prompt, isFallback = false, attempt = 1) {
   const modelName = isFallback ? CONFIG.FALLBACK_MODEL : CONFIG.PRIMARY_MODEL;
   const model = genAI.getGenerativeModel({ model: modelName });
 
@@ -63,7 +63,7 @@ async function generateWithResilience(prompt, isFallback = false, attempt = 1) {
 /**
  * Example function to generate property description
  */
-async function generatePropertyDescription(details) {
+export async function generatePropertyDescription(details) {
   const prompt = `Generate a modern, attractive rental property description for Occupra.
   Title: ${details.title}
   Price: ${details.price}
@@ -75,8 +75,3 @@ async function generatePropertyDescription(details) {
 
   return generateWithResilience(prompt);
 }
-
-module.exports = {
-  generateWithResilience,
-  generatePropertyDescription
-};

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const propertySchema = new mongoose.Schema({
   ownerId: {
@@ -146,7 +146,7 @@ const propertySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Create a 2dsphere index on the location field to enable geospatial queries
 propertySchema.index({ location: '2dsphere' });
 
-module.exports = mongoose.model('Property', propertySchema);
+const Property = mongoose.model('Property', propertySchema);
+export default Property;

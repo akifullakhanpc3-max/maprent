@@ -1,53 +1,26 @@
-const express = require('express');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import { requireOwner } from '../middleware/roles.js';
+import Property from '../models/Property.js';
+import Booking from '../models/Booking.js';
+
 const router = express.Router();
-const auth = require('../middleware/auth');
-const { requireOwner } = require('../middleware/roles');
-const Property = require('../models/Property');
-const Booking = require('../models/Booking');
 
 // @route   GET /api/owner/stats
-// @desc    Get owner's dashboard stats
-// @access  Private (Owner)
 router.get('/stats', [auth, requireOwner], async (req, res) => {
   try {
     const ownerId = req.user.id;
-
-    // 1. Total Listings
     const totalListings = await Property.countDocuments({ ownerId });
-
-    // 2. Active Bookings (Accepted)
     const activeBookingsCount = await Booking.countDocuments({ ownerId, status: 'accepted' });
-
-    // 3. Monthly Revenue
-    // Sum of rent for all accepted bookings (simplification)
     const activeBookings = await Booking.find({ ownerId, status: 'accepted' }).populate('propertyId', 'price');
-    const monthlyRevenue = activeBookings.reduce((sum, booking) => {
-      return sum + (booking.propertyId ? booking.propertyId.price : 0);
-    }, 0);
-
-    // 4. Occupancy Rate
+    const monthlyRevenue = activeBookings.reduce((sum, booking) => sum + (booking.propertyId ? booking.propertyId.price : 0), 0);
     const occupancyRate = totalListings > 0 ? Math.round((activeBookingsCount / totalListings) * 100) : 0;
+    const recentBookings = await Booking.find({ ownerId }).populate('propertyId', 'title').populate('userId', 'name email').sort({ createdAt: -1 }).limit(5);
 
-    // 5. Recent Activity (Latest 5 bookings)
-    const recentBookings = await Booking.find({ ownerId })
-      .populate('propertyId', 'title')
-      .populate('userId', 'name email')
-      .sort({ createdAt: -1 })
-      .limit(5);
-
-    res.json({
-      stats: {
-        totalListings,
-        activeBookings: activeBookingsCount,
-        monthlyRevenue,
-        occupancyRate
-      },
-      recentBookings
-    });
+    res.json({ stats: { totalListings, activeBookings: activeBookingsCount, monthlyRevenue, occupancyRate }, recentBookings });
   } catch (err) {
-    console.error(err.message);
     res.status(500).send('Server Error');
   }
 });
 
-module.exports = router;
+export default router;

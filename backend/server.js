@@ -1,27 +1,28 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
+import 'dotenv/config';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+// Route Imports
+import authRoutes from './routes/auth.js';
+import propertyRoutes from './routes/properties.js';
+import adminRoutes from './routes/admin.js';
+import bookingRoutes from './routes/bookings.js';
+import ownerRoutes from './routes/owner.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 // Trust Render's proxy for Rate Limiting
 app.set('trust proxy', 1);
 
-// Startup Check: Essential Environment Configuration
-const essentialConfigs = ['JWT_SECRET', 'MONGODB_URI'];
-essentialConfigs.forEach(conf => {
-  if (!process.env[conf]) {
-    console.error(`\x1b[41m CRITICAL CONFIG ERROR: \x1b[0m Missing ${conf} environment variable!`);
-    console.error('SERVER WILL LIKELY FAIL IN PRODUCTION MODES.');
-  }
-});
-
-// Essential Middleware (MUST BE FIRST)
+// Essential Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -29,10 +30,11 @@ app.use(express.json());
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
+  // unsafe-none is required to fix COOP issues with Firebase popups
   crossOriginOpenerPolicy: { policy: "unsafe-none" },
 }));
 
-// Rate limiting (Bumped for development)
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 1000, 
@@ -44,42 +46,28 @@ app.use('/api', limiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/occupra')
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('MongoDB Connection Error:', err));
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/properties', require('./routes/properties'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/owner', require('./routes/owner'));
+app.use('/api/auth', authRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/owner', ownerRoutes);
+
 const PORT = process.env.PORT || 5050;
 
-// Global Error Handler for Express
-app.use((err, req, res, next) => {
-  const isDev = process.env.NODE_ENV === 'development';
-  console.error('[SERVER EXCEPTION]', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('[SERVER_ERROR]', err.stack);
   res.status(500).json({ 
     msg: 'An internal server error occurred', 
-    error: isDev ? err.message : 'System fault detected',
-    id: Date.now().toString().slice(-6) // Correlation ID for logs
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error'
   });
-});
-
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('SYSTEM ALERT: Unhandled Promise Rejection at:', promise, 'reason:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('CRITICAL SYSTEM ERROR: Uncaught Exception:', err);
-  setTimeout(() => process.exit(1), 100);
 });
