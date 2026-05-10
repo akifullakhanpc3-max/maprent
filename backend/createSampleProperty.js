@@ -1,7 +1,7 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const User = require('./models/User');
-const Property = require('./models/Property');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import User from './models/User.js';
+import Property from './models/Property.js';
 
 async function createSampleProperty() {
   try {

@@ -1,6 +1,6 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const Property = require('./models/Property');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import Property from './models/Property.js';
 
 async function approveAllProperties() {
   try {

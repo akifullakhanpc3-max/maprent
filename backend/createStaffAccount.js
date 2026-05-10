@@ -1,12 +1,12 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const User = require('./models/User');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import User from './models/User.js';
 
-// ─── CONFIGURE CREDENTIALS HERE ───────────────────────────
+// ─── CONFIGURE CREDENTIALS VIA ENV ───────────────────────────
 const STAFF_NAME     = 'Secondary Admin';
-const STAFF_EMAIL    = 'staff@occupra.com';
-const STAFF_PASSWORD = 'Staff@1234';
+const STAFF_EMAIL    = process.env.STAFF_EMAIL || 'staff@occupra.com';
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || 'Staff@1234';
 const STAFF_ROLE     = 'employee'; // 'admin' | 'employee' | 'worker'
 
 // Permissions to grant (leave empty [] to use role defaults)

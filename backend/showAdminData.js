@@ -1,10 +1,10 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const User = require('./models/User');
-const Property = require('./models/Property');
-const Booking = require('./models/Booking');
-const Log = require('./models/Log');
-const Tenant = require('./models/Tenant');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import User from './models/User.js';
+import Property from './models/Property.js';
+import Booking from './models/Booking.js';
+import Log from './models/Log.js';
+import Tenant from './models/Tenant.js';
 
 async function showAdminData() {
   try {

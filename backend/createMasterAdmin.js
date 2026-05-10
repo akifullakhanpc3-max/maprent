@@ -1,10 +1,10 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const User = require('./models/User');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import User from './models/User.js';
 
-const EMAIL = 'akifullakhanpc@gmail.com';
-const PASSWORD = 'admin123';
+const EMAIL = process.env.MASTER_ADMIN_EMAIL || 'akifullakhanpc@gmail.com';
+const PASSWORD = process.env.MASTER_ADMIN_PASSWORD || 'admin123';
 const NAME = 'Akifulla Khan K N';
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
       existing.role = 'master_admin';
       existing.passwordHash = hash;
       await existing.save();
-      console.log(`✅ Existing user updated → role: master_admin, password: ${PASSWORD}`);
+      console.log(`✅ Existing user updated → role: master_admin, email: ${EMAIL}`);
     } else {
       // Create fresh
       const hash = await bcrypt.hash(PASSWORD, 10);
@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
         tenantId: null
       });
       await user.save();
-      console.log(`✅ Master Admin created → email: ${EMAIL}, password: ${PASSWORD}`);
+      console.log(`✅ Master Admin created → email: ${EMAIL}`);
     }
 
     // List all users

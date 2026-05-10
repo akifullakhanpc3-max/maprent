@@ -13,7 +13,7 @@ const CONFIG = {
   CAPACITY_ERROR_WAIT: 60000, // Wait 60s for capacity issues
 };
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'PLACEHOLDER_KEY');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Helper for delay
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

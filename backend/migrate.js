@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
-const Property = require('./models/Property');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import Property from './models/Property.js';
 
 async function migrate() {
   try {
