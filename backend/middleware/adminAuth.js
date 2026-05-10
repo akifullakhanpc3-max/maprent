@@ -13,11 +13,6 @@ const adminAuth = async (req, res, next) => {
 
   try {
     const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
-    
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not configured on server.');
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Validate user securely against the database

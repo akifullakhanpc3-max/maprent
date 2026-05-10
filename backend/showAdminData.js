@@ -8,7 +8,7 @@ import Tenant from './models/Tenant.js';
 
 async function showAdminData() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent');
+    await mongoose.connect(process.env.MONGODB_URI);
     
     const users = await User.find({}, 'name email role isBlocked');
     const properties = await Property.find({}, 'title status isFeatured');

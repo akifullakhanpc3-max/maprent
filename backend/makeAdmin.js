@@ -10,7 +10,7 @@ if (!emailToPromote) {
   process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
+mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log(`\n🔍 Searching for user: ${emailToPromote}...`);
     

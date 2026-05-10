@@ -22,7 +22,7 @@ export const firebaseAuth = async (req, res) => {
     } else {
       console.error('🚨 [CRITICAL] Firebase Admin SDK is not initialized.');
       return res.status(500).json({ 
-        msg: '🚨 [BACKEND_ERROR] Firebase Admin SDK is NOT initialized on the server. Please check your Render Environment Variables (FIREBASE_PROJECT_ID, etc.).' 
+        msg: '🚨 [BACKEND_ERROR] Firebase Admin SDK is NOT initialized on the server. Please check your .env file.' 
       });
     }
 
@@ -63,10 +63,6 @@ export const firebaseAuth = async (req, res) => {
         role: user.role
       }
     };
-
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not defined in environment variables.');
-    }
 
     jwt.sign(
       payload,

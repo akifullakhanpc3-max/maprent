@@ -5,7 +5,7 @@ import Property from './models/Property.js';
 
 async function createSampleProperty() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent');
+    await mongoose.connect(process.env.MONGODB_URI);
     
     // Find an owner
     const owner = await User.findOne({ role: { $in: ['user', 'owner'] } });

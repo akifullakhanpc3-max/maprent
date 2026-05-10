@@ -5,7 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const BUCKET = process.env.SUPABASE_BUCKET || 'property-images';
+const BUCKET = process.env.SUPABASE_BUCKET;
 
 /**
  * Uploads a file buffer to Supabase Storage.

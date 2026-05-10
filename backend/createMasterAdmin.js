@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import User from './models/User.js';
 
-const EMAIL = process.env.MASTER_ADMIN_EMAIL || 'akifullakhanpc@gmail.com';
-const PASSWORD = process.env.MASTER_ADMIN_PASSWORD || 'admin123';
+const EMAIL = process.env.MASTER_ADMIN_EMAIL;
+const PASSWORD = process.env.MASTER_ADMIN_PASSWORD;
 const NAME = 'Akifulla Khan K N';
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent')
+mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     const existing = await User.findOne({ email: EMAIL });
 

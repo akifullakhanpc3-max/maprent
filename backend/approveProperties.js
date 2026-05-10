@@ -4,7 +4,7 @@ import Property from './models/Property.js';
 
 async function approveAllProperties() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent');
+    await mongoose.connect(process.env.MONGODB_URI);
     
     const result = await Property.updateMany(
       { status: 'pending' },

@@ -10,11 +10,6 @@ const auth = async (req, res, next) => {
 
   try {
     const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
-    
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not configured on server.');
-    }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     if (!decoded || !decoded.user) {

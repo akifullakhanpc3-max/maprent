@@ -5,8 +5,8 @@ import User from './models/User.js';
 
 // ─── CONFIGURE CREDENTIALS VIA ENV ───────────────────────────
 const STAFF_NAME     = 'Secondary Admin';
-const STAFF_EMAIL    = process.env.STAFF_EMAIL || 'staff@occupra.com';
-const STAFF_PASSWORD = process.env.STAFF_PASSWORD || 'Staff@1234';
+const STAFF_EMAIL    = process.env.STAFF_EMAIL;
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD;
 const STAFF_ROLE     = 'employee'; // 'admin' | 'employee' | 'worker'
 
 // Permissions to grant (leave empty [] to use role defaults)
@@ -20,7 +20,7 @@ const STAFF_PERMISSIONS = [
 
 async function createStaffAccount() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maprent');
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
     const existing = await User.findOne({ email: STAFF_EMAIL });
