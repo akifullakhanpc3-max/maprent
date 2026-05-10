@@ -160,53 +160,57 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/otp-auth
-// @desc    Authenticate user via Firebase OTP
+// @route   POST /api/auth/firebase-auth
+// @desc    Authenticate user via Firebase (Google, etc.)
 // @access  Public
-router.post('/otp-auth', async (req, res) => {
-  const { firebaseToken, phone, role = 'user', name = 'User' } = req.body;
+router.post('/firebase-auth', async (req, res) => {
+  const { firebaseToken, role = 'user' } = req.body;
 
-  if (!firebaseToken && !phone) {
-    return res.status(400).json({ msg: 'Firebase token or phone is required.' });
+  if (!firebaseToken) {
+    return res.status(400).json({ msg: 'Firebase token is required.' });
   }
 
   try {
-    let uid = req.body.uid; // fallback for testing
-    let verifiedPhone = phone;
-
-    // Verify token with Firebase Admin if available
-    if (admin.apps.length > 0 && firebaseToken) {
-      const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-      uid = decodedToken.uid;
-      verifiedPhone = decodedToken.phone_number;
-    } else if (!uid || !verifiedPhone) {
-      // If admin SDK is not setup, we require phone and uid from frontend for development purposes
-      return res.status(401).json({ msg: 'Firebase Admin SDK not initialized. Must provide phone and uid for dev bypass.' });
+    let decodedToken;
+    
+    // Verify token with Firebase Admin
+    if (admin.apps.length > 0) {
+      decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    } else {
+      return res.status(401).json({ msg: 'Firebase Admin SDK not initialized.' });
     }
 
-    console.log(`[AUTH] OTP Login attempt for phone: ${verifiedPhone}`);
-    let user = await User.findOne({ firebaseUid: uid });
+    const { uid, email, name, picture } = decodedToken;
+    console.log(`[AUTH] Firebase Login attempt for: ${email || uid}`);
+
+    let user = await User.findOne({ 
+      $or: [
+        { firebaseUid: uid },
+        { email: email }
+      ]
+    });
 
     if (!user) {
-      // Try to find by phone just in case
-      user = await User.findOne({ phone: verifiedPhone });
-      if (user) {
-        user.firebaseUid = uid;
-      } else {
-        // Register new user
-        user = new User({
-          name: name,
-          phone: verifiedPhone,
-          firebaseUid: uid,
-          role: role
-        });
-      }
+      // Register new user
+      user = new User({
+        name: name || 'User',
+        email: email,
+        firebaseUid: uid,
+        role: role,
+        avatar: picture
+      });
       await user.save();
+    } else {
+      // Update existing user's firebaseUid if it was missing (e.g. they registered via email/pass before)
+      if (!user.firebaseUid) {
+        user.firebaseUid = uid;
+        await user.save();
+      }
     }
 
     // SaaS Activity Log
     if (user.tenantId) {
-      await createLog(user.id, user.tenantId, 'USER_LOGIN_OTP', { ip: req.ip });
+      await createLog(user.id, user.tenantId, 'USER_LOGIN_FIREBASE', { ip: req.ip, method: 'google' });
     }
 
     const payload = {
@@ -232,18 +236,19 @@ router.post('/otp-auth', async (req, res) => {
           user: {
             id: user.id,
             name: user.name,
-            phone: user.phone,
+            email: user.email,
             role: user.role,
             tenantId: user.tenantId,
+            avatar: user.avatar,
             permissions: user.permissions || []
           }
         });
       }
     );
   } catch (err) {
-    console.error('[AUTH_OTP_CRITICAL_FAIL]', err);
+    console.error('[AUTH_FIREBASE_CRITICAL_FAIL]', err);
     res.status(500).json({ 
-      msg: 'Server error during OTP authentication.', 
+      msg: 'Server error during Firebase authentication.', 
       error: err.message
     });
   }

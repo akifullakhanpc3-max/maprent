@@ -53,12 +53,23 @@ export const useAuthStore = create((set, get) => ({
 
   otpAuth: async (firebaseToken, phone, role = 'user', name = 'User') => {
     try {
-      const res = await api.post('/auth/otp-auth', { firebaseToken, phone, role, name, uid: firebaseToken ? undefined : firebaseToken /* for dev bypass */ });
+      const res = await api.post('/auth/firebase-auth', { firebaseToken, role });
       localStorage.setItem('token', res.data.token);
       set({ user: res.data.user, token: res.data.token, isAuthenticated: true });
       return true;
     } catch (err) {
-      throw err.response?.data?.msg || 'OTP authentication failed';
+      throw err.response?.data?.msg || 'Authentication failed';
+    }
+  },
+
+  firebaseAuth: async (firebaseToken, role = 'user') => {
+    try {
+      const res = await api.post('/auth/firebase-auth', { firebaseToken, role });
+      localStorage.setItem('token', res.data.token);
+      set({ user: res.data.user, token: res.data.token, isAuthenticated: true });
+      return true;
+    } catch (err) {
+      throw err.response?.data?.msg || 'Firebase authentication failed';
     }
   },
 
