@@ -17,23 +17,31 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
 
   const { otpAuth } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!window.recaptchaVerifier && auth) {
-      try {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': (response) => {
-            // reCAPTCHA solved
-          }
-        });
-      } catch (err) {
-        console.error("Firebase Recaptcha init error. Make sure Firebase config is present.", err);
+    if (!auth) return;
+
+    const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible',
+      'callback': (response) => {
+        // reCAPTCHA solved
+      },
+      'expired-callback': () => {
+        console.warn("reCAPTCHA expired");
       }
-    }
+    });
+
+    setRecaptchaVerifier(verifier);
+
+    return () => {
+      if (verifier) {
+        verifier.clear();
+      }
+    };
   }, []);
 
   const handleSendOtp = async (e) => {
@@ -48,10 +56,10 @@ export default function Login() {
     }
 
     try {
-      if (!window.recaptchaVerifier) {
-        throw new Error('reCAPTCHA not initialized. Check Firebase config.');
+      if (!recaptchaVerifier) {
+        throw new Error('reCAPTCHA not initialized. Please refresh the page.');
       }
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
       setConfirmationResult(confirmation);
       setShowOtpInput(true);
     } catch (err) {

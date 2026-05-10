@@ -19,23 +19,32 @@ export default function Register() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
 
   const { otpAuth, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!window.recaptchaVerifier && auth) {
-      try {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-register', {
-          'size': 'invisible',
-          'callback': (response) => {
-            // reCAPTCHA solved
-          }
-        });
-      } catch (err) {
-        console.error("Firebase Recaptcha init error.", err);
+    if (!auth) return;
+
+    const verifier = new RecaptchaVerifier(auth, 'recaptcha-container-register', {
+      'size': 'invisible',
+      'callback': (response) => {
+        // reCAPTCHA solved
+      },
+      'expired-callback': () => {
+        // Response expired. Ask user to solve reCAPTCHA again.
+        console.warn("reCAPTCHA expired");
       }
-    }
+    });
+
+    setRecaptchaVerifier(verifier);
+
+    return () => {
+      if (verifier) {
+        verifier.clear();
+      }
+    };
   }, []);
 
   if (isAuthenticated && user) {
@@ -53,10 +62,10 @@ export default function Register() {
     }
 
     try {
-      if (!window.recaptchaVerifier) {
-        throw new Error('reCAPTCHA not initialized. Check Firebase config.');
+      if (!recaptchaVerifier) {
+        throw new Error('reCAPTCHA not initialized. Please refresh the page.');
       }
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
       setConfirmationResult(confirmation);
       setShowOtpInput(true);
     } catch (err) {
