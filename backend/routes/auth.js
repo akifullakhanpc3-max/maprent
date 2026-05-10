@@ -176,6 +176,16 @@ router.post('/firebase-auth', async (req, res) => {
     // Verify token with Firebase Admin
     if (admin.apps.length > 0) {
       decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    } else if (process.env.NODE_ENV === 'development') {
+      // DEV BYPASS: Decode token without verification if Admin SDK is missing
+      console.warn('[AUTH] Firebase Admin SDK not initialized. Using unverified decoding for development.');
+      const base64Url = firebaseToken.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      decodedToken = JSON.parse(jsonPayload);
+      decodedToken.uid = decodedToken.user_id || decodedToken.sub;
     } else {
       return res.status(401).json({ msg: 'Firebase Admin SDK not initialized.' });
     }
