@@ -29,6 +29,7 @@ app.use(express.json());
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
 }));
 
 // Rate limiting (Bumped for development)
