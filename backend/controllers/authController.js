@@ -124,3 +124,44 @@ export const getMe = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+/**
+ * Get User Wishlist (Saved Properties)
+ */
+export const getWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate('savedProperties');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+    res.json(user.savedProperties);
+  } catch (err) {
+    console.error('[WISHLIST_GET_ERROR]', err.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+};
+
+/**
+ * Toggle Property in Wishlist
+ */
+export const toggleWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    const propertyId = req.params.propertyId;
+    const isSaved = user.savedProperties.includes(propertyId);
+
+    if (isSaved) {
+      // Remove from wishlist
+      user.savedProperties = user.savedProperties.filter(id => id.toString() !== propertyId);
+    } else {
+      // Add to wishlist
+      user.savedProperties.push(propertyId);
+    }
+
+    await user.save();
+    res.json(user.savedProperties);
+  } catch (err) {
+    console.error('[WISHLIST_TOGGLE_ERROR]', err.message);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+};

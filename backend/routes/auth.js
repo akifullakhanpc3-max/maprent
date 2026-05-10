@@ -1,5 +1,5 @@
 import express from 'express';
-import { firebaseAuth, login, getMe } from '../controllers/authController.js';
+import { firebaseAuth, login, getMe, getWishlist, toggleWishlist } from '../controllers/authController.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
@@ -18,5 +18,15 @@ router.post('/login', login);
 // @desc    Get current user details
 // @access  Private
 router.get('/me', auth, getMe);
+
+// @route   GET /api/auth/wishlist
+// @desc    Get user wishlist
+// @access  Private
+router.get('/wishlist', auth, getWishlist);
+
+// @route   PUT /api/auth/wishlist/:propertyId
+// @desc    Add/Remove property from wishlist
+// @access  Private
+router.put('/wishlist/:propertyId', auth, toggleWishlist);
 
 export default router;
