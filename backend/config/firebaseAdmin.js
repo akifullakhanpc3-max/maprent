@@ -5,14 +5,22 @@ dotenv.config();
 
 /**
  * Initializes Firebase Admin SDK using environment variables.
- * This is the recommended approach for production deployments like Render.
+ * Highly robust version for Render/Production.
  */
 if (!admin.apps.length) {
   try {
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    // Replace \n with actual newlines if the key was provided as a string
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+    if (privateKey) {
+      // Fix potential formatting issues from Render env var UI
+      privateKey = privateKey.replace(/\\n/g, '\n').trim();
+      // Remove surrounding quotes if they exist
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        privateKey = privateKey.substring(1, privateKey.length - 1);
+      }
+    }
 
     if (projectId && clientEmail && privateKey) {
       admin.initializeApp({
@@ -22,19 +30,18 @@ if (!admin.apps.length) {
           privateKey,
         }),
       });
-      console.log('✅ Firebase Admin SDK initialized successfully via Environment Variables.');
+      console.log('✅ [FIREBASE_ADMIN] Initialized successfully.');
     } else {
-      console.warn('⚠️ FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, or FIREBASE_PRIVATE_KEY is missing.');
+      const missing = [];
+      if (!projectId) missing.push('FIREBASE_PROJECT_ID');
+      if (!clientEmail) missing.push('FIREBASE_CLIENT_EMAIL');
+      if (!privateKey) missing.push('FIREBASE_PRIVATE_KEY');
       
-      // Fallback for local development if a path is provided
-      if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH) {
-        // Dynamic import for the JSON file (must be default export or handled carefully)
-        // Note: ESM require is not available, so we use fs or import()
-        console.warn('⚠️ Path-based initialization is deprecated. Use Environment Variables.');
-      }
+      console.error(`❌ [FIREBASE_ADMIN] Missing credentials: ${missing.join(', ')}`);
+      console.error('Check your Render Environment Variables dashboard.');
     }
   } catch (error) {
-    console.error('❌ Failed to initialize Firebase Admin SDK:', error.message);
+    console.error('❌ [FIREBASE_ADMIN] Initialization Critical Error:', error.message);
   }
 }
 

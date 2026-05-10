@@ -20,8 +20,10 @@ export const firebaseAuth = async (req, res) => {
     if (admin.apps.length > 0) {
       decodedToken = await admin.auth().verifyIdToken(firebaseToken);
     } else {
-      console.error('[AUTH_ERROR] Firebase Admin SDK not initialized.');
-      return res.status(500).json({ msg: 'Server configuration error: Firebase Admin SDK not ready.' });
+      console.error('🚨 [CRITICAL] Firebase Admin SDK is not initialized.');
+      return res.status(500).json({ 
+        msg: '🚨 [BACKEND_ERROR] Firebase Admin SDK is NOT initialized on the server. Please check your Render Environment Variables (FIREBASE_PROJECT_ID, etc.).' 
+      });
     }
 
     const { uid, email, name, picture } = decodedToken;
