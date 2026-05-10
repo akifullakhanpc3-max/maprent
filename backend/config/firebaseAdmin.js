@@ -11,13 +11,23 @@ if (!admin.apps.length) {
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (privateKey) {
-      // 1. Remove surrounding quotes if they exist
-      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-        privateKey = privateKey.substring(1, privateKey.length - 1);
-      }
+      const header = "-----BEGIN PRIVATE KEY-----";
+      const footer = "-----END PRIVATE KEY-----";
       
-      // 2. Replace literal '\n' strings with actual newline characters
-      privateKey = privateKey.replace(/\\n/g, '\n').trim();
+      // 1. Extract only the raw Base64 data
+      // Remove headers, footers, literal \n, rogue backslashes, and all whitespace
+      let rawKey = privateKey
+        .replace(header, '')
+        .replace(footer, '')
+        .replace(/\\n/g, '')
+        .replace(/\\/g, '') 
+        .replace(/\s+/g, '');
+      
+      // 2. Re-format it perfectly (64 chars per line)
+      const lines = rawKey.match(/.{1,64}/g);
+      if (lines) {
+        privateKey = `${header}\n${lines.join('\n')}\n${footer}\n`;
+      }
     }
 
     if (projectId && clientEmail && privateKey) {
