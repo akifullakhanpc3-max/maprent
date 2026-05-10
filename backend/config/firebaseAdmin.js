@@ -14,12 +14,17 @@ if (!admin.apps.length) {
     let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (privateKey) {
-      // Fix potential formatting issues from Render env var UI
-      privateKey = privateKey.replace(/\\n/g, '\n').trim();
-      // Remove surrounding quotes if they exist
+      // Remove any surrounding quotes (sometimes added by env var UIs)
+      privateKey = privateKey.trim();
       if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
         privateKey = privateKey.substring(1, privateKey.length - 1);
+      } else if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+        privateKey = privateKey.substring(1, privateKey.length - 1);
       }
+
+      // Fix formatting issues: Replace literal '\n' strings with actual newlines
+      // This is crucial for Render/Vercel/Heroku environment variables
+      privateKey = privateKey.replace(/\\n/g, '\n');
     }
 
     if (projectId && clientEmail && privateKey) {
