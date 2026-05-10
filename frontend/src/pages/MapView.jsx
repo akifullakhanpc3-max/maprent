@@ -96,9 +96,15 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
 }
 
 // ─── Animated Radius Circle (Isolated performance) ───────────────────────────
-const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetPosition, resetIcon, centerIcon }) => {
+const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, onDragEnd, resetPosition, resetIcon, centerIcon }) => {
   const [rippleProgress, setRippleProgress] = useState(0);
-  
+  const [dragPos, setDragPos] = useState(searchAnchor);
+
+  // Sync dragPos when searchAnchor changes from outside (e.g. search bar)
+  useEffect(() => {
+    setDragPos(searchAnchor);
+  }, [searchAnchor]);
+
   useEffect(() => {
     let start = performance.now();
     const CYCLE = 2800;
@@ -115,10 +121,33 @@ const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetP
     return () => cancelAnimationFrame(animFrame);
   }, []);
 
+  const eventHandlers = useMemo(() => ({
+    drag: (e) => {
+      const latlng = e.target.getLatLng();
+      setDragPos([latlng.lat, latlng.lng]);
+    },
+    dragend: (e) => {
+      const latlng = e.target.getLatLng();
+      const newPos = [latlng.lat, latlng.lng];
+      setDragPos(newPos);
+      onDragEnd(newPos);
+    }
+  }), [onDragEnd]);
+
+  // Calculate reset position dynamically based on drag position
+  const currentResetPos = useMemo(() => {
+    if (!dragPos || !radius || !L.latLng) return dragPos;
+    try {
+      const center = L.latLng(dragPos[0], dragPos[1]);
+      const bounds = center.toBounds(radius * 1.2 * 1000);
+      return bounds.getNorthEast();
+    } catch (e) { return dragPos; }
+  }, [dragPos, radius]);
+
   return (
     <>
       <Circle
-        center={searchAnchor}
+        center={dragPos}
         radius={(radius * 1000) * (1 + 0.15 * (1 - Math.pow(1 - rippleProgress, 3)))}
         pathOptions={{
           color: '#60a5fa',
@@ -129,7 +158,7 @@ const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetP
         }}
       />
       <Circle
-        center={searchAnchor}
+        center={dragPos}
         radius={radius * 1000}
         pathOptions={{
           color: '#1d4ed8',
@@ -139,12 +168,18 @@ const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, resetP
           interactive: false
         }}
       />
-      {/* Search Center Pin */}
-      <Marker position={searchAnchor} icon={centerIcon} interactive={false} />
-      
-      {/* Reset Controls */}
+      {/* Draggable Search Center Pin */}
       <Marker 
-        position={resetPosition || searchAnchor} 
+        position={dragPos} 
+        icon={centerIcon} 
+        draggable={true}
+        zIndexOffset={1000}
+        eventHandlers={eventHandlers}
+      />
+      
+      {/* Reset Controls (Moves with dragPos) */}
+      <Marker 
+        position={currentResetPos} 
         icon={resetIcon} 
         eventHandlers={{ 
           click: (e) => {
@@ -309,6 +344,10 @@ export default function MapView() {
     const c = map.getCenter();
     setFilters({ lat: c.lat, lng: c.lng, bounds: null, radius: filters.radius || 1 });
   }, [map, filters.radius, setFilters]);
+
+  const handleRadiusDragEnd = useCallback((newPos) => {
+    setFilters({ lat: newPos[0], lng: newPos[1], bounds: null, radius: filters.radius || 1 });
+  }, [filters.radius, setFilters]);
 
   const handleSearchArea = useCallback(() => {
     if (!map) return;
@@ -529,7 +568,7 @@ export default function MapView() {
               searchAnchor={searchAnchor} 
               radius={filters.radius} 
               onReset={handleResetFilters}
-              resetPosition={resetPosition}
+              onDragEnd={handleRadiusDragEnd}
               resetIcon={resetAnchorIcon}
               centerIcon={searchCenterIcon}
             />
