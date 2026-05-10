@@ -301,7 +301,10 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
                     CALL OWNER
                   </button>
                   <button
-                    onClick={() => window.open(`https://wa.me/91${property?.ownerPhone || '9999999999'}`, '_blank')}
+                    onClick={() => {
+                      const waNumber = property?.whatsapp ? property.whatsapp.replace(/\D/g, '') : (property?.ownerPhone || '9999999999');
+                      window.open(`https://wa.me/91${waNumber}`, '_blank');
+                    }}
                     className="footer-btn btn-whatsapp"
                   >
                     <MessageSquare size={18} />
