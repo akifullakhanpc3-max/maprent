@@ -4,13 +4,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBeUyXm8t747sUgKYIRz56LiiqSejhyZrw",
+  authDomain: "maprent-e0065.firebaseapp.com",
+  projectId: "maprent-e0065",
+  storageBucket: "maprent-e0065.firebasestorage.app",
+  messagingSenderId: "285618688646",
+  appId: "1:285618688646:web:67c0aaf57e9df3320a7707",
+  measurementId: "G-NCGTQ8BPQB"
 };
 
 // Initialize Firebase
