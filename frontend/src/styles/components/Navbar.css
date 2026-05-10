@@ -8,20 +8,18 @@
   height: 60px;
   z-index: 6000;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: block; /* Removed flex from outer navbar to let container handle layout */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(248, 250, 252, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  display: block;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
 }
 
 .navbar.scrolled {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.05),
-    0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .navbar-container {
@@ -120,6 +118,30 @@
 }
 
 /* Mobile Toggle */
+.navbar {
+  color: var(--text-main);
+}
+
+.navbar .btn-ghost {
+  color: var(--text-muted);
+}
+
+.navbar .btn-ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.navbar .btn-secondary {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.navbar .btn-secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-medium);
+}
+
 .mobile-menu-toggle {
   display: flex;
   align-items: center;
@@ -134,7 +156,7 @@
 }
 
 .mobile-menu-toggle:hover {
-  border-color: var(--accent-blue);
+  border-color: var(--primary-color);
   background: var(--bg-surface);
 }
 
