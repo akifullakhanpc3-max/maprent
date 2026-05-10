@@ -165,7 +165,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
               We couldn't find any matching listings in this area. Try expanding your search radius.
             </p>
             <button
-              onClick={() => setFilters({ radius: 5 })}
+              onClick={() => setFilters({ radius: 1 })}
               className="btn-reset-filters"
             >
               Reset Filters

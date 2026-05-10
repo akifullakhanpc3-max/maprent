@@ -27,8 +27,8 @@ import '../styles/pages/MapView.css';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const DEFAULT_CENTER = [12.2958, 76.6394]; // Mysore [lat, lng]
-const VOYAGER_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 // Fix for default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -49,7 +49,7 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
   useEffect(() => {
     if (!map) {
       setMap(mapInstance);
-      setFilters({ lat: null, lng: null, bounds: null, radius: 5 });
+      setFilters({ lat: null, lng: null, bounds: null, radius: 1 });
     }
   }, [mapInstance, map, setMap, setFilters]);
 
@@ -88,7 +88,7 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
     },
     click: (e) => {
       const { lat, lng } = e.latlng;
-      setFilters({ lat, lng, bounds: null, radius: storeFilters.radius || 5 });
+      setFilters({ lat, lng, bounds: null, radius: storeFilters.radius || 1 });
     }
   });
 
@@ -555,7 +555,7 @@ export default function MapView() {
             setCurrentBounds={setCurrentBounds} 
             filters={filters} setFilter={setFilter} setFilters={setFilters} 
           />
-          <TileLayer url={VOYAGER_URL} attribution={ATTRIBUTION} />
+          <TileLayer url={OSM_URL} attribution={ATTRIBUTION} />
 
           {/* User Location Marker (Pulsing Dot) */}
           {userLocation && (

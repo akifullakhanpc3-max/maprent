@@ -68,7 +68,7 @@ export default function FilterPanel({ isOpen, onClose }) {
       maxPrice: 200000,
       bhkType: 'All',
       city: 'All',
-      radius: 5,
+      radius: 1,
       amenities: [],
       allowedFor: []
     });
