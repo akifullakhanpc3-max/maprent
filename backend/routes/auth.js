@@ -4,6 +4,24 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH) {
+      const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log('Firebase Admin SDK initialized.');
+    } else {
+      console.warn("FIREBASE_SERVICE_ACCOUNT_KEY_PATH is not set. Firebase Admin SDK not initialized.");
+    }
+  } catch (err) {
+    console.error("Failed to initialize Firebase Admin SDK", err);
+  }
+}
 
 const { createLog } = require('../utils/logger');
 
@@ -138,6 +156,95 @@ router.post('/login', async (req, res) => {
       msg: 'Server error during login authentication node.', 
       error: err.message,
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+});
+
+// @route   POST /api/auth/otp-auth
+// @desc    Authenticate user via Firebase OTP
+// @access  Public
+router.post('/otp-auth', async (req, res) => {
+  const { firebaseToken, phone, role = 'user', name = 'User' } = req.body;
+
+  if (!firebaseToken && !phone) {
+    return res.status(400).json({ msg: 'Firebase token or phone is required.' });
+  }
+
+  try {
+    let uid = req.body.uid; // fallback for testing
+    let verifiedPhone = phone;
+
+    // Verify token with Firebase Admin if available
+    if (admin.apps.length > 0 && firebaseToken) {
+      const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+      uid = decodedToken.uid;
+      verifiedPhone = decodedToken.phone_number;
+    } else if (!uid || !verifiedPhone) {
+      // If admin SDK is not setup, we require phone and uid from frontend for development purposes
+      return res.status(401).json({ msg: 'Firebase Admin SDK not initialized. Must provide phone and uid for dev bypass.' });
+    }
+
+    console.log(`[AUTH] OTP Login attempt for phone: ${verifiedPhone}`);
+    let user = await User.findOne({ firebaseUid: uid });
+
+    if (!user) {
+      // Try to find by phone just in case
+      user = await User.findOne({ phone: verifiedPhone });
+      if (user) {
+        user.firebaseUid = uid;
+      } else {
+        // Register new user
+        user = new User({
+          name: name,
+          phone: verifiedPhone,
+          firebaseUid: uid,
+          role: role
+        });
+      }
+      await user.save();
+    }
+
+    // SaaS Activity Log
+    if (user.tenantId) {
+      await createLog(user.id, user.tenantId, 'USER_LOGIN_OTP', { ip: req.ip });
+    }
+
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role,
+        tenantId: user.tenantId
+      }
+    };
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not defined.');
+    }
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '5 days' },
+      (err, token) => {
+        if (err) throw err;
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+            tenantId: user.tenantId,
+            permissions: user.permissions || []
+          }
+        });
+      }
+    );
+  } catch (err) {
+    console.error('[AUTH_OTP_CRITICAL_FAIL]', err);
+    res.status(500).json({ 
+      msg: 'Server error during OTP authentication.', 
+      error: err.message
     });
   }
 });

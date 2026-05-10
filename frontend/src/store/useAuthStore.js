@@ -29,6 +29,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   login: async (email, password) => {
+    // Kept for legacy compatibility. Recommend using otpAuth instead.
     try {
       const res = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
@@ -47,6 +48,17 @@ export const useAuthStore = create((set, get) => ({
       return true;
     } catch (err) {
       throw err.response?.data?.msg || 'Registration failed';
+    }
+  },
+
+  otpAuth: async (firebaseToken, phone, role = 'user', name = 'User') => {
+    try {
+      const res = await api.post('/auth/otp-auth', { firebaseToken, phone, role, name, uid: firebaseToken ? undefined : firebaseToken /* for dev bypass */ });
+      localStorage.setItem('token', res.data.token);
+      set({ user: res.data.user, token: res.data.token, isAuthenticated: true });
+      return true;
+    } catch (err) {
+      throw err.response?.data?.msg || 'OTP authentication failed';
     }
   },
 

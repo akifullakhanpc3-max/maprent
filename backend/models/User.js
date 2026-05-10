@@ -7,13 +7,26 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
     lowercase: true,
   },
   passwordHash: {
     type: String,
-    required: true,
+    required: false,
+  },
+  phone: {
+    type: String,
+    required: false,
+    unique: true,
+    sparse: true,
+  },
+  firebaseUid: {
+    type: String,
+    required: false,
+    unique: true,
+    sparse: true,
   },
   tenantId: {
     type: mongoose.Schema.Types.ObjectId,

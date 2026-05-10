@@ -13,6 +13,7 @@
     "@react-google-maps/api": "^2.20.8",
     "axios": "^1.14.0",
     "clsx": "^2.1.1",
+    "firebase": "^12.13.0",
     "leaflet": "^1.9.4",
     "leaflet.gridlayer.googlemutant": "^0.16.0",
     "lucide-react": "^1.7.0",
