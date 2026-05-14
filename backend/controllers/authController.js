@@ -264,9 +264,11 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
     // Send Email
+    console.log(`[AUTH] Attempting to send recovery email to: ${user.email}`);
     const emailSent = await sendResetPasswordEmail(user.email, resetToken);
 
     if (!emailSent) {
+      console.error(`[AUTH_ERROR] Email delivery failed for: ${user.email}`);
       return res.status(500).json({ msg: 'Mail service unavailable. Please check backend logs.' });
     }
 
