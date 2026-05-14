@@ -1,5 +1,5 @@
 import express from 'express';
-import { firebaseAuth, login, getMe, getWishlist, toggleWishlist } from '../controllers/authController.js';
+import { firebaseAuth, login, register, getMe, getWishlist, toggleWishlist, forgotPassword, resetPassword, adminResetUserPassword } from '../controllers/authController.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
@@ -13,6 +13,11 @@ router.post('/firebase-auth', firebaseAuth);
 // @desc    Standard Login
 // @access  Public
 router.post('/login', login);
+
+// @route   POST /api/auth/register
+// @desc    Standard Registration
+// @access  Public
+router.post('/register', register);
 
 // @route   GET /api/auth/me
 // @desc    Get current user details
@@ -28,5 +33,20 @@ router.get('/wishlist', auth, getWishlist);
 // @desc    Add/Remove property from wishlist
 // @access  Private
 router.put('/wishlist/:propertyId', auth, toggleWishlist);
+
+// @route   POST /api/auth/forgot-password
+// @desc    Request password reset
+// @access  Public
+router.post('/forgot-password', forgotPassword);
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password using token
+// @access  Public
+router.post('/reset-password', resetPassword);
+
+// @route   PUT /api/auth/admin/reset-user-password
+// @desc    Admin reset user password
+// @access  Private (Admin)
+router.put('/admin/reset-user-password', auth, adminResetUserPassword);
 
 export default router;

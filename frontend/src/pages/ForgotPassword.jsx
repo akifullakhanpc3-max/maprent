@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import api from '../api/axios';
 import { Link } from 'react-router-dom';
-import { KeyRound, Mail, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { KeyRound, Mail, ArrowLeft, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/pages/Auth.css';
+import logo from '../../logo/Occupra logo.png';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ export default function ForgotPassword() {
     
     try {
       const res = await api.post('/auth/forgot-password', { email });
-      setMessage('Recovery link sent to your email.');
+      setMessage(res.data.msg || 'Recovery link sent to your email.');
       
       if (res.data.debug_token) {
         setDebugToken(res.data.debug_token);
@@ -38,12 +39,12 @@ export default function ForgotPassword() {
         
         <div className="auth-header">
            <Link to="/" className="auth-brand">
-              <ShieldCheck size={18} className="text-indigo-600" />
-              <span className="auth-brand-text">Occupra</span>
+              {logo ? <img src={logo} alt="Occupra" className="logo-auth-hero" /> :
+                <span className="auth-brand-text">Occupra</span>}
            </Link>
            <div className="flex-col gap-1">
              <h1 className="auth-title">Reset Password</h1>
-             <p className="auth-subtitle">Enter your email to recover access</p>
+             <p className="auth-subtitle">Recover access to your account</p>
            </div>
         </div>
 
@@ -60,42 +61,48 @@ export default function ForgotPassword() {
               <div className="form-group">
                 <label className="label-base">Email Address</label>
                 <div className="input-with-icon">
-                  <Mail className="input-icon" />
+                  <Mail className="input-icon" size={20} />
                   <input
                     type="email" required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="input-base auth-input"
-                    placeholder="name@company.com"
+                    placeholder="name@example.com"
                   />
                 </div>
               </div>
 
               <button
                 type="submit" disabled={loading}
-                className="btn btn-primary auth-btn h-11"
+                className="btn btn-primary auth-btn h-12 rounded-xl font-bold uppercase tracking-wider"
               >
                 {loading ? <LoadingSpinner size="small" /> : 'Send Reset Link'}
               </button>
+
+              <div className="auth-divider">
+                <span className="divider-line"></span>
+                <span className="divider-text">OR</span>
+                <span className="divider-line"></span>
+              </div>
             </form>
           ) : (
             <div className="flex-col items-center text-center gap-6 py-4 animate-scale-in">
-              <div className="w-14 h-14 bg-emerald-50 rounded-full flex-center border border-emerald-100 text-emerald-500">
-                <CheckCircle2 size={28} />
+              <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex-center border border-emerald-100 text-emerald-500 shadow-xl shadow-emerald-100">
+                <CheckCircle2 size={32} />
               </div>
               <div className="flex-col gap-2">
-                <h3 className="text-xl font-bold text-slate-900">Link Sent</h3>
-                <p className="text-sm font-medium text-slate-500">{message}</p>
+                <h3 className="text-xl font-bold text-slate-900">Recovery Sent</h3>
+                <p className="text-sm font-medium text-slate-500 max-w-[280px]">{message}</p>
               </div>
 
               {debugToken && (
-                <div className="w-full bg-slate-50 p-6 rounded-xl border border-slate-100 flex-col gap-3">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Development Bypass</p>
+                <div className="w-full bg-slate-50 p-6 rounded-2xl border border-slate-100 flex-col gap-3">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dev Bypass</p>
                     <Link 
                       to={`/reset-password/${debugToken}`}
                       className="btn btn-primary !h-10 text-xs w-full"
                     >
-                      Bypass Security
+                      Reset Now (Bypass)
                     </Link>
                 </div>
               )}
@@ -103,9 +110,9 @@ export default function ForgotPassword() {
           )}
 
           <div className="auth-footer">
-            <Link to="/login" className="flex-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+            <Link to="/login" className="flex-center gap-2 text-xs font-bold text-slate-400 hover:text-primary-color transition-colors uppercase tracking-widest">
               <ArrowLeft size={14} />
-              Back to Sign In
+              Back to Login
             </Link>
           </div>
         </div>

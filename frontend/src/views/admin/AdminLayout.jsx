@@ -26,6 +26,7 @@ export default function AdminLayout() {
       { name: 'Staff Management', href: '/admin/staff', icon: UserCog, show: true },
     ] : []),
     { name: 'Activity Logs', href: '/admin/logs', icon: Activity, show: isMaster || perms.includes('VIEW_ANALYTICS') },
+    { name: 'Security', href: '/admin/passwords', icon: ShieldAlert, show: isMaster || perms.includes('MANAGE_USERS') },
     { name: 'Settings', href: '/admin/settings', icon: Settings, show: true },
   ].filter(item => item.show);
 

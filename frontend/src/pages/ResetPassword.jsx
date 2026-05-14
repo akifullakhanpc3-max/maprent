@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import api from '../api/axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { KeyRound, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { KeyRound, Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/pages/Auth.css';
+import logo from '../../logo/Occupra logo.png';
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -27,7 +28,7 @@ export default function ResetPassword() {
     setError(null);
     
     try {
-      await api.put(`/auth/reset-password/${token}`, { password });
+      await api.post('/auth/reset-password', { token, password });
       setMessage('Password updated. Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
@@ -43,8 +44,8 @@ export default function ResetPassword() {
         
         <div className="auth-header">
            <Link to="/" className="auth-brand">
-              <ShieldCheck size={18} className="text-indigo-600" />
-              <span className="auth-brand-text">Occupra</span>
+              {logo ? <img src={logo} alt="Occupra" className="logo-auth-hero" /> :
+                <span className="auth-brand-text">Occupra</span>}
            </Link>
            <div className="flex-col gap-1">
              <h1 className="auth-title">New Password</h1>
@@ -65,7 +66,7 @@ export default function ResetPassword() {
               <div className="form-group">
                 <label className="label-base">New Password</label>
                 <div className="input-with-icon">
-                  <KeyRound className="input-icon" />
+                  <KeyRound className="input-icon" size={20} />
                   <input
                     type={showPassword ? "text" : "password"} required
                     value={password}
@@ -78,7 +79,7 @@ export default function ResetPassword() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
@@ -86,7 +87,7 @@ export default function ResetPassword() {
               <div className="form-group">
                 <label className="label-base">Confirm Password</label>
                 <div className="input-with-icon">
-                  <Lock className="input-icon" />
+                  <Lock className="input-icon" size={20} />
                   <input
                     type={showPassword ? "text" : "password"} required
                     value={confirmPassword}
@@ -99,15 +100,15 @@ export default function ResetPassword() {
 
               <button
                 type="submit" disabled={loading}
-                className="btn btn-primary auth-btn h-11"
+                className="btn btn-primary auth-btn h-12 rounded-xl font-bold uppercase tracking-wider"
               >
                 {loading ? <LoadingSpinner size="small" /> : 'Update Password'}
               </button>
             </form>
           ) : (
             <div className="flex-col items-center text-center gap-6 py-4 animate-scale-in">
-              <div className="w-14 h-14 bg-emerald-50 rounded-full flex-center border border-emerald-100 text-emerald-500">
-                <CheckCircle2 size={28} />
+              <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex-center border border-emerald-100 text-emerald-500 shadow-xl shadow-emerald-100">
+                <CheckCircle2 size={32} />
               </div>
               <div className="flex-col gap-2">
                 <h3 className="text-xl font-bold text-slate-900">Success!</h3>

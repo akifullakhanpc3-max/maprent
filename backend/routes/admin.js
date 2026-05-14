@@ -89,6 +89,23 @@ router.get('/users', adminAuth, checkPermission(PERMISSIONS.MANAGE_USERS), async
   }
 });
 
+// @route   GET /api/admin/users/search
+// @desc    Search user by email or phone
+router.get('/users/search', adminAuth, checkPermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
+  const { identifier } = req.query;
+  try {
+    const user = await User.findOne({
+      $or: [
+        { email: identifier },
+        { phone: identifier }
+      ]
+    }).select('-passwordHash');
+    res.json(user);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route   PUT /api/admin/users/:id/block
 router.put('/users/:id/block', adminAuth, checkPermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
   try {

@@ -59,15 +59,43 @@ export const useAuthStore = create((set, get) => ({
   },
 
   /**
-   * Legacy/Email Login
+   * Standard Registration
    */
-  login: async (email, password) => {
+  register: async (userData) => {
     try {
-      const res = await api.post('/auth/login', { email, password });
+      set({ loading: true });
+      const res = await api.post('/auth/register', userData);
       localStorage.setItem('token', res.data.token);
-      set({ user: res.data.user, token: res.data.token, isAuthenticated: true });
+      set({ 
+        user: res.data.user, 
+        token: res.data.token, 
+        isAuthenticated: true,
+        loading: false
+      });
       return true;
     } catch (err) {
+      set({ loading: false });
+      throw err.response?.data?.msg || 'Registration failed';
+    }
+  },
+
+  /**
+   * Standard Login (Email or Phone)
+   */
+  login: async (identifier, password) => {
+    try {
+      set({ loading: true });
+      const res = await api.post('/auth/login', { identifier, password });
+      localStorage.setItem('token', res.data.token);
+      set({ 
+        user: res.data.user, 
+        token: res.data.token, 
+        isAuthenticated: true,
+        loading: false
+      });
+      return true;
+    } catch (err) {
+      set({ loading: false });
       throw err.response?.data?.msg || 'Login failed';
     }
   },

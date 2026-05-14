@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate, Link } from 'react-router-dom';
-import { AlertCircle, User, Home } from 'lucide-react';
+import { AlertCircle, User, Home, Phone, Lock, Mail } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/pages/Auth.css';
 import logo from '../../logo/Occupra logo.png';
@@ -11,12 +11,31 @@ import { auth, googleProvider } from '../config/firebase';
 import { signInWithPopup } from "firebase/auth";
 
 export default function Login() {
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState('user'); // Default role for new users
 
-  const { firebaseAuth } = useAuthStore();
+  const { firebaseAuth, login, isAuthenticated, user: storeUser } = useAuthStore();
   const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      await login(identifier, password);
+      // Retrieve updated state for redirect
+      const user = useAuthStore.getState().user;
+      navigate(`/${user.role}/dashboard`);
+    } catch (err) {
+      setError(err || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -29,8 +48,8 @@ export default function Login() {
       // Send token to our backend
       await firebaseAuth(idToken, role);
       // Retrieve updated state to get correct role-based redirect
-      const userRole = useAuthStore.getState().user?.role || role;
-      navigate(`/${userRole}/dashboard`);
+      const user = useAuthStore.getState().user;
+      navigate(`/${user.role}/dashboard`);
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user') {
@@ -53,12 +72,12 @@ export default function Login() {
           </Link>
           <div className="flex-col gap-1">
             <h1 className="auth-title">Welcome Back</h1>
-            <p className="auth-subtitle">Sign in with your Google account to continue</p>
+            <p className="auth-subtitle">Sign in to continue</p>
           </div>
         </div>
 
         <div className="auth-card">
-          <div className="auth-form">
+          <form className="auth-form" onSubmit={handleLogin}>
             {error && (
               <div className="auth-error">
                 <AlertCircle size={14} />
@@ -66,7 +85,7 @@ export default function Login() {
               </div>
             )}
 
-            {/* ROLE SELECTOR - Hidden if user already exists, but needed for first-time login */}
+            {/* ROLE SELECTOR - For Google Login mainly, or just informative */}
             <div className="form-group">
               <label className="label-base">Login as</label>
               <div className="role-selector">
@@ -94,7 +113,55 @@ export default function Login() {
               </div>
             </div>
 
+            <div className="form-group">
+              <div className="input-with-icon">
+                <Phone className="input-icon" size={20} />
+                <input
+                  type="text"
+                  placeholder="Phone or Email"
+                  className="input-base auth-input"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="input-with-icon">
+                <Lock className="input-icon" size={20} />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="input-base auth-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-header-row" style={{ marginTop: '4px' }}>
+                <Link to="/forgot-password" style={{ fontSize: '12px', color: 'var(--primary-color)', fontWeight: '600' }}>
+                  Forgot Password?
+                </Link>
+              </div>
+            </div>
+
             <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full h-12 rounded-xl font-bold uppercase tracking-wider"
+            >
+              {loading ? <LoadingSpinner size="small" /> : "Sign In"}
+            </button>
+
+            <div className="auth-divider">
+              <span className="divider-line"></span>
+              <span className="divider-text">OR</span>
+              <span className="divider-line"></span>
+            </div>
+
+            <button
+              type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
               className="google-auth-btn"
@@ -110,7 +177,7 @@ export default function Login() {
                 </>
               )}
             </button>
-          </div>
+          </form>
 
           <div className="auth-footer">
             <p className="auth-footer-text">

@@ -38,6 +38,7 @@ import AdminBookings from './views/admin/AdminBookings';
 import AdminLogin from './views/admin/AdminLogin';
 import AdminStaff from './views/admin/AdminStaff';
 import AdminLogs from './pages/admin/AdminLogs';
+import AdminPasswordManagement from './views/admin/AdminPasswordManagement';
 
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ChangePassword from './components/settings/ChangePassword';
@@ -108,6 +109,7 @@ function App() {
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="logs" element={<AdminLogs />} />
           <Route path="staff" element={<AdminStaff />} />
+          <Route path="passwords" element={<AdminPasswordManagement />} />
           <Route path="settings" element={<div className="p-8"><ChangePassword /></div>} />
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
