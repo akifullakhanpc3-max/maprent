@@ -11,18 +11,33 @@ import nodemailer from 'nodemailer';
 export const sendResetPasswordEmail = async (email, token) => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
+  const port = parseInt(process.env.EMAIL_PORT) || 465;
+  // If port is 465, secure should usually be true. Otherwise false (for STARTTLS on 587)
+  const secure = process.env.EMAIL_SECURE === 'true' || port === 465;
+
+  console.log('[MAIL_SERVICE] Initializing transporter with config:', {
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: port,
+    secure: secure,
+    user: process.env.EMAIL_USER,
+    // Do not log password
+  });
+
   // Create transporter inside the function to catch initialization errors
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
+    port: port,
+    secure: secure, 
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    connectionTimeout: 10000, 
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000, 
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    // Add debug info for detailed logs in Render
+    debug: true,
+    logger: true,
   });
 
   const mailOptions = {
@@ -57,17 +72,24 @@ export const sendResetPasswordEmail = async (email, token) => {
   };
 
   try {
+    // Optional: Verify connection before sending
+    console.log('[MAIL_SERVICE] Verifying connection...');
+    await transporter.verify();
+    console.log('[MAIL_SERVICE] Connection verified. Sending email...');
+
     const info = await transporter.sendMail(mailOptions);
     console.log('[MAIL_SERVICE] Email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    console.error('[MAIL_SERVICE_ERROR] Failed to send email:');
-    console.error(' - Error Message:', error.message);
-    console.error(' - Error Code:', error.code);
+    console.error('[MAIL_SERVICE_ERROR] Detailed Failure:');
+    console.error(' - Message:', error.message);
+    console.error(' - Code:', error.code);
     console.error(' - Command:', error.command);
+    console.error(' - Response:', error.response);
+    console.error(' - Stack:', error.stack);
     
-    // Log the token for manual bypass in dev
-    console.log('[DEBUG_TOKEN] Reset Token:', token);
+    // Log the token for manual bypass in dev/staging
+    console.log('[DEBUG_TOKEN] Reset Token generated but mail failed:', token);
     return false;
   }
 };

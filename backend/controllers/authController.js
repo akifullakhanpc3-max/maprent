@@ -253,6 +253,7 @@ export const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
+      console.log(`[AUTH] Forgot password requested for non-existent email: ${email}`);
       // Don't reveal if user exists for security
       return res.json({ msg: 'Recovery link sent if email exists.' });
     }
@@ -262,6 +263,7 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
+    console.log(`[AUTH] Saving reset token for user: ${user.email}`);
     await user.save();
 
     // Send Email
@@ -270,7 +272,10 @@ export const forgotPassword = async (req, res) => {
 
     if (!emailSent) {
       console.error(`[AUTH_ERROR] Email delivery failed for: ${user.email}`);
-      return res.status(500).json({ msg: 'Mail service unavailable. Please check backend logs.' });
+      return res.status(500).json({ 
+        msg: 'Mail service unavailable. Please check backend logs for details.',
+        error: process.env.NODE_ENV !== 'production' ? 'Nodemailer failed' : undefined
+      });
     }
 
     res.json({ 
@@ -278,8 +283,11 @@ export const forgotPassword = async (req, res) => {
       debug_token: process.env.NODE_ENV === 'development' ? resetToken : null 
     });
   } catch (err) {
-    console.error('[AUTH_FORGOT_ERROR]', err.message);
-    res.status(500).json({ msg: 'Server Error' });
+    console.error('[AUTH_FORGOT_ERROR_CRITICAL]', err);
+    res.status(500).json({ 
+      msg: 'Server Error', 
+      error: process.env.NODE_ENV !== 'production' ? err.message : 'Internal Server Error' 
+    });
   }
 };
 
