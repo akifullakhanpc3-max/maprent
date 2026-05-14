@@ -11,6 +11,9 @@ const requiredVars = [
   'FIREBASE_PROJECT_ID',
   'FIREBASE_CLIENT_EMAIL',
   'FIREBASE_PRIVATE_KEY',
+  'EMAIL_USER',
+  'EMAIL_PASS',
+  'FRONTEND_URL'
 ];
 
 const validateEnv = () => {

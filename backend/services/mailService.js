@@ -54,13 +54,20 @@ export const sendResetPasswordEmail = async (email, token) => {
   };
 
   try {
+    // Verify transporter connection
+    await transporter.verify();
+    console.log('[MAIL_SERVICE] Transporter is ready');
+
     const info = await transporter.sendMail(mailOptions);
-    console.log('[MAIL_SERVICE] Email sent:', info.messageId);
+    console.log('[MAIL_SERVICE] Email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    console.error('[MAIL_SERVICE_ERROR]', error);
-    // Even if mail fails in dev, we return true to not reveal email existence
-    // or log the token in console for dev bypass
+    console.error('[MAIL_SERVICE_ERROR] Failed to send email:');
+    console.error(' - Error Message:', error.message);
+    console.error(' - Error Code:', error.code);
+    console.error(' - Command:', error.command);
+    
+    // Log the token for manual bypass in dev
     console.log('[DEBUG_TOKEN] Reset Token:', token);
     return false;
   }
