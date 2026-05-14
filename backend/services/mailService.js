@@ -5,22 +5,11 @@ import nodemailer from 'nodemailer';
  * Handles sending system emails via Nodemailer SMTP.
  */
 
-/**
- * Send Password Reset Email
- */
-export const sendResetPasswordEmail = async (email, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
-
+const createTransporter = () => {
   const port = parseInt(process.env.EMAIL_PORT) || 465;
   const secure = process.env.EMAIL_SECURE === 'true' || port === 465;
 
-  console.log(`[MAIL_SERVICE] Initializing Nodemailer SMTP:`);
-  console.log(` - Host: ${process.env.EMAIL_HOST || 'smtp.gmail.com'}`);
-  console.log(` - Port: ${port}`);
-  console.log(` - Secure: ${secure}`);
-  console.log(` - User: ${process.env.EMAIL_USER}`);
-
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: port,
     secure: secure, 
@@ -28,7 +17,6 @@ export const sendResetPasswordEmail = async (email, token) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // Increased timeouts for slower hosting connections
     connectionTimeout: 20000, 
     greetingTimeout: 20000,
     socketTimeout: 30000,
@@ -36,52 +24,60 @@ export const sendResetPasswordEmail = async (email, token) => {
       rejectUnauthorized: false,
       minVersion: 'TLSv1.2'
     },
-    debug: true,
-    logger: true // This will pipe Nodemailer internal logs to the console
+    debug: process.env.NODE_ENV !== 'production',
+    logger: process.env.NODE_ENV !== 'production'
   });
+};
+
+/**
+ * Send Password Reset Email
+ */
+export const sendResetPasswordEmail = async (email, token) => {
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  const transporter = createTransporter();
+
+  console.log(`[MAIL_FLOW] Preparing Reset Email for: ${email}`);
 
   try {
-    console.log('[MAIL_SERVICE] Verifying SMTP connection...');
-    await transporter.verify();
-    console.log('[MAIL_SERVICE] SMTP connection verified. Sending email...');
-
     const info = await transporter.sendMail({
       from: `"Occupra Support" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Reset Your Occupra Password',
-      html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #f9fafb; border-radius: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #4f46e5; margin: 0; font-size: 28px;">Occupra</h1>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Security & Account Recovery</p>
-          </div>
-          
-          <div style="background-color: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            <h2 style="color: #111827; margin-top: 0;">Password Reset Request</h2>
-            <p style="color: #4b5563; line-height: 1.6;">We received a request to reset the password for your Occupra account. If you didn't make this request, you can safely ignore this email.</p>
-            
-            <div style="text-align: center; margin: 35px 0;">
-              <a href="${resetUrl}" style="background-color: #4f46e5; color: #ffffff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);">
-                Reset My Password
-              </a>
-            </div>
-            
-            <p style="color: #9ca3af; font-size: 12px; text-align: center;">This link will expire in 1 hour for your security.</p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 30px;">
-            <p style="color: #9ca3af; font-size: 12px;">&copy; 2026 Occupra Inc. All rights reserved.</p>
-          </div>
-        </div>
-      `,
+      html: getResetTemplate(resetUrl),
     });
-    console.log('[MAIL_SERVICE] Email sent successfully:', info.messageId);
+
+    console.log(`[MAIL_FLOW] Success! MessageID: ${info.messageId}`);
+    console.log(`[MAIL_FLOW] Accepted: ${info.accepted}`);
     return true;
   } catch (error) {
-    console.error('[MAIL_SERVICE_ERROR] SMTP Delivery Failed:');
-    console.error(' - Error:', error.message);
-    console.error(' - Code:', error.code);
+    console.error(`[MAIL_FLOW_ERROR] Failed to send to ${email}:`, error.message);
     return { error: error.message };
+  }
+};
+
+/**
+ * Send Booking/Contact Notification to Owner
+ */
+export const sendBookingNotificationEmail = async (ownerEmail, bookingData, propertyTitle) => {
+  const transporter = createTransporter();
+
+  console.log(`[MAIL_FLOW] Forwarding Booking Notification to Owner: ${ownerEmail}`);
+  console.log(`[MAIL_FLOW] From Tenant: ${bookingData.name} (${bookingData.email || 'N/A'})`);
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Occupra Alerts" <${process.env.EMAIL_USER}>`,
+      to: ownerEmail,
+      replyTo: bookingData.email || bookingData.phone,
+      subject: `New Application: ${propertyTitle}`,
+      html: getBookingTemplate(bookingData, propertyTitle),
+    });
+
+    console.log(`[MAIL_FLOW] Forwarded successfully to ${ownerEmail}. MessageID: ${info.messageId}`);
+    return true;
+  } catch (error) {
+    console.error(`[MAIL_FLOW_ERROR] Forwarding failed to ${ownerEmail}:`, error.message);
+    return false;
   }
 };
 
@@ -89,41 +85,65 @@ export const sendResetPasswordEmail = async (email, token) => {
  * Diagnostic Function: Test SMTP connection
  */
 export const testEmailConnection = async (testEmail) => {
-  const port = parseInt(process.env.EMAIL_PORT) || 465;
-  const secure = process.env.EMAIL_SECURE === 'true' || port === 465;
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port,
-    secure,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    connectionTimeout: 20000,
-    tls: { rejectUnauthorized: false }
-  });
+  const transporter = createTransporter();
 
   try {
+    console.log('[DIAG] Verifying SMTP connection...');
     await transporter.verify();
-    await transporter.sendMail({
+    
+    console.log(`[DIAG] Sending test mail to: ${testEmail}`);
+    const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: testEmail,
       subject: 'Occupra SMTP Diagnostic',
-      text: 'Testing Nodemailer SMTP delivery.'
+      text: 'If you see this, your SMTP configuration is working and forwarding to this inbox.'
     });
-    return { success: true, method: 'Nodemailer SMTP', message: 'Test email sent.' };
+
+    return { 
+      success: true, 
+      method: 'Nodemailer SMTP', 
+      accepted: info.accepted,
+      response: info.response 
+    };
   } catch (error) {
     return { 
       success: false, 
       method: 'Nodemailer SMTP', 
       message: error.message,
+      code: error.code,
       config: {
         host: process.env.EMAIL_HOST,
-        port: port,
-        secure: secure,
         user: process.env.EMAIL_USER
       }
     };
   }
 };
+
+/**
+ * Templates
+ */
+const getResetTemplate = (resetUrl) => `
+  <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+    <h2 style="color: #4f46e5;">Password Reset</h2>
+    <p>You requested a password reset. Click the button below to continue:</p>
+    <a href="${resetUrl}" style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Reset Password</a>
+    <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">This link expires in 1 hour.</p>
+  </div>
+`;
+
+const getBookingTemplate = (data, title) => `
+  <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+    <h2 style="color: #4f46e5;">New Property Application</h2>
+    <p>You have received a new application for <strong>${title}</strong>.</p>
+    
+    <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+      <p><strong>Tenant Name:</strong> ${data.name}</p>
+      <p><strong>Phone:</strong> ${data.phone}</p>
+      <p><strong>Move-in Date:</strong> ${new Date(data.moveInDate).toLocaleDateString()}</p>
+      <p><strong>Duration:</strong> ${data.duration} months</p>
+      <p><strong>Message:</strong> ${data.message || 'No message provided'}</p>
+    </div>
+    
+    <p>You can reply directly to this email to contact the tenant.</p>
+  </div>
+`;

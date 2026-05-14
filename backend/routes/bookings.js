@@ -3,10 +3,10 @@ import auth from '../middleware/auth.js';
 import { requireUser, requireOwner } from '../middleware/roles.js';
 import Booking from '../models/Booking.js';
 import Property from '../models/Property.js';
+import { sendBookingNotificationEmail } from '../services/mailService.js';
 
 const router = express.Router();
 
-// @route   GET /api/bookings
 router.get('/', auth, async (req, res) => {
   try {
     if (req.user.role === 'admin' || req.user.role === 'master_admin') {
@@ -30,10 +30,12 @@ router.get('/', auth, async (req, res) => {
 router.post('/', [auth, requireUser], async (req, res) => {
   try {
     const { propertyId, name, phone, moveInDate, duration, message } = req.body;
-    const property = await Property.findById(propertyId);
+    
+    // Find property and owner details
+    const property = await Property.findById(propertyId).populate('ownerId', 'name email');
     if (!property) return res.status(404).json({ msg: 'Property not found' });
 
-    if (property.ownerId && property.ownerId.toString() === req.user.id) {
+    if (property.ownerId && property.ownerId._id.toString() === req.user.id) {
       return res.status(400).json({ msg: 'Cannot book your own property' });
     }
 
@@ -44,7 +46,7 @@ router.post('/', [auth, requireUser], async (req, res) => {
       userId: req.user.id,
       tenantId: req.user.tenantId || null,
       propertyId,
-      ownerId: property.ownerId,
+      ownerId: property.ownerId._id,
       name,
       phone,
       moveInDate,
@@ -53,8 +55,21 @@ router.post('/', [auth, requireUser], async (req, res) => {
     });
 
     await newBooking.save();
+
+    // 📬 Send Notification to Owner
+    if (property.ownerId && property.ownerId.email) {
+      console.log(`[BOOKING] Sending notification to owner: ${property.ownerId.email}`);
+      // Use fire-and-forget or await depending on preference. Awaiting for reliability.
+      await sendBookingNotificationEmail(
+        property.ownerId.email, 
+        { name, phone, moveInDate, duration, message, email: req.user.email }, 
+        property.title
+      );
+    }
+
     res.status(201).json(newBooking);
   } catch (err) {
+    console.error('[BOOKING_ERROR]', err.message);
     res.status(500).send('Server Error');
   }
 });
