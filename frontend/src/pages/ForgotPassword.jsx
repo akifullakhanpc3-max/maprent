@@ -76,8 +76,17 @@ export default function ForgotPassword() {
                 type="submit" disabled={loading}
                 className="btn btn-primary auth-btn h-12 rounded-xl font-bold uppercase tracking-wider"
               >
-                {loading ? <LoadingSpinner size="small" /> : 'Send Reset Link'}
+                {loading ? 'Initiating Recovery...' : 'Send Reset Link'}
               </button>
+
+              {loading && (
+                <div className="flex-col animate-fade-in">
+                  <div className="loading-progress-container">
+                    <div className="loading-progress-bar"></div>
+                  </div>
+                  <p className="sending-status-text">Dispatching Recovery Email...</p>
+                </div>
+              )}
 
               <div className="auth-divider">
                 <span className="divider-line"></span>
