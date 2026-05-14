@@ -38,6 +38,10 @@ export const sendResetPasswordEmail = async (email, token) => {
     // Add debug info for detailed logs in Render
     debug: true,
     logger: true,
+    tls: {
+      // Do not fail on invalid certificates (common on some hosting providers)
+      rejectUnauthorized: false
+    }
   });
 
   const mailOptions = {
@@ -90,6 +94,54 @@ export const sendResetPasswordEmail = async (email, token) => {
     
     // Log the token for manual bypass in dev/staging
     console.log('[DEBUG_TOKEN] Reset Token generated but mail failed:', token);
-    return false;
+    return { error: error.message, code: error.code, command: error.command };
+  }
+};
+
+/**
+ * Diagnostic Function: Test connection and send simple mail
+ */
+export const testEmailConnection = async (testEmail) => {
+  const port = parseInt(process.env.EMAIL_PORT) || 465;
+  const secure = process.env.EMAIL_SECURE === 'true' || port === 465;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port,
+    secure,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    connectionTimeout: 20000,
+    tls: { rejectUnauthorized: false }
+  });
+
+  try {
+    console.log('[DIAG] Testing connection...');
+    await transporter.verify();
+    
+    console.log('[DIAG] Sending test mail...');
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: testEmail,
+      subject: 'Occupra Email Diagnostic',
+      text: 'If you are reading this, your email configuration is working perfectly.'
+    });
+
+    return { success: true, message: 'Connection and send successful.' };
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error.message, 
+      code: error.code, 
+      command: error.command,
+      config: {
+        host: process.env.EMAIL_HOST,
+        port: port,
+        secure: secure,
+        user: process.env.EMAIL_USER
+      }
+    };
   }
 };

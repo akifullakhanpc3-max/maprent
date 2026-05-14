@@ -1,5 +1,5 @@
 import express from 'express';
-import { firebaseAuth, login, register, getMe, getWishlist, toggleWishlist, forgotPassword, resetPassword, adminResetUserPassword } from '../controllers/authController.js';
+import { firebaseAuth, login, register, getMe, getWishlist, toggleWishlist, forgotPassword, resetPassword, adminResetUserPassword, diagMail } from '../controllers/authController.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
@@ -43,6 +43,11 @@ router.post('/forgot-password', forgotPassword);
 // @desc    Reset password using token
 // @access  Public
 router.post('/reset-password', resetPassword);
+
+// @route   GET /api/auth/diag-mail
+// @desc    Diagnostic email test
+// @access  Public (Temporary)
+router.get('/diag-mail', diagMail);
 
 // @route   PUT /api/auth/admin/reset-user-password
 // @desc    Admin reset user password

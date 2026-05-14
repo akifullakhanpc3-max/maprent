@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import admin from '../config/firebaseAdmin.js';
 import crypto from 'crypto';
-import { sendResetPasswordEmail } from '../services/mailService.js';
+import { sendResetPasswordEmail, testEmailConnection } from '../services/mailService.js';
 
 /**
  * Verifies Firebase Token and handles User Login/Registration
@@ -345,5 +345,23 @@ export const adminResetUserPassword = async (req, res) => {
   } catch (err) {
     console.error('[ADMIN_RESET_USER_PASS_ERROR]', err.message);
     res.status(500).json({ msg: 'Server Error' });
+  }
+};
+
+/**
+ * Diagnostic: Test Email Connection
+ * Usage: GET /api/auth/diag-mail?email=your-email@example.com
+ */
+export const diagMail = async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ msg: 'Email query parameter is required.' });
+
+  console.log('[DIAG] Starting email diagnostic for:', email);
+  const result = await testEmailConnection(email);
+  
+  if (result.success) {
+    res.json(result);
+  } else {
+    res.status(500).json(result);
   }
 };
