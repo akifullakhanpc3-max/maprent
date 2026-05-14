@@ -14,7 +14,11 @@ export const sendResetPasswordEmail = async (email, token) => {
   const port = parseInt(process.env.EMAIL_PORT) || 465;
   const secure = process.env.EMAIL_SECURE === 'true' || port === 465;
 
-  console.log(`[MAIL_SERVICE] Initializing SMTP: ${process.env.EMAIL_HOST || 'smtp.gmail.com'}:${port}`);
+  console.log(`[MAIL_SERVICE] Initializing Nodemailer SMTP:`);
+  console.log(` - Host: ${process.env.EMAIL_HOST || 'smtp.gmail.com'}`);
+  console.log(` - Port: ${port}`);
+  console.log(` - Secure: ${secure}`);
+  console.log(` - User: ${process.env.EMAIL_USER}`);
 
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -24,14 +28,23 @@ export const sendResetPasswordEmail = async (email, token) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    connectionTimeout: 15000,
+    // Increased timeouts for slower hosting connections
+    connectionTimeout: 20000, 
+    greetingTimeout: 20000,
+    socketTimeout: 30000,
     tls: { 
-      rejectUnauthorized: false // Helps bypass some hosting firewall/certificate issues
-    }
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2'
+    },
+    debug: true,
+    logger: true // This will pipe Nodemailer internal logs to the console
   });
 
   try {
-    console.log('[MAIL_SERVICE] Attempting SMTP delivery...');
+    console.log('[MAIL_SERVICE] Verifying SMTP connection...');
+    await transporter.verify();
+    console.log('[MAIL_SERVICE] SMTP connection verified. Sending email...');
+
     const info = await transporter.sendMail({
       from: `"Occupra Support" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -62,10 +75,12 @@ export const sendResetPasswordEmail = async (email, token) => {
         </div>
       `,
     });
-    console.log('[MAIL_SERVICE] Email sent successfully via SMTP:', info.messageId);
+    console.log('[MAIL_SERVICE] Email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    console.error('[MAIL_SERVICE_ERROR] SMTP Failure:', error.message);
+    console.error('[MAIL_SERVICE_ERROR] SMTP Delivery Failed:');
+    console.error(' - Error:', error.message);
+    console.error(' - Code:', error.code);
     return { error: error.message };
   }
 };
