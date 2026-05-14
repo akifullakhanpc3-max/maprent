@@ -248,6 +248,7 @@ export const toggleWishlist = async (req, res) => {
  */
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log('📬 [FORGOT_PASSWORD_REQUEST] Received request for:', email);
 
   try {
     const user = await User.findOne({ email });

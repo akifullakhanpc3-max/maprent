@@ -5,26 +5,25 @@ import nodemailer from 'nodemailer';
  * Handles sending system emails.
  */
 
-// Configure Transporter (Update .env with real credentials)
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: 465, // Using SSL port for better compatibility
-  secure: true, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Add timeouts to prevent hanging
-  connectionTimeout: 10000, 
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
-
 /**
  * Send Password Reset Email
  */
 export const sendResetPasswordEmail = async (email, token) => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+  // Create transporter inside the function to catch initialization errors
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: 465,
+    secure: true, 
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    connectionTimeout: 10000, 
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  });
 
   const mailOptions = {
     from: `"Occupra Support" <${process.env.EMAIL_USER}>`,
