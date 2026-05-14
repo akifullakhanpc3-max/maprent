@@ -263,8 +263,10 @@ export const forgotPassword = async (req, res) => {
 
     await user.save();
 
-    // Send Email
-    const emailSent = await sendResetPasswordEmail(user.email, resetToken);
+    // Send Email (Non-blocking to improve response time)
+    sendResetPasswordEmail(user.email, resetToken).catch(err => {
+      console.error('[MAIL_BACKGROUND_ERROR]', err);
+    });
 
     res.json({ 
       msg: 'Recovery link sent to your email.',
