@@ -153,12 +153,67 @@ router.put('/properties/:id/approve', adminAuth, checkPermission(PERMISSIONS.APP
   }
 });
 
+// @route   PUT /api/admin/properties/:id/feature
+router.put('/properties/:id/feature', adminAuth, checkPermission(PERMISSIONS.APPROVE_PROPERTY), async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) return res.status(404).json({ msg: 'Property not found' });
+    property.isFeatured = !property.isFeatured;
+    await property.save();
+    res.json(property);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
 // @route   DELETE /api/admin/properties/:id
 router.delete('/properties/:id', adminAuth, checkPermission(PERMISSIONS.DELETE_PROPERTY), async (req, res) => {
   try {
     const property = await Property.findByIdAndDelete(req.params.id);
     if (!property) return res.status(404).json({ msg: 'Property not found' });
     res.json({ msg: 'Property strictly deleted by Admin' });
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   GET /api/admin/bookings
+router.get('/bookings', adminAuth, checkPermission(PERMISSIONS.VIEW_ANALYTICS), async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate('propertyId', 'title location price images')
+      .populate('userId', 'name email')
+      .populate('ownerId', 'name email')
+      .sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   PUT /api/admin/bookings/:id/status
+router.put('/bookings/:id/status', adminAuth, checkPermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
+  try {
+    const { status } = req.body;
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).populate('propertyId', 'title').populate('userId', 'name email');
+    
+    if (!booking) return res.status(404).json({ msg: 'Booking not found' });
+    res.json(booking);
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// @route   DELETE /api/admin/bookings/:id
+router.delete('/bookings/:id', adminAuth, checkPermission(PERMISSIONS.MANAGE_USERS), async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndDelete(req.params.id);
+    if (!booking) return res.status(404).json({ msg: 'Booking not found' });
+    res.json({ msg: 'Booking removed by admin' });
   } catch (err) {
     res.status(500).send('Server Error');
   }
@@ -186,6 +241,37 @@ router.post('/staff', adminAuth, masterAdminOnly, async (req, res) => {
     await staff.save();
     const { passwordHash: _, ...safeStaff } = staff.toObject();
     res.status(201).json(safeStaff);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+});
+
+router.put('/staff/:id/permissions', adminAuth, masterAdminOnly, async (req, res) => {
+  try {
+    const { permissions } = req.body;
+    const staff = await User.findByIdAndUpdate(req.params.id, { permissions }, { new: true }).select('-passwordHash');
+    if (!staff) return res.status(404).json({ msg: 'Staff member not found' });
+    res.json(staff);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+});
+
+router.put('/staff/:id/role', adminAuth, masterAdminOnly, async (req, res) => {
+  try {
+    const { role } = req.body;
+    const staff = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-passwordHash');
+    if (!staff) return res.status(404).json({ msg: 'Staff member not found' });
+    res.json(staff);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+});
+
+router.delete('/staff/:id', adminAuth, masterAdminOnly, async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'Staff member removed' });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
