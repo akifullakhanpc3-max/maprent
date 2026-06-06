@@ -1,16 +1,7 @@
 import Link from "next/link";
 import { Info } from "lucide-react";
-import dynamic from "next/dynamic";
+import PropertyDetailsClient from "@/components/DynamicPropertyDetailsClient";
 
-const PropertyDetailsClient = dynamic(() => import("@/components/PropertyDetailsClient"), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-center p-8 gap-4">
-      <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-sm font-bold uppercase tracking-widest text-slate-400">Loading Premium Asset Context...</p>
-    </div>
-  ),
-});
 
 // Helper function to fetch single property details directly on the server
 async function getProperty(id) {
