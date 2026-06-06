@@ -615,7 +615,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                             maxLength="10"
                             pattern="[0-9]{10}"
                             value={formData.phone} onChange={handleChange} 
-                            className="input-base" placeholder="9876543210" 
+                            className="input-base !pl-10" placeholder="9876543210" 
                           />
                         </div>
                       </div>
@@ -642,7 +642,7 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                             pattern="[0-9]{10}"
                             disabled={isSameAsPhone}
                             value={formData.whatsapp} onChange={handleChange} 
-                            className="input-base" placeholder="9876543210" 
+                            className="input-base !pl-10" placeholder="9876543210" 
                           />
                         </div>
                       </div>
