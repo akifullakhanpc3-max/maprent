@@ -272,6 +272,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
                 <MiniMap
                   lat={property.location?.coordinates?.[1]}
                   lng={property.location?.coordinates?.[0]}
+                  currentProperty={property}
                   onSelectProperty={onSelectProperty}
                 />
               </div>
@@ -328,6 +329,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
           <MiniMap
             lat={property.location?.coordinates?.[1]}
             lng={property.location?.coordinates?.[0]}
+            currentProperty={property}
             onSelectProperty={onSelectProperty}
           />
         </div>

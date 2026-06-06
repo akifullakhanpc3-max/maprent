@@ -18,10 +18,10 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
 import MapSearchBar from '../components/MapSearchBar';
 import PropertyListPane from '../components/PropertyListPane';
 import MapCursor from '../components/MapCursor';
+import BuildingFootprints from '../components/BuildingFootprints';
 
 const FilterPanel = dynamic(() => import('../components/FilterPanel'), { ssr: false });
 const BookingFormModal = dynamic(() => import('../components/BookingFormModal'), { ssr: false });
@@ -427,27 +427,54 @@ export default function MapView() {
     setTimeout(handleSearchArea, 100);
   }, [setFilters, handleSearchArea]);
 
-  // Run Search By Area on initial load
+  // ─── History-driven overlay (back button closes overlay without refresh) ─────
   useEffect(() => {
-    if (map) {
-      handleSearchArea();
-    }
-  }, [map, handleSearchArea]);
-
-  // Open overlay when coming from a direct property link
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const propertyId = searchParams.get('propertyId');
-    if (propertyId) {
-      fetchPropertyById(propertyId).then((result) => {
+    const urlId = new URLSearchParams(window.location.search).get('propertyId');
+    if (urlId && urlId !== selectedProperty?._id) {
+      fetchPropertyById(urlId).then((result) => {
         if (result?.data) {
           setSelectedProperty(result.data);
           setHighlightedId(result.data._id);
         }
       });
     }
-  }, [searchParams, fetchPropertyById]);
+
+    const handler = () => {
+      const newUrlId = new URLSearchParams(window.location.search).get('propertyId');
+      if (selectedProperty && !newUrlId) {
+        setSelectedProperty(null);
+        setHighlightedId(null);
+      } else if (newUrlId && newUrlId !== selectedProperty?._id) {
+        fetchPropertyById(newUrlId).then((result) => {
+          if (result?.data) {
+            setSelectedProperty(result.data);
+            setHighlightedId(result.data._id);
+          }
+        });
+      }
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [selectedProperty, fetchPropertyById]);
+
+  const openOverlay = useCallback((property) => {
+    setHighlightedId(property._id);
+    setSelectedProperty(property);
+    window.history.pushState(null, '', `?propertyId=${property._id}`);
+  }, []);
+
+  const closeOverlay = useCallback(() => {
+    setHighlightedId(null);
+    setSelectedProperty(null);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
+
+  // Run Search By Area on initial load
+  useEffect(() => {
+    if (map) {
+      handleSearchArea();
+    }
+  }, [map, handleSearchArea]);
 
   // ─── Icons ──────────────────────────────────────────────────────────────────
   const searchCenterIcon = useMemo(() => L.divIcon({
@@ -500,8 +527,7 @@ export default function MapView() {
           eventHandlers={{
             click: (e) => {
               L.DomEvent.stopPropagation(e);
-              setHighlightedId(property._id);
-              setSelectedProperty(property);
+              openOverlay(property);
               const card = document.getElementById(`property-card-${property._id}`);
               if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -600,6 +626,9 @@ export default function MapView() {
             />
           )}
 
+          {/* 2D Building Footprints (zoom 15+) */}
+          <BuildingFootprints properties={properties} />
+
           {/* Price markers clustered */}
           <MarkerClusterGroup
             chunkedLoading
@@ -650,11 +679,10 @@ export default function MapView() {
       {selectedProperty && (
         <PropertyDetailsOverlay
           property={selectedProperty}
-          onClose={() => setSelectedProperty(null)}
-          onShowRoute={(p) => { setSelectedProperty(null); handleShowRoute(p); }}
+          onClose={closeOverlay}
+          onShowRoute={(p) => { closeOverlay(); handleShowRoute(p); }}
           onSelectProperty={(p) => {
-            setHighlightedId(p._id);
-            setSelectedProperty(p);
+            openOverlay(p);
             const card = document.getElementById(`property-card-${p._id}`);
             if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }}

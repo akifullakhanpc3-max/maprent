@@ -4,6 +4,7 @@ import axios from 'axios';
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://maprent-2.onrender.com';
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
+  timeout: 15000,
 });
 
 // Add a request interceptor to add the JWT token to requests if available
