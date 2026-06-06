@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, MapPin, Grid, CheckCircle2, Share2, Heart, ShieldCheck, Zap, Clock, Navigation2, Phone, MessageSquare, ChevronRight, Layers, Maximize, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, MapPin, Grid, CheckCircle2, Share2, Heart, ShieldCheck, Zap, Clock, Navigation2, Phone, MessageSquare, ChevronRight, Layers, Maximize } from 'lucide-react';
 import BookingFormModal from './BookingFormModal';
 import ImageWithSkeleton from './ImageWithSkeleton';
 import api, { BASE_URL } from '../api/axios';
@@ -11,6 +12,7 @@ import '../styles/components/PropertyDetailsCard.css';
 import { formatBHK, formatDaysAgo, formatArea, toSentenceCase } from '../utils/formatters';
 
 export default function PropertyDetailsOverlay({ property, onClose, onShowRoute, onSelectProperty }) {
+  const router = useRouter();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFullScreen, setShowFullScreen] = useState(false);
@@ -113,6 +115,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               <button className="header-icon-btn" onClick={handleShare}>
                 <Share2 size={18} />
               </button>
+
             </div>
           </div>
 

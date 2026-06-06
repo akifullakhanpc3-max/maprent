@@ -106,11 +106,13 @@ export const usePropertyStore = create((set, get) => ({
     try {
       const res = await api.get(`/properties/${id}`);
       set({ loading: false });
-      return res.data;
+      return { data: res.data, error: null };
     } catch (err) {
-      console.error('[SINGLE_FETCH_ERROR]', err);
+      const status = err?.response?.status;
+      console.error('[SINGLE_FETCH_ERROR]', status, err?.message);
       set({ loading: false });
-      return null;
+      if (status === 404) return { data: null, error: 'not_found' };
+      return { data: null, error: 'server_error' };
     }
   }
 }));

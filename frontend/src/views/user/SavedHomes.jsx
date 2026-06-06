@@ -165,7 +165,6 @@ export default function SavedHomes() {
             ))}
          </div>
       )}
-
       {/* Property Details Overlay */}
       {selectedProperty && (
         <PropertyDetailsOverlay 

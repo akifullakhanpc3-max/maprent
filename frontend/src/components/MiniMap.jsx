@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 // import 'leaflet/dist/leaflet.css';
@@ -17,68 +17,45 @@ if (L.Icon.Default.prototype._getIconUrl) {
   });
 }
 
-// Helper to fix Leaflet size issues in modals
+// Helper to fix Leaflet size issues in modals and animated containers
 function MapResizer() {
   const map = useMap();
+  const containerRef = useRef(null);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 800);
+    const el = map.getContainer();
+    containerRef.current = el;
+
+    // Multiple invalidations to catch all animation phases
+    const timers = [100, 300, 600, 1000].map(delay =>
+      setTimeout(() => {
+        map.invalidateSize();
+      }, delay)
+    );
+
+    // ResizeObserver for responsive containers
+    let observer;
+    if (typeof ResizeObserver !== 'undefined' && el) {
+      observer = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      observer.observe(el);
+    }
 
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
 
     return () => {
-      clearTimeout(timer);
+      timers.forEach(clearTimeout);
       window.removeEventListener('resize', handleResize);
+      if (observer) observer.disconnect();
     };
   }, [map]);
   return null;
 }
 
-const VOYAGER_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-const createPriceIcon = (property, isActive) => {
-  const price = property.price;
-  let formattedPrice = 'N/A';
-  if (price > 0) {
-    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
-                   : price >= 1000   ? `₹${(price / 1000).toFixed(0)}k`
-                   : `₹${price}`;
-  }
-
-  const html = `
-    <div class="price-pin-wrapper ${isActive ? 'is-active' : ''} mini-map-scale">
-      ${property.bhkType ? `<span class="pin-bhk-tag">${property.bhkType.toUpperCase()}</span>` : ''}
-      <span class="price-text">${formattedPrice}</span>
-      <div class="price-pin-tail"></div>
-    </div>
-  `;
-
-  return L.divIcon({
-    className: 'custom-price-pin',
-    html: html,
-    iconSize: [120, 40],
-    iconAnchor: [60, 40]
-  });
-};
-
-const createClusterCustomIcon = function (cluster) {
-  const count = cluster.getChildCount();
-  return L.divIcon({
-    html: `
-      <div class="price-pin-wrapper cluster-pin">
-        <span class="pin-bhk-tag">${count}</span>
-        <span class="price-text">PROPERTIES</span>
-        <div class="price-pin-tail"></div>
-      </div>
-    `,
-    className: 'custom-price-pin',
-    iconSize: [120, 40],
-    iconAnchor: [60, 40],
-  });
-};
+const OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectProperty }) {
   const { properties } = usePropertyStore();
@@ -92,7 +69,6 @@ export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectP
         <Marker
           key={property._id}
           position={[pLat, pLng]}
-          icon={createPriceIcon(property, isCenter)}
           eventHandlers={onSelectProperty && !isCenter ? {
             click: (e) => {
               L.DomEvent.stopPropagation(e);
@@ -119,13 +95,12 @@ export default function MiniMap({ lat, lng, zoom = 14, className = "", onSelectP
         doubleClickZoom={true}
         className="h-full w-full rounded-2xl"
       >
-        <TileLayer url={VOYAGER_URL} attribution={ATTRIBUTION} />
+        <TileLayer url={OSM_URL} attribution={ATTRIBUTION} />
         {/* Render all property tags */}
         <MarkerClusterGroup
             chunkedLoading
             maxClusterRadius={40}
             showCoverageOnHover={false}
-            iconCreateFunction={createClusterCustomIcon}
         >
           {memoizedMarkers}
         </MarkerClusterGroup>

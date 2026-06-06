@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { Grid, Search, ChevronRight, Clock, Navigation, RotateCcw, Maximize } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
@@ -9,6 +10,7 @@ import { formatBHK, formatDaysAgo, toSentenceCase } from '../utils/formatters';
 
 export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute, onSearchArea, onSearchRadius, onResetFilters }) {
   const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
+  const router = useRouter();
 
   const getDaysAgo = (date) => {
     return formatDaysAgo(date);
@@ -199,8 +201,14 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                     <span className="list-tag color-gray">{toSentenceCase(property.tenantPreferred || 'Open to All')}</span>
                   </div>
 
-                  <button className="view-details-cta">
-                    View Details
+                  <button
+                    className="view-details-cta"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/property/${property._id}`);
+                    }}
+                  >
+                    Open Full Page
                     <ChevronRight size={16} />
                   </button>
                 </div>

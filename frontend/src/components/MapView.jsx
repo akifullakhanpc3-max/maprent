@@ -18,6 +18,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import MapSearchBar from '../components/MapSearchBar';
 import PropertyListPane from '../components/PropertyListPane';
 import MapCursor from '../components/MapCursor';
@@ -432,6 +433,21 @@ export default function MapView() {
       handleSearchArea();
     }
   }, [map, handleSearchArea]);
+
+  // Open overlay when coming from a direct property link
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const propertyId = searchParams.get('propertyId');
+    if (propertyId) {
+      fetchPropertyById(propertyId).then((result) => {
+        if (result?.data) {
+          setSelectedProperty(result.data);
+          setHighlightedId(result.data._id);
+        }
+      });
+    }
+  }, [searchParams, fetchPropertyById]);
 
   // ─── Icons ──────────────────────────────────────────────────────────────────
   const searchCenterIcon = useMemo(() => L.divIcon({

@@ -1046,6 +1046,7 @@
   }
 }
 
+
 .mini-map-section {
   width: 100%;
   border-radius: 20px;
@@ -1055,13 +1056,13 @@
 
 @media (min-width: 1024px) {
   .mini-map-section {
-    display: none; /* Only show in-line map on mobile */
+    display: none;
   }
 }
 
 .mini-map-container {
   width: 100%;
-  height: 300px; /* Explicit height is critical for Leaflet */
+  height: 300px;
   min-height: 250px;
   background: #f1f5f9;
   position: relative;

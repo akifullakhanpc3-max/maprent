@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, MapPin, Grid, CheckCircle2, Share2, Heart,
@@ -24,6 +25,24 @@ const getFloorSuffix = (floor) => {
 
 export default function PropertyDetailsClient({ property }) {
   const router = useRouter();
+
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-center p-8">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mb-4 border border-rose-100 shadow-sm">
+          <Info size={32} />
+        </div>
+        <h2 className="text-xl font-black text-slate-900 tracking-tighter">Listing Not Found</h2>
+        <p className="text-slate-500 text-sm max-w-xs mt-2">
+          The property listing you are trying to view does not exist or has been deactivated by the owner.
+        </p>
+        <Link href="/" className="btn btn-primary mt-6 !px-10">
+          Back to Discovery Map
+        </Link>
+      </div>
+    );
+  }
+
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showAnalyze, setShowAnalyze] = useState(false);

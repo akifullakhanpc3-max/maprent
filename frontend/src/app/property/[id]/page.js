@@ -1,17 +1,18 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Info } from "lucide-react";
-import PropertyDetailsClient from "@/components/DynamicPropertyDetailsClient";
 
 
 // Helper function to fetch single property details directly on the server
 async function getProperty(id) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://maprent-2.onrender.com/api';
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://maprent-2.onrender.com';
+  const apiUrl = `${baseUrl}/api`;
   try {
     const res = await fetch(`${apiUrl}/properties/${id}`, { 
       next: { revalidate: 60 } // Cache data for 60 seconds (high performance)
     });
     if (!res.ok) return null;
-    return await res.ok ? res.json() : null;
+    return res.json();
   } catch (err) {
     console.error("[SERVER_FETCH_ERROR]", err);
     return null;
@@ -36,8 +37,8 @@ export async function generateMetadata({ params }) {
     ? property.description.substring(0, 160) + '...'
     : `Rent this verified ${property.bhkType || ''} property in ${property.city || ''} for ${priceText}. Direct owner contact, zero commission, map-based discovery.`;
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'https://maprent-2.onrender.com';
-  const imageUrl = property.images?.[0]?.startsWith('http') ? property.images[0] : `${baseUrl}${property.images?.[0] || '/logo/Occupra logo.png'}`;
+  const imageBase = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'https://maprent-2.onrender.com';
+  const imageUrl = property.images?.[0]?.startsWith('http') ? property.images[0] : `${imageBase}${property.images?.[0] || '/logo/Occupra logo.png'}`;
 
   return {
     title: seoTitle,
@@ -85,46 +86,5 @@ export default async function PropertyPage({ params }) {
     );
   }
 
-  // ─── JSON-LD Structured Schema Markup (Google Search Rich Snippet) ──────────
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SingleFamilyResidence",
-    "name": property.title,
-    "description": property.description || `Verified rental home in ${property.city}`,
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": property.city,
-      "addressRegion": "Karnataka",
-      "addressCountry": "IN"
-    },
-    "offers": {
-      "@type": "Offer",
-      "price": property.price,
-      "priceCurrency": "INR",
-      "priceSpecification": {
-        "@type": "UnitPriceSpecification",
-        "price": property.price,
-        "priceCurrency": "INR",
-        "referenceQuantity": {
-          "@type": "QuantitativeValue",
-          "value": 1,
-          "unitCode": "MON"
-        }
-      },
-      "availability": "https://schema.org/InStock",
-      "url": `https://maprent-2.onrender.com/property/${property._id}`
-    }
-  };
-
-  return (
-    <>
-      {/* Inject Structured Data into the HTML Head */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      
-      <PropertyDetailsClient property={property} />
-    </>
-  );
+  redirect(`/?propertyId=${id}`);
 }
