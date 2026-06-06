@@ -4,14 +4,14 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import {
   Filter, LocateFixed, Layers, Target, RotateCcw
 } from 'lucide-react';
-import { 
-  MapContainer, 
-  TileLayer, 
-  Marker, 
-  Circle, 
-  Polyline, 
-  useMap, 
-  useMapEvents 
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Circle,
+  Polyline,
+  useMap,
+  useMapEvents
 } from 'react-leaflet';
 import L from 'leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
@@ -43,12 +43,12 @@ L.Icon.Default.mergeOptions({
 
 
 
-  
+
 // ─── Map Controller (Isolated to prevent parent re-renders) ───────────────────
 function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setFilters }) {
   const mapInstance = useMap();
   const { filters: storeFilters } = usePropertyStore(); // Extra check if needed
-  
+
   useEffect(() => {
     if (!map) {
       setMap(mapInstance);
@@ -58,22 +58,22 @@ function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setF
 
   useEffect(() => {
     if (!mapInstance) return;
-    
+
     // ResizeObserver is essential here because CSS transitions (like width/height 0.4s)
     // mean the container size changes AFTER the window resize event fires.
     const resizeObserver = new ResizeObserver(() => {
       mapInstance.invalidateSize();
     });
-    
+
     const container = mapInstance.getContainer();
     if (container) {
       resizeObserver.observe(container);
     }
-    
+
     // Also bind to window resize as a fallback
     const handleResize = () => mapInstance.invalidateSize();
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
@@ -172,23 +172,23 @@ const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, onDrag
         }}
       />
       {/* Draggable Search Center Pin */}
-      <Marker 
-        position={dragPos} 
-        icon={centerIcon} 
+      <Marker
+        position={dragPos}
+        icon={centerIcon}
         draggable={true}
         zIndexOffset={1000}
         eventHandlers={eventHandlers}
       />
-      
+
       {/* Reset Controls (Moves with dragPos) */}
-      <Marker 
-        position={currentResetPos} 
-        icon={resetIcon} 
-        eventHandlers={{ 
+      <Marker
+        position={currentResetPos}
+        icon={resetIcon}
+        eventHandlers={{
           click: (e) => {
             L.DomEvent.stopPropagation(e);
             onReset();
-          } 
+          }
         }}
       />
     </>
@@ -201,8 +201,8 @@ const createPriceIcon = (property, isActive) => {
   let formattedPrice = 'N/A';
   if (price > 0) {
     formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
-                   : price >= 1000   ? `₹${(price / 1000).toFixed(0)}k`
-                   : `₹${price}`;
+      : price >= 1000 ? `₹${(price / 1000).toFixed(0)}k`
+        : `₹${price}`;
   }
 
   const html = `
@@ -249,20 +249,20 @@ export default function MapView() {
 
   // ── UI state ──
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [highlightedId, setHighlightedId]       = useState(null);
-  const [routeData, setRouteData]               = useState(null);
-  const [isNavigating, setIsNavigating]         = useState(false);
-  const [isFilterOpen, setIsFilterOpen]         = useState(false);
-  const [currentBounds, setCurrentBounds]       = useState(null);
-  const [searchAnchor, setSearchAnchor]         = useState(null);
-  const [userLocation, setUserLocation]         = useState(null);
-  
+  const [highlightedId, setHighlightedId] = useState(null);
+  const [routeData, setRouteData] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [currentBounds, setCurrentBounds] = useState(null);
+  const [searchAnchor, setSearchAnchor] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+
   // ── Local slider (smooth drag without store spam) ──
   const [localRadius, setLocalRadius] = useState(filters.radius || 1);
   const sliderTimer = useRef(null);
-  
-  useEffect(() => { 
-    setLocalRadius(filters.radius || 1); 
+
+  useEffect(() => {
+    setLocalRadius(filters.radius || 1);
     if (filters.lat && filters.lng) {
       setSearchAnchor([filters.lat, filters.lng]);
     } else {
@@ -292,13 +292,13 @@ export default function MapView() {
     const [lat, lng] = coords;
     map.panTo([lat, lng]);
     map.setZoom(14);
-    
+
     setTimeout(() => {
       const bounds = map.getBounds();
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
-      setFilters({ 
-        bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`, 
+      setFilters({
+        bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`,
         lat: null, lng: null, radius: null
       });
     }, 400);
@@ -314,7 +314,7 @@ export default function MapView() {
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => {
           const pos = [coords.latitude, coords.longitude];
-          
+
           // 1. Update Persistent User Tracking
           setUserLocation(pos);
 
@@ -325,14 +325,14 @@ export default function MapView() {
               easeLinearity: 0.25
             });
           }
-          
+
           // 3. Resolve the position for any consumers (like NavigationPanel)
           resolve(pos);
         },
         (err) => {
           console.error('[GEOLOCATION_ERROR]', err);
-          const msg = err.code === 1 ? 'Location access denied. Please enable it in browser settings.' 
-                    : 'Unable to retrieve location. Please check your GPS signal.';
+          const msg = err.code === 1 ? 'Location access denied. Please enable it in browser settings.'
+            : 'Unable to retrieve location. Please check your GPS signal.';
           alert(msg);
           reject(err);
         },
@@ -379,11 +379,11 @@ export default function MapView() {
       if (data.routes?.[0]) {
         const route = data.routes[0];
         setRouteData({
-          coordinates:   route.geometry.coordinates.map(c => [c[1], c[0]]),
+          coordinates: route.geometry.coordinates.map(c => [c[1], c[0]]),
           propertyTitle: property.title,
-          distance:      route.distance,
-          duration:      route.duration,
-          steps:         route.legs?.[0]?.steps || [],
+          distance: route.distance,
+          duration: route.duration,
+          steps: route.legs?.[0]?.steps || [],
         });
         setIsNavigating(true);
         const b = L.latLngBounds(route.geometry.coordinates.map(c => [c[1], c[0]]));
@@ -395,12 +395,12 @@ export default function MapView() {
   }, [map]);
 
   const handleSearchRoute = useCallback(async (startCoords, endCoords) => {
-    const currentDest  = routeData?.coordinates?.[routeData.coordinates.length - 1];
+    const currentDest = routeData?.coordinates?.[routeData.coordinates.length - 1];
     const currentStart = routeData?.coordinates?.[0];
     const start = startCoords
       ? [startCoords[0], startCoords[1]] // [lat, lng]
       : currentStart ? [currentStart[0], currentStart[1]] : null;
-    const end = endCoords 
+    const end = endCoords
       ? [endCoords[0], endCoords[1]] // [lat, lng]
       : currentDest ? [currentDest[0], currentDest[1]] : null;
     if (!start || !end) return;
@@ -410,7 +410,7 @@ export default function MapView() {
       ).then(r => r.json());
       if (data.routes?.[0]) {
         const route = data.routes[0];
-        const path  = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        const path = route.geometry.coordinates.map(c => [c[1], c[0]]);
         setRouteData(prev => ({ ...prev, coordinates: path, distance: route.distance, duration: route.duration, steps: route.legs?.[0]?.steps || [] }));
         if (map && path.length) {
           const b = L.latLngBounds(path);
@@ -512,8 +512,8 @@ export default function MapView() {
           <div className="flex items-center gap-2">
             <div className="w-2 h-6 bg-primary-color rounded-full" />
             <div className="flex flex-col">
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
-              <p className="discovery-subtitle">Precision property search driven by real-time map data</p>
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">FIND YOUR PERFECT RENTAL</h2>
+              <p className="discovery-subtitle">Smart rental search powered by live map data — see prices, availability & more in real time. </p>
             </div>
           </div>
         </div>
@@ -552,10 +552,10 @@ export default function MapView() {
           preferCanvas={true}
           className="luxury-leaflet-map"
         >
-          <MapController 
-            map={map} setMap={setMap} 
-            setCurrentBounds={setCurrentBounds} 
-            filters={filters} setFilter={setFilter} setFilters={setFilters} 
+          <MapController
+            map={map} setMap={setMap}
+            setCurrentBounds={setCurrentBounds}
+            filters={filters} setFilter={setFilter} setFilters={setFilters}
           />
           <TileLayer url={OSM_URL} attribution={ATTRIBUTION} />
 
@@ -566,9 +566,9 @@ export default function MapView() {
 
           {/* Radius circles (Isolated for performance) */}
           {searchAnchor && filters.radius && (
-            <AnimatedRadiusCircle 
-              searchAnchor={searchAnchor} 
-              radius={filters.radius} 
+            <AnimatedRadiusCircle
+              searchAnchor={searchAnchor}
+              radius={filters.radius}
               onReset={handleResetFilters}
               onDragEnd={handleRadiusDragEnd}
               resetIcon={resetAnchorIcon}
@@ -578,9 +578,9 @@ export default function MapView() {
 
           {/* Route polyline */}
           {routeData && (
-            <Polyline 
-              positions={routeData.coordinates} 
-              pathOptions={{ color: '#2563eb', opacity: 0.85, weight: 6 }} 
+            <Polyline
+              positions={routeData.coordinates}
+              pathOptions={{ color: '#2563eb', opacity: 0.85, weight: 6 }}
             />
           )}
 
