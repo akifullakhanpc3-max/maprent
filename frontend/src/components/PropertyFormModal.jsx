@@ -32,6 +32,27 @@ const locationIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
+function createPriceTagIcon(bhkType, price) {
+  let formattedPrice = 'N/A';
+  if (price > 0) {
+    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
+      : price >= 1000 ? `₹${(price / 1000).toFixed(0)}k`
+        : `₹${price}`;
+  }
+  return L.divIcon({
+    className: 'custom-price-pin',
+    html: `
+      <div class="price-pin-wrapper is-active">
+        ${bhkType ? `<span class="pin-bhk-tag">${bhkType.toUpperCase()}</span>` : ''}
+        <span class="price-text">${formattedPrice}</span>
+        <div class="price-pin-tail"></div>
+      </div>
+    `,
+    iconSize: [120, 40],
+    iconAnchor: [60, 40],
+  });
+}
+
 function MapFixer() {
   const map = useMap();
   useEffect(() => {
@@ -56,20 +77,30 @@ function MapEventsHandler({ setPosition, onLocationFound }) {
   return null;
 }
 
-function LocationMarker({ position, setPosition, onLocationFound }) {
+function LocationMarker({ position, setPosition, onLocationFound, priceTag }) {
   return position === null ? null : (
-    <Marker 
-      position={position} 
-      icon={locationIcon} 
-      draggable={true} 
-      eventHandlers={{
-        dragend: (e) => {
-          const coords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
-          setPosition(coords);
-          if (onLocationFound) onLocationFound(coords);
-        }
-      }} 
-    />
+    <>
+      {priceTag && (
+        <Marker
+          position={position}
+          icon={createPriceTagIcon(priceTag.bhkType, priceTag.price)}
+          interactive={false}
+          keyboard={false}
+        />
+      )}
+      <Marker
+        position={position}
+        icon={locationIcon}
+        draggable={true}
+        eventHandlers={{
+          dragend: (e) => {
+            const coords = [e.target.getLatLng().lat, e.target.getLatLng().lng];
+            setPosition(coords);
+            if (onLocationFound) onLocationFound(coords);
+          }
+        }}
+      />
+    </>
   );
 }
 
@@ -102,7 +133,13 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     propertyType: 'Non-Gated'
   });
 
-  const [position, setPosition] = useState(null);
+  const [position, setPosition] = useState(() => {
+    if (existingProperty?.location?.coordinates) {
+      return [existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]];
+    }
+    if (initialCoords) return initialCoords;
+    return null;
+  });
   const [isCustomHeadline, setIsCustomHeadline] = useState(false);
   const [isSameAsPhone, setIsSameAsPhone] = useState(false);
   const [images, setImages] = useState([]);
@@ -155,6 +192,9 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
         propertyType: existingProperty.propertyType || 'Non-Gated'
       });
       setPosition([existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]]);
+      if (mapRef.current) {
+        mapRef.current.flyTo([existingProperty.location.coordinates[1], existingProperty.location.coordinates[0]], 15);
+      }
       
       // Determine if headline is custom
       if (existingProperty.title && !predefinedHeadlines.includes(existingProperty.title)) {
@@ -368,7 +408,15 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
                       <MapFixer />
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       <MapEventsHandler setPosition={setPosition} onLocationFound={reverseGeocode} />
-                      <LocationMarker position={position} setPosition={setPosition} onLocationFound={reverseGeocode} />
+                      <LocationMarker
+                        position={position}
+                        setPosition={setPosition}
+                        onLocationFound={reverseGeocode}
+                        priceTag={existingProperty && (formData.price || existingProperty.price) ? {
+                          bhkType: formData.bhkType || existingProperty.bhkType,
+                          price: formData.price || existingProperty.price,
+                        } : null}
+                      />
                     </MapContainer>
                   </div>
                 </div>
