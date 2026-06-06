@@ -6,7 +6,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'maprent-2.onrender.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
-      { protocol: 'https', hostname: '*.supabase.co' }
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'fqockhvlcmaecesuevgc.supabase.co' }
     ],
   },
   async redirects() {

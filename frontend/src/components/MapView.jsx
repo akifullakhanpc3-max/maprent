@@ -512,7 +512,7 @@ export default function MapView() {
           <div className="flex items-center gap-2">
             <div className="w-2 h-6 bg-primary-color rounded-full" />
             <div className="flex flex-col">
-              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">FIND YOUR PERFECT RENTAL</h2>
+              <h2 className="text-sm font-black tracking-widest text-slate-400">Find Your Perfect Rental</h2>
               <p className="discovery-subtitle">Smart rental search powered by live map data — see prices, availability & more in real time. </p>
             </div>
           </div>

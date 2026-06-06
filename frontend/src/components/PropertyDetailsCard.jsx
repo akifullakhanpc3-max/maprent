@@ -4,6 +4,7 @@ import React from 'react';
 import { Share2, Heart, X, Maximize, Clock, Phone, ExternalLink } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { formatBHK, formatDaysAgo, formatArea, toSentenceCase } from '../utils/formatters';
 // import '../styles/components/PropertyDetailsCard.css';
 
 const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
@@ -18,20 +19,8 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
     await toggleWishlist(property._id);
   };
 
-  const getDaysAgo = (date, id) => {
-    let created;
-    if (date) {
-      created = new Date(date);
-    } else if (id && typeof id === 'string' && id.length === 24) {
-      const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
-      created = new Date(timestamp);
-    }
-    if (!created || isNaN(created.getTime())) return 'Recently';
-    const now = new Date();
-    const diffTime = Math.abs(now - created);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Listed Today';
-    return `Listed ${diffDays}d ago`;
+  const getDaysAgo = (date) => {
+    return formatDaysAgo(date);
   };
 
   const phoneNum = property.phone || '910000000000';
@@ -40,7 +29,7 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
     <div className="property-details-card">
       <div className="card-header-stack">
         <div className="card-title-row">
-          <h3 className="card-property-title">{property.title}</h3>
+          <h3 className="card-property-title">{formatBHK(property.title) || property.title}</h3>
           <div className="header-actions-group">
             <button
               className={`action-pill-btn ${isWishlisted ? 'liked' : ''}`}
@@ -95,20 +84,20 @@ const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
       </div>
 
       <div className="pill-tags-container">
-        <span className="tag-pill color-purple">{property.bhkType || "2 BHK"}</span>
-        <span className="tag-pill color-orange">{property.furnishing || "Unfurnished"}</span>
+        <span className="tag-pill color-purple">{formatBHK(property.bhkType) || "2 BHK"}</span>
+        <span className="tag-pill color-orange">{toSentenceCase(property.furnishing || "Unfurnished")}</span>
         <span className="tag-pill color-blue">
           {property.maintenance ? "Maintenance Extra" : "Incl. Maintenance"}
         </span>
-        <span className="tag-pill color-gray">{property.propertyType || "Not Gated"}</span>
-        <span className="tag-pill color-green">{property.tenantPreferred || "Family"}</span>
-        <span className="tag-pill color-dark">{getDaysAgo(property.createdAt, property._id)}</span>
+        <span className="tag-pill color-gray">{toSentenceCase(property.propertyType || "Non-Gated")}</span>
+        <span className="tag-pill color-green">{toSentenceCase(property.tenantPreferred || "Open to All")}</span>
+        <span className="tag-pill color-dark">{getDaysAgo(property.createdAt)}</span>
       </div>
 
       <div className="property-footer-meta">
         <div className="meta-spec-item">
           <Maximize size={16} />
-          <span>{property.sqft || '860'} sq.ft</span>
+          <span>{property.sqft ? formatArea(property.sqft) + ' sq.ft' : '860 sq.ft'}</span>
         </div>
         <div className="meta-spec-item">
           <Phone size={16} />

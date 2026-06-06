@@ -5,24 +5,13 @@ import { usePropertyStore } from '../store/usePropertyStore';
 import { Grid, Search, ChevronRight, Clock, Navigation, RotateCcw, Maximize } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
 import DiscoverCities from './DiscoverCities';
+import { formatBHK, formatDaysAgo, toSentenceCase } from '../utils/formatters';
 
 export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute, onSearchArea, onSearchRadius, onResetFilters }) {
   const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
 
-  const getDaysAgo = (date, id) => {
-    let created;
-    if (date) {
-      created = new Date(date);
-    } else if (id && typeof id === 'string' && id.length === 24) {
-      const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
-      created = new Date(timestamp);
-    }
-    if (!created || isNaN(created.getTime())) return 'Recently';
-    const now = new Date();
-    const diffTime = Math.abs(now - created);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Listed Today';
-    return `Listed ${diffDays}d ago`;
+  const getDaysAgo = (date) => {
+    return formatDaysAgo(date);
   };
 
   // Statistics calculation
@@ -59,32 +48,32 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
               onClick={onSearchArea}
               className={`action-btn search-full-btn ${isAreaActive ? 'is-active' : ''}`}
               data-tooltip="Find properties within the current map view (Default)"
-              title="Search by Area"
+              title="Browse by Area"
             >
               {isAreaActive && <div className="btn-shimmer"></div>}
               <Grid size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
-              <span style={{ position: 'relative', zIndex: 2 }}>Search by Area</span>
+              <span style={{ position: 'relative', zIndex: 2 }}>Browse by Area</span>
             </button>
             
             <button
               onClick={onSearchRadius}
               className={`action-btn search-radius-btn ${isRadiusActive ? 'is-active' : ''}`}
               data-tooltip="Search properties within a selected radius from center"
-              title="Search by Radius"
+              title="Search Nearby"
             >
               {isRadiusActive && <div className="btn-shimmer"></div>}
               <Navigation size={15} strokeWidth={2.2} style={{ position: 'relative', zIndex: 2 }} />
-              <span style={{ position: 'relative', zIndex: 2 }}>Search by Radius</span>
+              <span style={{ position: 'relative', zIndex: 2 }}>Search Nearby</span>
             </button>
 
             <button
               onClick={onResetFilters}
               className="action-btn reset-action-btn"
               data-tooltip="Clear all filters and reset the map view"
-              title="Reset Filters"
+              title="Clear Filters"
             >
               <RotateCcw size={15} strokeWidth={2.2} />
-              <span>Reset Filters</span>
+              <span>Clear Filters</span>
             </button>
           </div>
           <p className="discovery-help-text">
@@ -119,27 +108,27 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
 
         {/* Stats Insights - Dashboard Style */}
         <div className="sidebar-stats-header">
-          <h3 className="section-title">Market Insight</h3>
+          <h3 className="section-title">Live Availability</h3>
           <div className="live-indicator">LIVE</div>
         </div>
 
         <div className="premium-stats-bar">
           <div className="stat-item main">
             <span className="stat-val">{stats.total}</span>
-            <span className="stat-label">Available</span>
+            <span className="stat-label">Total Listed</span>
           </div>
           <div className="stat-separator"></div>
           <div className="stat-item">
             <span className="stat-val">{stats.bhk1}</span>
-            <span className="stat-label">1BHK</span>
+            <span className="stat-label">1 BHK</span>
           </div>
           <div className="stat-item">
             <span className="stat-val">{stats.bhk2}</span>
-            <span className="stat-label">2BHK</span>
+            <span className="stat-label">2 BHK</span>
           </div>
           <div className="stat-item">
             <span className="stat-val">{stats.bhk3}</span>
-            <span className="stat-label">3BHK</span>
+            <span className="stat-label">3 BHK</span>
           </div>
         </div>
 
@@ -191,7 +180,7 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                     <span className="rent-freq">/month</span>
                   </div>
 
-                  <h3 className="list-property-title">{property.title}</h3>
+                  <h3 className="list-property-title">{formatBHK(property.title) || property.title}</h3>
 
                   <div className="list-info-row">
                     <div className="info-pill">
@@ -200,14 +189,14 @@ export default function PropertyListPane({ selectedProperty, setSelectedProperty
                     </div>
                     <div className="info-pill">
                       <Clock size={14} />
-                      <span>{getDaysAgo(property.createdAt, property._id)}</span>
+                      <span>{getDaysAgo(property.createdAt)}</span>
                     </div>
                   </div>
 
                   <div className="list-tags-row">
-                    <span className="list-tag color-purple">{property.furnishing || 'Unfurnished'}</span>
-                    <span className="list-tag color-orange">{property.propertyType || 'Non-Gated'}</span>
-                    <span className="list-tag color-gray">{property.tenantPreferred || 'Any'}</span>
+                    <span className="list-tag color-purple">{toSentenceCase(property.furnishing || 'Unfurnished')}</span>
+                    <span className="list-tag color-orange">{toSentenceCase(property.propertyType || 'Non-Gated')}</span>
+                    <span className="list-tag color-gray">{toSentenceCase(property.tenantPreferred || 'Open to All')}</span>
                   </div>
 
                   <button className="view-details-cta">

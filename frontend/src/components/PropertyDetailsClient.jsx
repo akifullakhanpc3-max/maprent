@@ -10,6 +10,7 @@ import {
 import BookingFormModal from '../components/BookingFormModal';
 import ImageWithSkeleton from '../components/ImageWithSkeleton';
 import Navbar from '../components/Navbar';
+import { formatBHK, toSentenceCase } from '../utils/formatters';
 
 const getFloorSuffix = (floor) => {
   if (floor >= 11 && floor <= 13) return 'th';
@@ -143,7 +144,7 @@ export default function PropertyDetailsClient({ property }) {
                   <div className="flex-center h-full bg-slate-100 text-slate-300"><Grid size={64} /></div>
                 )}
                 <div className="floating-meta-badges">
-                  <span className="premium-badge !px-4 !py-2 !text-[9px] uppercase tracking-widest">{property.bhkType} Unit</span>
+                  <span className="premium-badge !px-4 !py-2 !text-[9px] uppercase tracking-widest">{formatBHK(property.bhkType)} Unit</span>
                   <div className="verification-badge !px-4 !py-2 !text-[9px] bg-slate-900/40 text-white backdrop-blur uppercase tracking-widest">
                     <ShieldCheck size={12} />
                     <span>Occupra Verified</span>
@@ -153,7 +154,7 @@ export default function PropertyDetailsClient({ property }) {
 
               {/* Narratives Section */}
               <div className="console-card !p-8 md:!p-12 flex-col gap-6">
-                <h3 className="text-lg font-black text-main tracking-tighter border-b border-slate-100 pb-5 uppercase">Architectural Narrative</h3>
+                <h3 className="text-lg font-black text-main tracking-tighter border-b border-slate-100 pb-5 uppercase">About This Property</h3>
                 <p className="text-slate-600 leading-relaxed text-base font-medium">
                   {property.description || "No description provided for this listing."}
                 </p>
@@ -162,7 +163,7 @@ export default function PropertyDetailsClient({ property }) {
               {property.amenities?.length > 0 && (
                 <div className="flex-col gap-8">
                   <div className="flex items-center gap-3">
-                    <h4 className="text-lg font-black text-main tracking-tighter uppercase">Listing Ecosystem</h4>
+                    <h4 className="text-lg font-black text-main tracking-tighter uppercase">Amenities & Features</h4>
                     <div className="h-[2px] bg-slate-100 grow" />
                   </div>
                   <div className="flex flex-wrap gap-3 md:gap-4">
@@ -171,7 +172,9 @@ export default function PropertyDetailsClient({ property }) {
                         <div className="w-8 min-w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex-center group-hover:scale-110 transition-transform">
                           <CheckCircle2 size={12} />
                         </div>
-                        <span className="font-bold text-[11px] uppercase tracking-wide text-slate-600 truncate">{amenity}</span>
+                        <span className="font-bold text-[11px] uppercase tracking-wide text-slate-600 truncate">
+                          {amenity === 'WIFI' ? 'Wi-Fi' : amenity === 'PARKING' ? 'Car Parking' : toSentenceCase(amenity)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -208,12 +211,12 @@ export default function PropertyDetailsClient({ property }) {
                       <MapPin size={12} />
                       {property.city || 'Regional Center'}
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-[0.9]">{property.title}</h1>
+                    <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-[0.9]">{formatBHK(property.title) || property.title}</h1>
                   </div>
 
                   <div className="flex-between items-center py-6 border-y border-slate-50">
                     <div className="flex-col gap-1">
-                      <span className="uppercase !text-[9px] font-black tracking-widest text-slate-400">Monthly Lease Node</span>
+                      <span className="uppercase !text-[9px] font-black tracking-widest text-slate-400">Monthly Rent</span>
                       <p className="text-4xl font-black text-indigo-600 tracking-tighter leading-none">{property.price ? '₹' + property.price.toLocaleString() : 'Price N/A'}</p>
                     </div>
                     <div className="status-pill success !px-4 !py-2 uppercase font-black text-[10px] tracking-widest">Live Asset</div>
@@ -227,7 +230,7 @@ export default function PropertyDetailsClient({ property }) {
                       </p>
                     </div>
                     <div className="flex-col gap-1 border-l border-slate-100 pl-4">
-                      <span className="uppercase !text-[8px] font-black tracking-widest text-slate-400">Maintenance</span>
+                      <span className="uppercase !text-[8px] font-black tracking-widest text-slate-400">Monthly Maintenance</span>
                       <p className="text-sm font-black text-slate-700 tracking-tighter">
                         {property.maintenance ? '₹' + property.maintenance.toLocaleString() : 'Not Specified'}
                       </p>
@@ -331,7 +334,7 @@ export default function PropertyDetailsClient({ property }) {
                             <Home size={14} className="text-amber-500" />
                             <div>
                               <span className="pd-stat-label">Property Type</span>
-                              <span className="pd-stat-val">{property.bhkType}</span>
+                              <span className="pd-stat-val">{formatBHK(property.bhkType)}</span>
                             </div>
                           </div>
                           <div className="pd-analyze-stat">

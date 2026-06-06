@@ -7,7 +7,8 @@ import ImageWithSkeleton from './ImageWithSkeleton';
 import api, { BASE_URL } from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
 import MiniMap from './MiniMap';
-import '../styles/components/PropertyDetailsCard.css'
+import '../styles/components/PropertyDetailsCard.css';
+import { formatBHK, formatDaysAgo, formatArea, toSentenceCase } from '../utils/formatters';
 
 export default function PropertyDetailsOverlay({ property, onClose, onShowRoute, onSelectProperty }) {
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -87,23 +88,8 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
 
   if (!property) return null;
 
-  const getDaysAgo = (date, id) => {
-    let created;
-    if (date) {
-      created = new Date(date);
-    } else if (id && typeof id === 'string' && id.length === 24) {
-      // Fallback: Extract timestamp from MongoDB ObjectId
-      const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
-      created = new Date(timestamp);
-    }
-
-    if (!created || isNaN(created.getTime())) return 'Recently';
-
-    const now = new Date();
-    const diffTime = Math.abs(now - created);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Listed Today';
-    return `Listed ${diffDays}d ago`;
+  const getDaysAgo = (date) => {
+    return formatDaysAgo(date);
   };
 
   return (
@@ -146,9 +132,9 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
                 </div>
               )}
               <div className="overlay-image-badges">
-                <span className="badge-item badge-dark">{property.bhkType} Unit</span>
+                <span className="badge-item badge-dark">{formatBHK(property.bhkType)} Unit</span>
                 <span className="badge-item badge-green">Available</span>
-                <span className="badge-item badge-blue">{getDaysAgo(property.createdAt, property._id)}</span>
+                <span className="badge-item badge-blue">{getDaysAgo(property.createdAt)}</span>
                 {property.isPinned && (
                   <span className="badge-item badge-gold">Pinned</span>
                 )}
@@ -168,26 +154,26 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               {/* Identity & Location */}
               <div className="title-location-group">
                 <div className="location-chip">
-                  HOME CENTER
+                  Residential Rental
                 </div>
                 <h1 className="main-property-title">
-                  {property.title || '2BHK Apartment'}
+                  {formatBHK(property.title) || '2 BHK Apartment'}
                 </h1>
                 <div className="main-price-display">
                   <span className="price-value">{property.price ? '₹' + property.price.toLocaleString() : '₹123'}</span>
-                  <span className="price-label">MONTHLY RENT</span>
+                  <span className="price-label">Monthly Rent</span>
                 </div>
 
                 {/* Tags Section (Synced with Card) */}
                 <div className="pill-tags-container overlay-tags-margin">
-                  <span className="tag-pill color-purple">{property.bhkType || "2 BHK"}</span>
-                  <span className="tag-pill color-orange">{property.furnishing || "Unfurnished"}</span>
+                  <span className="tag-pill color-purple">{formatBHK(property.bhkType) || "2 BHK"}</span>
+                  <span className="tag-pill color-orange">{toSentenceCase(property.furnishing || "Unfurnished")}</span>
                   <span className="tag-pill color-blue">
                     {property.maintenance ? "Maintenance Extra" : "Incl. Maintenance"}
                   </span>
-                  <span className="tag-pill color-gray">{property.propertyType || "Not Gated"}</span>
-                  <span className="tag-pill color-green">{property.tenantPreferred || "Family"}</span>
-                  <span className="tag-pill color-dark">{getDaysAgo(property.createdAt, property._id)}</span>
+                  <span className="tag-pill color-gray">{toSentenceCase(property.propertyType || "Non-Gated Community")}</span>
+                  <span className="tag-pill color-green">{toSentenceCase(property.tenantPreferred || "Family Preferred")}</span>
+                  <span className="tag-pill color-dark">{getDaysAgo(property.createdAt)}</span>
                 </div>
               </div>
 
@@ -195,7 +181,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               {/* Price Hero Section (Secondary Details) */}
               <div className="price-hero-card">
                 <div className="price-stack">
-                  <span className="stack-label">SECURITY DEPOSIT</span>
+                  <span className="stack-label">Security Deposit</span>
                   <span className="sub-price-val">
                     {(property.securityDeposit !== undefined && property.securityDeposit !== null)
                       ? '₹' + property.securityDeposit.toLocaleString()
@@ -204,7 +190,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
                 </div>
                 <div className="price-divider-v" />
                 <div className="price-stack">
-                  <span className="stack-label">MAINTENANCE</span>
+                  <span className="stack-label">Monthly Maintenance</span>
                   <span className="sub-price-val">
                     {property.maintenance ? '₹' + property.maintenance.toLocaleString() : '₹12'}
                   </span>
@@ -215,25 +201,25 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               {/* Specifications Grid */}
               <div className="section-container">
                 <h4 className="section-title-line">
-                  <span>Property Specifications</span>
+                  <span>Property Details</span>
                   <div className="line-grow" />
                 </h4>
                 <div className="specs-grid-layout">
                   <div className="spec-card">
-                    <span className="spec-label">Area</span>
-                    <span className="spec-value">{property.sqft || '860'} SQFT</span>
+                    <span className="spec-label">Carpet Area</span>
+                    <span className="spec-value">{property.sqft ? formatArea(property.sqft) + ' sq.ft' : '860 sq.ft'}</span>
                   </div>
                   <div className="spec-card">
-                    <span className="spec-label">Preference</span>
-                    <span className="spec-value">{property.foodPreference || 'Any'}</span>
+                    <span className="spec-label">Tenant Preference</span>
+                    <span className="spec-value">{toSentenceCase(property.foodPreference || 'Any')}</span>
                   </div>
                   <div className="spec-card">
-                    <span className="spec-label">Community</span>
-                    <span className="spec-value">{property.propertyType || 'Non-Gated'}</span>
+                    <span className="spec-label">Society Type</span>
+                    <span className="spec-value">{toSentenceCase(property.propertyType || 'Non-Gated')}</span>
                   </div>
                   <div className="spec-card">
-                    <span className="spec-label">Pets</span>
-                    <span className="spec-value">{property.petsAllowed ? 'Allowed' : 'Not Allowed'}</span>
+                    <span className="spec-label">Pets Allowed</span>
+                    <span className="spec-value">{property.petsAllowed ? 'Allowed' : 'No'}</span>
                   </div>
                 </div>
               </div>
@@ -241,7 +227,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               {/* Description Section */}
               <div className="section-container">
                 <h4 className="section-title-line">
-                  <span>Description</span>
+                  <span>About This Property</span>
                   <div className="line-grow" />
                 </h4>
                 <p className="description-text-body">
@@ -252,7 +238,7 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
                   className="report-listing-trigger"
                 >
                   <ShieldCheck size={14} />
-                  Report this Listing
+                  Report this listing
                 </button>
               </div>
 
@@ -260,14 +246,14 @@ export default function PropertyDetailsOverlay({ property, onClose, onShowRoute,
               {property.amenities?.length > 0 && (
                 <div className="section-container">
                   <h4 className="section-title-line">
-                    <span>Amenities</span>
+                    <span>Amenities & Features</span>
                     <div className="line-grow" />
                   </h4>
                   <div className="amenities-flex-list">
                     {property.amenities.map((a, i) => (
                       <div key={i} className="amenity-chip-item">
                         <CheckCircle2 size={16} />
-                        <span className="amenity-name">{a}</span>
+                        <span className="amenity-name">{a === 'WIFI' ? 'Wi-Fi' : a === 'PARKING' ? 'Car Parking' : toSentenceCase(a)}</span>
                       </div>
                     ))}
                   </div>

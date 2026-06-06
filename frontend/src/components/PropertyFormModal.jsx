@@ -9,6 +9,7 @@ import { usePropertyStore } from '../store/usePropertyStore';
 import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart, Phone, MessageCircle } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
 import MapSearchBar from './MapSearchBar';
+import { validatePropertyData } from '../utils/validation';
 // import '../styles/components/BookingFormModal.css'; // Reusing modal core styles
 
 // Fix typical Leaflet icon issue in React
@@ -255,6 +256,12 @@ export default function PropertyFormModal({ isOpen, onClose, refresh, existingPr
     // Phone validation
     if (formData.phone.length !== 10) return setError('Phone number must be exactly 10 digits.');
     if (formData.whatsapp.length !== 10) return setError('WhatsApp number must be exactly 10 digits.');
+    
+    const validationErrors = validatePropertyData(formData);
+    if (validationErrors.length > 0) {
+      return setError(validationErrors.join(' '));
+    }
+    
     setLoading(true);
 
     try {

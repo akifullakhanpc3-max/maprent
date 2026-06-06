@@ -205,7 +205,7 @@ export default function MapSearchBar({ onSearch, currentBounds }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Try 'Bangaluru', 'Noidaa', 'Gurgoan'..."
+          placeholder="Search by city, area or landmark..."
           className="search-input-field"
         />
         {query && (
