@@ -1,19 +1,13 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+"use client";
+
+import React, { useState, useMemo } from 'react';
 import { usePropertyStore } from '../store/usePropertyStore';
-import { useAuthStore } from '../store/useAuthStore';
-import { ArrowLeft, MapPin, Grid, CheckCircle2, Search, Share2, Heart, ShieldCheck, ChevronRight, Zap, Info, Clock, Navigation2, Navigation, Phone, MessageSquare, ExternalLink, Maximize, Building2, RotateCcw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Grid, Search, ChevronRight, Clock, Navigation, RotateCcw, Maximize } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
-import BookingFormModal from './BookingFormModal';
-import ImageWithSkeleton from './ImageWithSkeleton';
 import DiscoverCities from './DiscoverCities';
-import '../styles/components/PropertyListPane.css';
 
 export default function PropertyListPane({ selectedProperty, setSelectedProperty, highlightedId, setHighlightedId, onShowRoute, onSearchArea, onSearchRadius, onResetFilters }) {
-  const navigate = useNavigate();
   const { properties, filters, setFilter, setFilters, loading } = usePropertyStore();
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const getDaysAgo = (date, id) => {
     let created;

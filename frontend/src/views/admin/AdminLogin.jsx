@@ -1,11 +1,13 @@
+"use client";
+
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ShieldAlert, KeyRound, ArrowLeft, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
-import '../../styles/pages/Auth.css';
 
 export default function AdminLogin() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login } = useAuthStore();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -17,7 +19,6 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // Standardize to centralized userAuthStore for consistent headers
       await login(formData.email.trim(), formData.password);
       
       const { user } = useAuthStore.getState();
@@ -100,7 +101,7 @@ export default function AdminLogin() {
           </form>
           
           <div className="auth-footer">
-            <Link to="/" className="auth-footer-text !text-slate-400 hover:!text-indigo-600 transition-colors inline-flex items-center gap-2">
+            <Link href="/" className="auth-footer-text !text-slate-400 hover:!text-indigo-600 transition-colors inline-flex items-center gap-2">
               <ArrowLeft size={12} /> Return to discovery engine
             </Link>
           </div>

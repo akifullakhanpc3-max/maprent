@@ -1,8 +1,10 @@
+"use client";
+
 import React from 'react';
 import { Share2, Heart, X, Maximize, Clock, Phone, ExternalLink } from 'lucide-react';
 import { BASE_URL } from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
-import '../styles/components/PropertyDetailsCard.css';
+// import '../styles/components/PropertyDetailsCard.css';
 
 const PropertyDetailsCard = ({ property, onClose, onShowRoute }) => {
   const { user, toggleWishlist } = useAuthStore();

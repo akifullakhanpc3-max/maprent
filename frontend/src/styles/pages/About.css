@@ -1,0 +1,429 @@
+/* src/styles/pages/About.css */
+
+/* ============================================================
+   ABOUT PAGE — Full Responsive Layout System
+   Breakpoints: Mobile < 640px | Tablet 640–1023px | Desktop 1024px+
+   ============================================================ */
+
+/* === Page Wrapper === */
+.about-page-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === HERO SECTION === */
+.about-hero {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #0f172a; /* slate-900 fallback */
+}
+
+@media (min-width: 768px) {
+  .about-hero {
+    height: 65vh;
+    min-height: 480px;
+  }
+}
+
+.about-hero-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+}
+
+.about-hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .about-hero-content {
+    padding: 0 32px;
+    gap: 32px;
+  }
+}
+
+.about-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.about-hero-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.about-hero-title {
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  word-break: break-word;
+  margin: 0;
+}
+
+.about-hero-subtitle {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  color: #94a3b8; /* slate-400 */
+  font-weight: 500;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Hero Buttons — wrap on mobile */
+.about-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.about-hero-actions .btn {
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .about-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .about-hero-actions .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* === MISSION SECTION === */
+.about-mission {
+  width: 100%;
+  padding: 56px 20px;
+}
+
+@media (min-width: 768px) {
+  .about-mission {
+    padding: 80px 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-mission {
+    padding: 96px 48px;
+  }
+}
+
+.about-mission-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .about-mission-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+}
+
+/* Stats Row — wraps on mobile */
+.about-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  padding-top: 16px;
+}
+
+@media (min-width: 480px) {
+  .about-stats-row {
+    gap: 32px;
+  }
+}
+
+.about-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 60px;
+}
+
+/* Mission image container */
+.about-mission-image-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.about-mission-image-wrap img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  display: block;
+}
+
+/* Floating badge — only on large screens, hidden on small to prevent overflow */
+.about-mission-badge {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .about-mission-badge {
+    display: block;
+    position: absolute;
+    bottom: -24px;
+    left: -24px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f1f5f9;
+  }
+}
+
+/* === FEATURES SECTION === */
+.about-features {
+  width: 100%;
+  padding: 16px 16px;
+}
+
+@media (min-width: 768px) {
+  .about-features {
+    padding: 32px 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-features {
+    padding: 40px 48px;
+  }
+}
+
+.about-features-card {
+  max-width: 1280px;
+  margin: 0 auto;
+  background: rgba(248, 250, 252, 0.5);
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 48px 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .about-features-card {
+    padding: 64px 48px;
+  }
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .about-features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Feature card — override antiGravityFloat from .console-card */
+.about-feature-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* Override the floating animation that comes from .console-card */
+  animation: none !important;
+  will-change: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.about-feature-card:hover {
+  border-color: #818cf8; /* indigo-400 */
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.1);
+  transform: translateY(-4px);
+}
+
+.about-feature-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background: #0f172a;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background-color 200ms ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.about-feature-card:hover .about-feature-icon {
+  background: #4f46e5; /* indigo-600 */
+}
+
+.about-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* === CTA SECTION === */
+.about-cta {
+  width: 100%;
+  padding: 40px 16px;
+}
+
+@media (min-width: 768px) {
+  .about-cta {
+    padding: 64px 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-cta {
+    padding: 80px 48px;
+  }
+}
+
+.about-cta-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  background: #0f172a;
+  border-radius: 20px;
+  padding: 48px 24px;
+  color: white;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .about-cta-inner {
+    padding: 64px 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-cta-inner {
+    padding: 80px 80px;
+  }
+}
+
+.about-cta-watermark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 32px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.about-cta-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.about-cta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* CTA buttons — wrap gracefully on small screens */
+.about-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .about-cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .about-cta-actions .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Fix: ghost button hover on dark backgrounds (hero + CTA) —
+   override the global btn-ghost hover that applies a light bg + dark text */
+.about-hero-actions .btn-ghost:hover:not(:disabled),
+.about-cta-actions .btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.35);
+}

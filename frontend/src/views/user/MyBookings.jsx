@@ -1,12 +1,13 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import { useBookingStore } from '../../store/useBookingStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { BASE_URL } from '../../api/axios';
-import { MapPin, Calendar, CheckCircle2, XCircle, Clock, Search, Trash2, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { MapPin, Calendar, Search, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import '../../styles/views/Dashboards.css';
 
 export default function MyBookings() {
   const { myRequests, fetchMyRequests, updateBookingStatus, loading, setProcessing } = useBookingStore();
@@ -51,7 +52,7 @@ export default function MyBookings() {
             <h3 className="text-xl font-bold text-slate-900">No applications</h3>
             <p className="text-sm font-medium text-slate-500">You haven't initiated any property requests yet.</p>
           </div>
-          <Link to="/" className="btn btn-primary mt-8 !px-10">
+          <Link href="/" className="btn btn-primary mt-8 !px-10">
             Explore Properties
           </Link>
         </div>
@@ -95,12 +96,12 @@ export default function MyBookings() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-100 flex-col gap-1">
-                      <span className="label-base !m-0 !text-[8px] !text-slate-400">Move-in Date</span>
-                      <span className="text-xs font-bold text-slate-700">{new Date(booking.moveInDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                       <span className="label-base !m-0 !text-[8px] !text-slate-400">Move-in Date</span>
+                       <span className="text-xs font-bold text-slate-700">{new Date(booking.moveInDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
                     <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-100 flex-col gap-1">
-                      <span className="label-base !m-0 !text-[8px] !text-slate-400">Lease term</span>
-                      <span className="text-xs font-bold text-slate-700">{booking.duration} Months</span>
+                       <span className="label-base !m-0 !text-[8px] !text-slate-400">Lease term</span>
+                       <span className="text-xs font-bold text-slate-700">{booking.duration} Months</span>
                     </div>
                   </div>
                 </div>

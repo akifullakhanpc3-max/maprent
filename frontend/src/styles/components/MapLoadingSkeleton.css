@@ -1,0 +1,191 @@
+/* src/styles/components/MapLoadingSkeleton.css */
+
+/* ── Shimmer keyframe ── */
+@keyframes skeleton-sweep {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* ── Base shimmer block ── */
+.skeleton-shimmer {
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.skeleton-block,
+.skeleton-map-tile {
+  background: linear-gradient(
+    90deg,
+    #e2e8f0 0%,
+    #f1f5f9 40%,
+    #e2e8f0 80%
+  );
+  background-size: 800px 100%;
+  animation: skeleton-sweep 1.6s ease-in-out infinite;
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-full {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Outer layout — mirrors .map-dashboard-layout ── */
+.skeleton-map-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .skeleton-map-layout {
+    flex-direction: column;
+  }
+}
+
+/* ── LEFT SIDEBAR ── */
+.skeleton-sidebar {
+  width: 350px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  border-right: 2px solid #e2e8f0;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .skeleton-sidebar {
+    width: 100%;
+    height: auto;
+    min-height: 50vh;
+    border-right: none;
+    border-top: 1px solid #e2e8f0;
+    order: 2;
+  }
+}
+
+/* Sidebar top: search + chips */
+.skeleton-sidebar-header {
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.skeleton-chip-row {
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* Scrollable card list area */
+.skeleton-card-list {
+  flex: 1;
+  overflow: hidden;
+  padding: 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Property card skeleton ── */
+.skeleton-property-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.skeleton-card-image {
+  height: 130px;
+  background: #e2e8f0;
+}
+
+.skeleton-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeleton-card-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ── RIGHT MAP PANE ── */
+.skeleton-map-pane {
+  flex: 1;
+  position: relative;
+  background: #e8edf2;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .skeleton-map-pane {
+    height: 50vh;
+    min-height: 350px;
+    order: 1;
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* Floating top search bar on map */
+.skeleton-map-topbar {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  width: calc(100% - 48px);
+  max-width: 560px;
+}
+
+/* Map tile shimmer grid — simulates map tiles */
+.skeleton-map-tiles {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 1px;
+}
+
+.skeleton-map-tile {
+  background: linear-gradient(
+    90deg,
+    #dde3eb 0%,
+    #edf1f5 40%,
+    #dde3eb 80%
+  );
+  background-size: 800px 100%;
+  animation: skeleton-sweep 2s ease-in-out infinite;
+  border-radius: 0;
+}
+
+/* Zoom controls placeholder */
+.skeleton-zoom-controls {
+  position: absolute;
+  bottom: 28px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}

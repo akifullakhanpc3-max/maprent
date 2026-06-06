@@ -17,10 +17,12 @@ import propertyRoutes from './routes/properties.js';
 import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
 import ownerRoutes from './routes/owner.js';
+import blogRoutes from './routes/blogs.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Triggering fresh build for admin routes
 const app = express();
 
 // Trust Render's proxy for Rate Limiting
@@ -60,6 +62,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/owner', ownerRoutes);
+app.use('/api/blogs', blogRoutes);
 
 const PORT = process.env.PORT;
 

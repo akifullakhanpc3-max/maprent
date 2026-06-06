@@ -1,7 +1,9 @@
+"use client";
+
 import React from 'react';
 import { MapPin } from 'lucide-react';
 import { usePropertyStore } from '../store/usePropertyStore';
-import '../styles/components/DiscoverCities.css';
+// import '../styles/components/DiscoverCities.css';
 
 const CITIES = [
   { name: 'Bangalore', coords: [12.9716, 77.5946] },

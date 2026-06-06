@@ -1,14 +1,16 @@
-import { useState } from 'react';
-import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
+"use client";
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Home, Calendar, LogOut, Menu, X, PlusCircle, ClipboardList } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import '../../styles/views/Dashboards.css';
-import logo from '../../../logo/Occupra logo.png';
 
-export default function OwnerLayout() {
+export default function OwnerLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
   const { logout, user, loading } = useAuthStore();
 
   const navigation = [
@@ -19,11 +21,14 @@ export default function OwnerLayout() {
     { name: 'Availability', href: '/owner/availability', icon: Calendar },
   ];
 
-  if (loading) return <LoadingSpinner fullScreen />;
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'owner')) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
-  if (!user || user.role !== 'owner') {
-    return <Navigate to="/" replace />;
-  }
+  if (loading) return <LoadingSpinner fullScreen />;
+  if (!user || user.role !== 'owner') return null;
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -33,14 +38,13 @@ export default function OwnerLayout() {
       <div 
         className={`mobile-overlay ${isSidebarOpen ? 'visible' : ''}`} 
         onClick={() => setIsSidebarOpen(false)} 
-        style={{ zIndex: 4500 }} /* Ensure it covers everything but sidebar */
       />
 
       {/* Sidebar */}
       <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" className="flex-row gap-3">
-            <img src={logo} alt="Occupra" className="logo-sidebar-compact" />
+          <Link href="/" className="flex-row gap-3">
+            <img src="/logo/Occupra logo.png" alt="Occupra" className="logo-sidebar-compact" />
             <div className="flex-col">
               <span className="text-sm font-black text-main tracking-tighter">OCCUPRA</span>
               <span className="text-[9px] font-bold text-low uppercase tracking-[0.1em]">Owner Console</span>
@@ -53,11 +57,11 @@ export default function OwnerLayout() {
 
         <nav className="sidebar-nav">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = pathname === item.href || (item.href === '/owner/properties' && pathname === '/owner/properties/new');
             return (
               <Link
                 key={item.name}
-                to={item.href}
+                href={item.href}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`nav-link ${isActive ? 'active' : ''}`}
               >
@@ -79,7 +83,7 @@ export default function OwnerLayout() {
             </div>
           </div>
           <button
-            onClick={logout}
+            onClick={() => { logout(); router.push('/'); }}
             className="btn btn-secondary !h-9 !text-[10px] !text-error !justify-start w-full"
           >
             <LogOut size={12} />
@@ -102,16 +106,16 @@ export default function OwnerLayout() {
            </div>
            
            <div className="flex-row gap-4">
-              <Link to="/" className="text-xs font-bold text-muted hover:text-primary transition-colors">
+              <Link href="/" className="text-xs font-bold text-muted hover:text-primary transition-colors">
                 Public View
               </Link>
            </div>
         </header>
 
         <main className="main-content">
-           <div className="dashboard-content-overflow">
-              <Outlet />
-           </div>
+          <div className="dashboard-content-overflow">
+            {children}
+          </div>
         </main>
       </div>
     </div>

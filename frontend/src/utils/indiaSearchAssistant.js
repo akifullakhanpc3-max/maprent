@@ -124,11 +124,13 @@ export const findClosestIndianLocation = (query) => {
 const SEARCH_CACHE_KEY = 'occupra_search_history';
 
 export const getCachedSearch = (query) => {
+  if (typeof window === 'undefined') return null;
   const cache = JSON.parse(localStorage.getItem(SEARCH_CACHE_KEY) || '{}');
   return cache[normalize(query)];
 };
 
 export const saveSearchToCache = (query, result) => {
+  if (typeof window === 'undefined') return;
   const cache = JSON.parse(localStorage.getItem(SEARCH_CACHE_KEY) || '{}');
   cache[normalize(query)] = result;
   localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(cache));

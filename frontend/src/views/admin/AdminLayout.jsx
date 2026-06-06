@@ -1,26 +1,28 @@
-import { useState } from 'react';
-import { Link, useLocation, Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Home, Calendar, LogOut, ShieldAlert, Activity, Globe, Menu, X, Settings, UserCog } from 'lucide-react';
+"use client";
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, Users, Home, Calendar, LogOut, ShieldAlert, Activity, Globe, Menu, X, Settings, UserCog, BookOpen } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import '../../styles/views/Dashboards.css';
-import logo from '../../../logo/Occupra logo.png';
 
-export default function AdminLayout() {
+export default function AdminLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
   const { logout, user, loading } = useAuthStore();
 
   const ADMIN_ROLES = ['admin', 'master_admin', 'employee', 'worker'];
   const perms = user?.permissions || [];
   const isMaster = user?.role === 'master_admin';
-  const hasAdminLevel = ['admin', 'master_admin'].includes(user?.role);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, show: true },
     { name: 'Users', href: '/admin/users', icon: Users, show: isMaster || perms.includes('MANAGE_USERS') },
     { name: 'Properties', href: '/admin/properties', icon: Home, show: true },
     { name: 'Bookings', href: '/admin/bookings', icon: Calendar, show: isMaster || perms.includes('MANAGE_BOOKINGS') },
+    { name: 'Blogs CMS', href: '/admin/blogs', icon: BookOpen, show: true },
     ...(isMaster ? [
       { name: 'Tenants', href: '/admin/tenants', icon: Globe, show: true },
       { name: 'Staff Management', href: '/admin/staff', icon: UserCog, show: true },
@@ -30,13 +32,21 @@ export default function AdminLayout() {
     { name: 'Settings', href: '/admin/settings', icon: Settings, show: true },
   ].filter(item => item.show);
 
-  if (loading) return <LoadingSpinner fullScreen />;
-
-  if (!user || !['admin', 'master_admin', 'employee', 'worker'].includes(user.role)) {
-    return <Navigate to="/" replace />;
-  }
+  useEffect(() => {
+    if (!loading && (!user || !ADMIN_ROLES.includes(user.role)) && pathname !== '/admin/login') {
+      router.push('/admin/login');
+    }
+  }, [user, loading, router, pathname]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const isLoginPage = pathname === '/admin/login';
+
+  if (loading) return <LoadingSpinner fullScreen />;
+
+  if (isLoginPage) return children;
+
+  if (!user || !ADMIN_ROLES.includes(user.role)) return null;
 
   return (
     <div className="dashboard-layout">
@@ -49,8 +59,8 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <Link to="/" className="flex-row gap-3">
-            <img src={logo} alt="Occupra" className="logo-sidebar-compact" />
+          <Link href="/" className="flex-row gap-3">
+            <img src="/logo/Occupra logo.png" alt="Occupra" className="logo-sidebar-compact" />
             <div className="flex-col">
               <span className="brand-name text-white">ADMIN</span>
               <span className="label-base !text-[8px] !m-0 !tracking-[0.2em] text-slate-500">Infrastructure</span>
@@ -63,11 +73,11 @@ export default function AdminLayout() {
 
         <nav className="sidebar-nav">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
-                to={item.href}
+                href={item.href}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`nav-link ${isActive ? 'active' : ''}`}
               >
@@ -91,7 +101,7 @@ export default function AdminLayout() {
             </div>
           </div>
           <button
-            onClick={logout}
+            onClick={() => { logout(); router.push('/'); }}
             className="btn btn-ghost w-full !h-8 !text-[10px] !text-rose-400 border border-rose-500/10 hover:bg-rose-500/10"
           >
             <LogOut size={12} />
@@ -114,20 +124,20 @@ export default function AdminLayout() {
            </div>
            
            <div className="flex-row gap-4">
-              <Link to="/" className="label-base hover:text-primary-color transition-colors">
+              <Link href="/" className="label-base hover:text-primary-color transition-colors">
                 Exit Console
               </Link>
               <div className="h-4 w-px bg-border-light" />
-              <Link to="/admin/settings" className="btn btn-secondary !p-2 !h-9 !w-9 flex items-center justify-center">
+              <Link href="/admin/settings" className="btn btn-secondary !p-2 !h-9 !w-9 flex items-center justify-center">
                 <Settings size={16} />
               </Link>
            </div>
         </header>
         
         <main className="main-content">
-           <div className="dashboard-content-overflow">
-              <Outlet />
-           </div>
+          <div className="dashboard-content-overflow">
+            {children}
+          </div>
         </main>
       </div>
     </div>

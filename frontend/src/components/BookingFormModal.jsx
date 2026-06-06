@@ -1,8 +1,10 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { X, Calendar, User, Phone, MessageSquare, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useBookingStore } from '../store/useBookingStore';
 import LoadingSpinner from './common/LoadingSpinner';
-import '../styles/components/BookingFormModal.css';
+// import '../styles/components/BookingFormModal.css';
 
 export default function BookingFormModal({ isOpen, onClose, propertyId, propertyTitle }) {
   const { createBooking } = useBookingStore();

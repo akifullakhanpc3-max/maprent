@@ -1,9 +1,11 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import api, { BASE_URL } from '../../api/axios';
 import { Calendar, Search, MapPin, Power, Activity, ShieldCheck, AlertCircle, Home, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
-import '../../styles/views/Dashboards.css';
-import '../../styles/views/ManageProperties.css';
+// import '../../styles/views/Dashboards.css';
+// import '../../styles/views/ManageProperties.css';
 
 export default function ManageAvailability() {
   const [properties, setProperties] = useState([]);

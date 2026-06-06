@@ -3,7 +3,7 @@
 .modal-overlay-container {
   position: fixed;
   inset: 0;
-  z-index: 8000; /* Higher than Map (1000), Sidebar (5000), and Detail Overlay (7000) */
+  z-index: 9500;
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(8px);
   display: flex;
@@ -225,7 +225,7 @@ textarea.input-base {
 .glass-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 7999;
+  z-index: 9499;
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(8px);
 }
@@ -240,8 +240,8 @@ textarea.input-base {
   }
   
   .modal-content-standard {
-    max-height: 100vh;
-    height: 100vh;
+    max-height: 100dvh;
+    height: 100dvh;
     border-radius: 0;
   }
   

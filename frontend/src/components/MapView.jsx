@@ -1,0 +1,650 @@
+"use client";
+
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import {
+  Filter, LocateFixed, Layers, Target, RotateCcw
+} from 'lucide-react';
+import { 
+  MapContainer, 
+  TileLayer, 
+  Marker, 
+  Circle, 
+  Polyline, 
+  useMap, 
+  useMapEvents 
+} from 'react-leaflet';
+import L from 'leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import { usePropertyStore } from '../store/usePropertyStore';
+import { useAuthStore } from '../store/useAuthStore';
+import dynamic from 'next/dynamic';
+import MapSearchBar from '../components/MapSearchBar';
+import PropertyListPane from '../components/PropertyListPane';
+import MapCursor from '../components/MapCursor';
+
+const FilterPanel = dynamic(() => import('../components/FilterPanel'), { ssr: false });
+const BookingFormModal = dynamic(() => import('../components/BookingFormModal'), { ssr: false });
+const PropertyDetailsOverlay = dynamic(() => import('../components/PropertyDetailsOverlay'), { ssr: false });
+const NavigationPanel = dynamic(() => import('../components/NavigationPanel'), { ssr: false });
+// import '../styles/pages/MapView.css';
+
+// ─── Config ───────────────────────────────────────────────────────────────────
+const DEFAULT_CENTER = [12.2958, 76.6394]; // Mysore [lat, lng]
+const OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+// Fix for default Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+
+
+  
+// ─── Map Controller (Isolated to prevent parent re-renders) ───────────────────
+function MapController({ map, setMap, setCurrentBounds, filters, setFilter, setFilters }) {
+  const mapInstance = useMap();
+  const { filters: storeFilters } = usePropertyStore(); // Extra check if needed
+  
+  useEffect(() => {
+    if (!map) {
+      setMap(mapInstance);
+      setFilters({ lat: null, lng: null, bounds: null, radius: 1 });
+    }
+  }, [mapInstance, map, setMap, setFilters]);
+
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    // ResizeObserver is essential here because CSS transitions (like width/height 0.4s)
+    // mean the container size changes AFTER the window resize event fires.
+    const resizeObserver = new ResizeObserver(() => {
+      mapInstance.invalidateSize();
+    });
+    
+    const container = mapInstance.getContainer();
+    if (container) {
+      resizeObserver.observe(container);
+    }
+    
+    // Also bind to window resize as a fallback
+    const handleResize = () => mapInstance.invalidateSize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [mapInstance]);
+
+  useMapEvents({
+    moveend: () => {
+      const bounds = mapInstance.getBounds();
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
+      const str = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
+      setCurrentBounds(str);
+      if (!storeFilters.lat || !storeFilters.lng) setFilter('bounds', str);
+    },
+    click: (e) => {
+      const { lat, lng } = e.latlng;
+      setFilters({ lat, lng, bounds: null, radius: storeFilters.radius || 1 });
+    }
+  });
+
+  return null;
+}
+
+// ─── Animated Radius Circle (Isolated performance) ───────────────────────────
+const AnimatedRadiusCircle = React.memo(({ searchAnchor, radius, onReset, onDragEnd, resetPosition, resetIcon, centerIcon }) => {
+  const [rippleProgress, setRippleProgress] = useState(0);
+  const [dragPos, setDragPos] = useState(searchAnchor);
+
+  // Sync dragPos when searchAnchor changes from outside (e.g. search bar)
+  useEffect(() => {
+    setDragPos(searchAnchor);
+  }, [searchAnchor]);
+
+  useEffect(() => {
+    let start = performance.now();
+    const CYCLE = 2800;
+    let animFrame;
+
+    const tick = (ts) => {
+      let elapsed = ts - start;
+      if (elapsed > CYCLE) { start = ts; elapsed = 0; }
+      setRippleProgress(elapsed / CYCLE);
+      animFrame = requestAnimationFrame(tick);
+    };
+
+    animFrame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animFrame);
+  }, []);
+
+  const eventHandlers = useMemo(() => ({
+    drag: (e) => {
+      const latlng = e.target.getLatLng();
+      setDragPos([latlng.lat, latlng.lng]);
+    },
+    dragend: (e) => {
+      const latlng = e.target.getLatLng();
+      const newPos = [latlng.lat, latlng.lng];
+      setDragPos(newPos);
+      onDragEnd(newPos);
+    }
+  }), [onDragEnd]);
+
+  // Calculate reset position dynamically based on drag position
+  const currentResetPos = useMemo(() => {
+    if (!dragPos || !radius || !L.latLng) return dragPos;
+    try {
+      const center = L.latLng(dragPos[0], dragPos[1]);
+      const bounds = center.toBounds(radius * 1.2 * 1000);
+      return bounds.getNorthEast();
+    } catch (e) { return dragPos; }
+  }, [dragPos, radius]);
+
+  return (
+    <>
+      <Circle
+        center={dragPos}
+        radius={(radius * 1000) * (1 + 0.15 * (1 - Math.pow(1 - rippleProgress, 3)))}
+        pathOptions={{
+          color: '#60a5fa',
+          fillOpacity: 0,
+          opacity: 0.6,
+          weight: Math.max(1, 12 * (1 - rippleProgress)),
+          interactive: false
+        }}
+      />
+      <Circle
+        center={dragPos}
+        radius={radius * 1000}
+        pathOptions={{
+          color: '#1d4ed8',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.15,
+          weight: 4,
+          interactive: false
+        }}
+      />
+      {/* Draggable Search Center Pin */}
+      <Marker 
+        position={dragPos} 
+        icon={centerIcon} 
+        draggable={true}
+        zIndexOffset={1000}
+        eventHandlers={eventHandlers}
+      />
+      
+      {/* Reset Controls (Moves with dragPos) */}
+      <Marker 
+        position={currentResetPos} 
+        icon={resetIcon} 
+        eventHandlers={{ 
+          click: (e) => {
+            L.DomEvent.stopPropagation(e);
+            onReset();
+          } 
+        }}
+      />
+    </>
+  );
+});
+
+// ─── Utility: Price Markers Creation ──────────────────────────────────────────
+const createPriceIcon = (property, isActive) => {
+  const price = property.price;
+  let formattedPrice = 'N/A';
+  if (price > 0) {
+    formattedPrice = price >= 100000 ? `₹${(price / 100000).toFixed(1)}L`
+                   : price >= 1000   ? `₹${(price / 1000).toFixed(0)}k`
+                   : `₹${price}`;
+  }
+
+  const html = `
+    <div class="price-pin-wrapper ${isActive ? 'is-active' : ''}">
+      ${property.bhkType ? `<span class="pin-bhk-tag">${property.bhkType.toUpperCase()}</span>` : ''}
+      <span class="price-text">${formattedPrice}</span>
+      <div class="price-pin-tail"></div>
+    </div>
+  `;
+
+  return L.divIcon({
+    className: 'custom-price-pin',
+    html: html,
+    iconSize: [120, 40],
+    iconAnchor: [60, 40]
+  });
+};
+
+// ─── Utility: Custom Cluster Icon ─────────────────────────────────────────────
+const createClusterCustomIcon = function (cluster) {
+  const count = cluster.getChildCount();
+  return L.divIcon({
+    html: `
+      <div class="price-pin-wrapper cluster-pin">
+        <span class="pin-bhk-tag">${count}</span>
+        <span class="price-text">PROPERTIES</span>
+        <div class="price-pin-tail"></div>
+      </div>
+    `,
+    className: 'custom-price-pin',
+    iconSize: [120, 40],
+    iconAnchor: [60, 40],
+  });
+};
+
+
+// ─── Main Component ────────────────────────────────────────────────────────────
+export default function MapView() {
+  const { properties, filters, loading, setFilter, setFilters, fetchPropertyById } = usePropertyStore();
+  const { user } = useAuthStore();
+
+  // ── Map instance ──
+  const [map, setMap] = useState(null);
+
+  // ── UI state ──
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [highlightedId, setHighlightedId]       = useState(null);
+  const [routeData, setRouteData]               = useState(null);
+  const [isNavigating, setIsNavigating]         = useState(false);
+  const [isFilterOpen, setIsFilterOpen]         = useState(false);
+  const [currentBounds, setCurrentBounds]       = useState(null);
+  const [searchAnchor, setSearchAnchor]         = useState(null);
+  const [userLocation, setUserLocation]         = useState(null);
+  
+  // ── Local slider (smooth drag without store spam) ──
+  const [localRadius, setLocalRadius] = useState(filters.radius || 1);
+  const sliderTimer = useRef(null);
+  
+  useEffect(() => { 
+    setLocalRadius(filters.radius || 1); 
+    if (filters.lat && filters.lng) {
+      setSearchAnchor([filters.lat, filters.lng]);
+    } else {
+      setSearchAnchor(null); // Cleanup circle when switching to Area mode
+      // If we're resetting filters, clear navigation and selection too
+      if (!filters.city || filters.city === 'All') {
+        setIsNavigating(false);
+        setRouteData(null);
+        setSelectedProperty(null);
+      }
+    }
+  }, [filters.radius, filters.lat, filters.lng, filters.city]);
+
+  // ─── Fit map to circle bounds ─────────────────────────────────────────────
+  const fitToRadius = useCallback(() => {
+    if (!map || !searchAnchor || !filters.radius) return;
+    const center = L.latLng(searchAnchor[0], searchAnchor[1]);
+    const bounds = center.toBounds(filters.radius * 1000);
+    map.fitBounds(bounds, { padding: [60, 60] });
+  }, [map, searchAnchor, filters.radius]);
+
+
+
+  // ─── Event handlers ───────────────────────────────────────────────────────
+  const handleLocationSelect = useCallback((coords) => {
+    if (!map || !Array.isArray(coords)) return;
+    const [lat, lng] = coords;
+    map.panTo([lat, lng]);
+    map.setZoom(14);
+    
+    setTimeout(() => {
+      const bounds = map.getBounds();
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+      setFilters({ 
+        bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`, 
+        lat: null, lng: null, radius: null
+      });
+    }, 400);
+  }, [map, setFilters]);
+
+  const handleLocateMe = useCallback(() => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported.');
+        return reject('No geolocation');
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          const pos = [coords.latitude, coords.longitude];
+          
+          // 1. Update Persistent User Tracking
+          setUserLocation(pos);
+
+          // 2. Update Map - use flyTo for premium feel
+          if (map) {
+            map.flyTo(pos, 16, {
+              duration: 1.5,
+              easeLinearity: 0.25
+            });
+          }
+          
+          // 3. Resolve the position for any consumers (like NavigationPanel)
+          resolve(pos);
+        },
+        (err) => {
+          console.error('[GEOLOCATION_ERROR]', err);
+          const msg = err.code === 1 ? 'Location access denied. Please enable it in browser settings.' 
+                    : 'Unable to retrieve location. Please check your GPS signal.';
+          alert(msg);
+          reject(err);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    });
+  }, [map, setFilters, filters.radius]);
+
+  const handleRadiusSearch = useCallback(() => {
+    if (!map) return;
+    const c = map.getCenter();
+    setFilters({ lat: c.lat, lng: c.lng, bounds: null, radius: filters.radius || 1 });
+  }, [map, filters.radius, setFilters]);
+
+  const handleRadiusDragEnd = useCallback((newPos) => {
+    setFilters({ lat: newPos[0], lng: newPos[1], bounds: null, radius: filters.radius || 1 });
+  }, [filters.radius, setFilters]);
+
+  const handleSearchArea = useCallback(() => {
+    if (!map) return;
+    const bounds = map.getBounds();
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    setFilters({ bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`, lat: null, lng: null });
+  }, [map, setFilters]);
+
+  const handleSearchRadius = useCallback(() => {
+    if (!map) return;
+    const center = map.getCenter();
+    setFilters({ lat: center.lat, lng: center.lng, bounds: null, radius: filters.radius || 1 });
+  }, [map, filters.radius, setFilters]);
+
+  const handleShowRoute = useCallback(async (property) => {
+    if (!map) return;
+    const coords = property?.location?.coordinates;
+    if (!Array.isArray(coords) || coords[0] == null) {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.title)}`, '_blank');
+      return;
+    }
+    const center = map.getCenter();
+    const url = `https://router.project-osrm.org/route/v1/driving/${center.lng},${center.lat};${coords[0]},${coords[1]}?overview=full&geometries=geojson&steps=true`;
+    try {
+      const data = await fetch(url).then(r => r.json());
+      if (data.routes?.[0]) {
+        const route = data.routes[0];
+        setRouteData({
+          coordinates:   route.geometry.coordinates.map(c => [c[1], c[0]]),
+          propertyTitle: property.title,
+          distance:      route.distance,
+          duration:      route.duration,
+          steps:         route.legs?.[0]?.steps || [],
+        });
+        setIsNavigating(true);
+        const b = L.latLngBounds(route.geometry.coordinates.map(c => [c[1], c[0]]));
+        map.fitBounds(b, { padding: [40, 40] });
+      }
+    } catch {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`, '_blank');
+    }
+  }, [map]);
+
+  const handleSearchRoute = useCallback(async (startCoords, endCoords) => {
+    const currentDest  = routeData?.coordinates?.[routeData.coordinates.length - 1];
+    const currentStart = routeData?.coordinates?.[0];
+    const start = startCoords
+      ? [startCoords[0], startCoords[1]] // [lat, lng]
+      : currentStart ? [currentStart[0], currentStart[1]] : null;
+    const end = endCoords 
+      ? [endCoords[0], endCoords[1]] // [lat, lng]
+      : currentDest ? [currentDest[0], currentDest[1]] : null;
+    if (!start || !end) return;
+    try {
+      const data = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson&steps=true`
+      ).then(r => r.json());
+      if (data.routes?.[0]) {
+        const route = data.routes[0];
+        const path  = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        setRouteData(prev => ({ ...prev, coordinates: path, distance: route.distance, duration: route.duration, steps: route.legs?.[0]?.steps || [] }));
+        if (map && path.length) {
+          const b = L.latLngBounds(path);
+          map.fitBounds(b, { padding: [40, 40] });
+        }
+      }
+    } catch (err) { console.error(err); }
+  }, [map, routeData]);
+
+  const handleResetFilters = useCallback(() => {
+    setFilters({ lat: null, lng: null, bounds: null, radius: 1 });
+    setSearchAnchor(null);
+    setTimeout(handleSearchArea, 100);
+  }, [setFilters, handleSearchArea]);
+
+  // Run Search By Area on initial load
+  useEffect(() => {
+    if (map) {
+      handleSearchArea();
+    }
+  }, [map, handleSearchArea]);
+
+  // ─── Icons ──────────────────────────────────────────────────────────────────
+  const searchCenterIcon = useMemo(() => L.divIcon({
+    className: 'radius-center-pin',
+    html: '<div class="pin-drop-visual"><div class="pin-inner-dot"></div></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 36]
+  }), []);
+
+  const userLocationIcon = useMemo(() => L.divIcon({
+    className: 'user-location-marker',
+    html: '<div class="user-pulse-ring"></div><div class="user-pulse-dot"></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  }), []);
+
+  const resetAnchorIcon = useMemo(() => L.divIcon({
+    className: 'reset-anchor-marker',
+    html: `
+      <div class="reset-view-anchor-btn" title="Clear Radius Search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  }), []);
+
+  const resetPosition = useMemo(() => {
+    if (!searchAnchor || !filters.radius || !L.latLng) return searchAnchor;
+    try {
+      const center = L.latLng(searchAnchor[0], searchAnchor[1]);
+      const bounds = center.toBounds(filters.radius * 1.2 * 1000);
+      return bounds.getNorthEast();
+    } catch (e) { return searchAnchor; }
+  }, [searchAnchor, filters.radius]);
+
+  // ─── Render Helpers ─────────────────────────────────────────────────────────
+  const memoizedMarkers = useMemo(
+    () => properties.map(property => {
+      const isActive = highlightedId === property._id || selectedProperty?._id === property._id;
+      const [lng, lat] = property.location.coordinates;
+      return (
+        <Marker
+          key={property._id}
+          position={[lat, lng]}
+          icon={createPriceIcon(property, isActive)}
+          eventHandlers={{
+            click: (e) => {
+              L.DomEvent.stopPropagation(e);
+              setHighlightedId(property._id);
+              setSelectedProperty(property);
+              const card = document.getElementById(`property-card-${property._id}`);
+              if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }}
+        />
+      );
+    }),
+    [properties, highlightedId, selectedProperty?._id]
+  );
+
+
+  // ─── Render ───────────────────────────────────────────────────────────────
+  return (
+    <div className="map-dashboard-layout animate-fade-in">
+      {/* ── Global Loading Indicator ── */}
+      {loading && (
+        <div className="global-loading-indicator">
+          <div className="loading-progress-line" />
+        </div>
+      )}
+      {/* ── Sidebar ── */}
+      <aside className="sidebar-discovery-pane">
+        <div className="sidebar-header-glow flex-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-6 bg-primary-color rounded-full" />
+            <div className="flex flex-col">
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Discovery Engine</h2>
+              <p className="discovery-subtitle">Precision property search driven by real-time map data</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="sidebar-content-scroll custom-scrollbar">
+          {isNavigating ? (
+            <NavigationPanel
+              routeData={routeData}
+              onClear={() => { setIsNavigating(false); setRouteData(null); }}
+              propertyTitle={routeData.propertyTitle}
+              selectedProperty={selectedProperty}
+              onLocate={handleLocateMe}
+              onSearchRoute={handleSearchRoute}
+            />
+          ) : (
+            <PropertyListPane
+              selectedProperty={selectedProperty}
+              setSelectedProperty={setSelectedProperty}
+              highlightedId={highlightedId}
+              setHighlightedId={setHighlightedId}
+              onShowRoute={handleShowRoute}
+              onSearchArea={handleSearchArea}
+              onSearchRadius={handleSearchRadius}
+              onResetFilters={handleResetFilters}
+            />
+          )}
+        </div>
+      </aside>
+
+      {/* ── Map ── */}
+      <main className="map-main-viewport">
+        <MapContainer
+          center={DEFAULT_CENTER}
+          zoom={12}
+          zoomControl={false}
+          preferCanvas={true}
+          className="luxury-leaflet-map"
+        >
+          <MapController 
+            map={map} setMap={setMap} 
+            setCurrentBounds={setCurrentBounds} 
+            filters={filters} setFilter={setFilter} setFilters={setFilters} 
+          />
+          <TileLayer url={OSM_URL} attribution={ATTRIBUTION} />
+
+          {/* User Location Marker (Pulsing Dot) */}
+          {userLocation && (
+            <Marker position={userLocation} icon={userLocationIcon} zIndexOffset={1000} />
+          )}
+
+          {/* Radius circles (Isolated for performance) */}
+          {searchAnchor && filters.radius && (
+            <AnimatedRadiusCircle 
+              searchAnchor={searchAnchor} 
+              radius={filters.radius} 
+              onReset={handleResetFilters}
+              onDragEnd={handleRadiusDragEnd}
+              resetIcon={resetAnchorIcon}
+              centerIcon={searchCenterIcon}
+            />
+          )}
+
+          {/* Route polyline */}
+          {routeData && (
+            <Polyline 
+              positions={routeData.coordinates} 
+              pathOptions={{ color: '#2563eb', opacity: 0.85, weight: 6 }} 
+            />
+          )}
+
+          {/* Price markers clustered */}
+          <MarkerClusterGroup
+            chunkedLoading
+            maxClusterRadius={40}
+            showCoverageOnHover={false}
+            iconCreateFunction={createClusterCustomIcon}
+          >
+            {memoizedMarkers}
+          </MarkerClusterGroup>
+        </MapContainer>
+
+
+        {/* ── Overlays ── */}
+        <div className="map-overlay-center-top">
+          <MapSearchBar onSearch={handleLocationSelect} currentBounds={currentBounds} />
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="search-filter-quick-btn shadow-premium"
+            title="Open Filters"
+          >
+            <Filter size={20} />
+          </button>
+        </div>
+
+        <div className="map-overlay-zoom-controls">
+          <div className="zoom-controls-stack shadow-premium">
+            <button onClick={handleLocateMe} className="zoom-btn" title="Locate Me">
+              <LocateFixed size={14} /> <span className="zoom-label">Me</span>
+            </button>
+            <div className="zoom-divider" />
+            <button onClick={handleRadiusSearch} className="zoom-btn" title="Radius Search on Center">
+              <Target size={14} /> <span className="zoom-label">Radius</span>
+            </button>
+            <div className="zoom-divider" />
+            <button onClick={() => map?.zoomIn()} className="zoom-btn">
+              <span className="text-sm">＋</span> <span className="zoom-label">In</span>
+            </button>
+            <div className="zoom-divider" />
+            <button onClick={() => map?.zoomOut()} className="zoom-btn">
+              <span className="text-sm">－</span> <span className="zoom-label">Out</span>
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <FilterPanel isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+
+      {selectedProperty && (
+        <PropertyDetailsOverlay
+          property={selectedProperty}
+          onClose={() => setSelectedProperty(null)}
+          onShowRoute={(p) => { setSelectedProperty(null); handleShowRoute(p); }}
+          onSelectProperty={(p) => {
+            setHighlightedId(p._id);
+            setSelectedProperty(p);
+            const card = document.getElementById(`property-card-${p._id}`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+

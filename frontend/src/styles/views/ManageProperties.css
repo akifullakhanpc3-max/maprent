@@ -81,8 +81,10 @@
 }
 
 .search-input-premium:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 4px rgba(30, 77, 183, 0.08);
+  /* Fixed: --accent-blue is not in design system, use --primary-color */
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
 }
 
 
@@ -120,9 +122,10 @@
 }
 
 .property-list-card:hover {
-  transform: translateY(-8px);
+  /* Reduced: -8px was causing grid row height to shift on hover */
+  transform: translateY(-4px);
   border-color: var(--primary-color);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
 .card-image-wrapper {

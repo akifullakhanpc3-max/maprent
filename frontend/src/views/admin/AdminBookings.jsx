@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useState, Fragment } from 'react';
 import { Trash2, Calendar, ShieldAlert, User, Home, Clock, AlertCircle, XCircle } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 export default function AdminBookings() {
   const { bookings, fetchBookings, deleteBooking, updateBookingStatus, loading, error, setProcessing } = useAdminStore();

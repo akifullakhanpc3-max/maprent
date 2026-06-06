@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, Fragment } from 'react';
 import { Home, Trash2, CheckCircle, XCircle, Star, StarOff, Pencil, RotateCcw, User, Search, MapPin, AlertCircle, Building2, ExternalLink } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
@@ -5,8 +7,8 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { BASE_URL } from '../../api/axios';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import '../../styles/views/Dashboards.css';
-import '../../styles/views/AdminProperties.css';
+// import '../../styles/views/Dashboards.css';
+// import '../../styles/views/AdminProperties.css';
 
 export default function AdminProperties() {
   const { properties, fetchProperties, updatePropertyStatus, toggleFeatureProperty, deleteProperty, editProperty, loading, error, setProcessing } = useAdminStore();

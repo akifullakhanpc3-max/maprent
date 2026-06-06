@@ -30,8 +30,9 @@
 
 .map-dashboard-layout {
   display: flex;
-  width: 100vw;
-  height: 100%; /* Fill exactly the parent wrapper calc(100vh - 80px) */
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
   background-color: var(--sidebar-bg);
   overflow: hidden;
   position: relative;
@@ -41,10 +42,10 @@
 @media (max-width: 768px) {
   .map-dashboard-layout {
     flex-direction: column;
-    height: auto; /* Allow natural scroll for sidebar below map */
-    min-height: 100vh;
-    overflow-y: auto; /* Enable page scroll */
-    margin-top: 60px; /* Aligned with Navbar height */
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    margin-top: 60px;
   }
 }
 
@@ -242,18 +243,26 @@
   gap: 12px;
   width: 100%;
   max-width: 600px;
-  min-width: 450px;
+  min-width: 0;
   padding: 0 var(--s-4);
   pointer-events: none;
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .map-overlay-center-top {
+    left: calc(320px + (100vw - 320px) / 2);
+    max-width: calc(100% - 380px);
+  }
 }
 
 @media (max-width: 768px) {
   .map-overlay-center-top {
     position: absolute;
-    top: 8px; /* Reduced from 16px to minimize gap to Navbar */
+    top: 8px;
     left: 50%;
     min-width: 0;
     width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
   }
 }
 
@@ -829,7 +838,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
   height: 100dvh;
   z-index: 7000;

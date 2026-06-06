@@ -1,13 +1,15 @@
+"use client";
+
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// import 'leaflet/dist/leaflet.css';
 import api from '../api/axios';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { X, Upload, MapPin, Search, Check, Info, ShieldCheck, User, Users, Heart, Phone, MessageCircle } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
 import MapSearchBar from './MapSearchBar';
-import '../styles/components/BookingFormModal.css'; // Reusing modal core styles
+// import '../styles/components/BookingFormModal.css'; // Reusing modal core styles
 
 // Fix typical Leaflet icon issue in React
 delete L.Icon.Default.prototype._getIconUrl;

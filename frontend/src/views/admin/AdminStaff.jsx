@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import {
   Shield, ShieldCheck, ShieldAlert, UserPlus, Trash2, ChevronDown,
@@ -5,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 const ALL_PERMISSIONS = [
   'VIEW_ANALYTICS', 'MANAGE_USERS', 'APPROVE_PROPERTY',
@@ -54,10 +56,10 @@ function PermissionChip({ perm, active, onToggle, disabled }) {
       disabled={disabled}
       title={disabled ? 'Only master admin can change permissions' : undefined}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all select-none
-        ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-105'}
+        ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
         ${active
           ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200'
-          : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-indigo-300'
+          : 'bg-white text-slate-500 border-slate-200 hover:bg-indigo-50 hover:border-indigo-300'
         }`}
     >
       {active ? <Check size={10} /> : <X size={10} />}
@@ -258,11 +260,11 @@ export default function AdminStaff() {
 
                   {/* EXPANDED PERMISSIONS PANEL */}
                   {isExpanded && (
-                    <div className="px-6 pb-6 pt-2 bg-slate-50/80 border-t border-slate-100 animate-fade-in">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
+                    <div className="px-6 pb-6 pt-2 bg-slate-100/30 border-t border-slate-200 animate-fade-in">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">
                         Assigned Permissions — toggle to grant or revoke access
                       </p>
-                      <div className="flex flex-wrap gap-2 mb-5">
+                      <div className="flex flex-wrap gap-1.5 mb-5">
                         {ALL_PERMISSIONS.map(perm => (
                           <PermissionChip
                             key={perm}
@@ -334,9 +336,9 @@ export default function AdminStaff() {
                     </div>
                   </div>
 
-                  <div className="flex-col gap-3 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Initial Permissions</p>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="flex-col gap-3 p-4 bg-slate-100/40 border border-slate-200 rounded-xl">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Initial Permissions</p>
+                    <div className="flex flex-wrap gap-1.5">
                       {ALL_PERMISSIONS.map(perm => (
                         <PermissionChip
                           key={perm}

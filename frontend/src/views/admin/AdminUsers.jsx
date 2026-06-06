@@ -1,9 +1,11 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import { ShieldAlert, Trash2, CheckCircle2, XCircle, User, Mail, Shield, Unlock, Lock } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 export default function AdminUsers() {
   const { users, fetchUsers, toggleBlockUser, deleteUser, loading, error, setProcessing } = useAdminStore();

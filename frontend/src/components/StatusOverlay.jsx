@@ -1,8 +1,10 @@
+"use client";
+
 import { CheckCircle2, Loader2, Info, ShieldCheck, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useBookingStore } from '../store/useBookingStore';
 import { useAdminStore } from '../store/useAdminStore';
 import { useEffect } from 'react';
-import '../styles/components/StatusOverlay.css';
+// import '../styles/components/StatusOverlay.css';
 
 export default function StatusOverlay() {
   const bookingProc = useBookingStore(s => s.processing);

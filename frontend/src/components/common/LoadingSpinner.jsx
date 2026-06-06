@@ -1,4 +1,6 @@
-import './LoadingSpinner.css';
+"use client";
+
+// import './LoadingSpinner.css';
 
 /**
  * REUSABLE LOADING SPINNER

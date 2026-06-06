@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import api from '../../api/axios';
 import { ShieldAlert, Search, KeyRound, AlertCircle, CheckCircle2, User as UserIcon } from 'lucide-react';

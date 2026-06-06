@@ -11,13 +11,13 @@
   width: 100%;
 }
 
-/* Sidebar Styles */
+/* sidebar z-index: must be below navbar (6000) so it doesn't overlap */
 .dashboard-sidebar {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 5000;
+  z-index: 5100;
   width: 280px;
   background: var(--bg-card);
   border-right: 1px solid var(--border-subtle);
@@ -142,6 +142,10 @@
     margin-left: 0 !important;
   }
 
+  .dashboard-main-container {
+    height: 100dvh;
+  }
+
   .main-content {
     padding: var(--s-4);
   }
@@ -158,11 +162,12 @@
   border: 1px solid var(--border-subtle);
   padding: var(--s-6);
   box-shadow: var(--shadow-sm);
-  transition: all var(--trans-base);
+  transition: transform var(--trans-base), box-shadow var(--trans-base), border-color var(--trans-base);
   width: 100%;
   min-width: 0;
-  animation: antiGravityFloat 10s ease-in-out infinite;
-  will-change: transform;
+  /* Removed antiGravityFloat — causes constant layout shifts on all dashboard cards */
+  animation: none;
+  will-change: auto;
 }
 
 /* Responsive Flex Utility */
@@ -178,8 +183,10 @@
 }
 
 .console-card:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--shadow-premium);
+  /* Reduced: -8px lift was causing overflow in tight grid layouts */
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-medium);
 }
 
 .stats-grid {

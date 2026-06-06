@@ -1,17 +1,18 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePropertyStore } from '../store/usePropertyStore';
-import { Map, LayoutDashboard, LogOut, Menu, X, Info, ChevronRight } from 'lucide-react';
-import MapSearchBar from './MapSearchBar';
-import '../styles/components/Navbar.css';
-import logo from '../../logo/Occupra logo.png';
+import { LayoutDashboard, LogOut, Menu, X, Info, ChevronRight, Map } from 'lucide-react';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
-  const location = useLocation();
+  const pathname = usePathname();
+  
   const adminRoles = ['master_admin', 'admin', 'employee', 'worker'];
   const dashboardPath = user && adminRoles.includes(user.role) ? '/admin/dashboard' : `/${user?.role}/dashboard`;
 
@@ -31,28 +32,53 @@ export default function Navbar() {
     document.body.style.overflow = 'unset';
   };
 
+  const handleBrandClick = () => {
+    try {
+      const resetFilters = usePropertyStore.getState().resetFilters;
+      if (resetFilters) resetFilters();
+    } catch (e) {
+      console.warn("resetFilters not available in store yet", e);
+    }
+    closeMenu();
+  };
+
   const publicNav = [
     { name: 'Rentals', href: '/', icon: Map },
     { name: 'About', href: '/about', icon: Info },
+    // { name: 'Blog', href: '/blog', icon: Info },
   ];
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
 
-        {/* Left: Brand */}
         <Link 
-          to="/" 
+          href="/" 
           className="brand-link" 
-          onClick={() => {
-            resetFilters();
-            closeMenu();
-          }}
+          onClick={handleBrandClick}
         >
-          {logo ? <img src={logo} alt="Occupra" className="logo-header" /> :
-            <span className="auth-brand-text">Occupra</span>}
-          {/* <span className="brand-tagline hidden-mobile">Find your perfect space, your way.</span> */}
+          <img 
+            src="/logo/Occupra logo.png" 
+            alt="Occupra" 
+            className="logo-header" 
+          />
         </Link>
+
+        {/* Middle: Premium Desktop Navigation Routes */}
+        <div className="hidden-mobile nav-pill-container">
+          {publicNav.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`nav-pill-link ${isActive ? 'active' : ''}`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
 
 
         {/* Right: Actions */}
@@ -60,7 +86,7 @@ export default function Navbar() {
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
               <Link
-                to={dashboardPath}
+                href={dashboardPath}
                 className="btn btn-secondary !h-9 !px-4"
               >
                 <LayoutDashboard size={14} />
@@ -76,10 +102,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center hidden-mobile" style={{ gap: '8px' }}>
-              <Link to="/register" className="btn btn-primary" style={{ padding: '0 12px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
+              <Link href="/register" className="btn btn-primary" style={{ padding: '0 12px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
                 Sign Up
               </Link>
-              <Link to="/login" className="btn btn-ghost" style={{ padding: '0 8px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
+              <Link href="/login" className="btn btn-ghost" style={{ padding: '0 8px', height: '32px', fontSize: '12px', whiteSpace: 'nowrap', width: 'auto', minWidth: 'auto' }}>
                 Sign In
               </Link>
             </div>
@@ -108,11 +134,11 @@ export default function Navbar() {
 
           <div className="mobile-nav-list">
             {publicNav.map((item) => {
-              const isActive = location.pathname === item.href;
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
-                  to={item.href}
+                  href={item.href}
                   onClick={closeMenu}
                   className={`mobile-nav-item ${isActive ? 'active' : ''}`}
                 >
@@ -128,7 +154,7 @@ export default function Navbar() {
             {isAuthenticated && user ? (
               <div className="flex flex-col gap-2">
                 <Link
-                  to={`/${user.role}/dashboard`}
+                  href={`/${user.role}/dashboard`}
                   onClick={closeMenu}
                   className="btn btn-primary w-full"
                 >
@@ -143,10 +169,10 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <Link to="/login" onClick={closeMenu} className="btn btn-secondary w-full">
+                <Link href="/login" onClick={closeMenu} className="btn btn-secondary w-full">
                   Sign In
                 </Link>
-                <Link to="/register" onClick={closeMenu} className="btn btn-primary w-full">
+                <Link href="/register" onClick={closeMenu} className="btn btn-primary w-full">
                   Join Platform
                 </Link>
               </div>

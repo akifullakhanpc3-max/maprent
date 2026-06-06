@@ -1,5 +1,7 @@
+"use client";
+
 import { SlidersHorizontal } from 'lucide-react';
-import '../styles/components/FilterToggleButton.css';
+// import '../styles/components/FilterToggleButton.css';
 
 export default function FilterToggleButton({ onClick, activeCount = 0 }) {
   return (

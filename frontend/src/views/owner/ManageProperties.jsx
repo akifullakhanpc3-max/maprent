@@ -1,12 +1,12 @@
+"use client";
+
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { usePathname, useRouter } from 'next/navigation';
 import api, { BASE_URL } from '../../api/axios';
 import PropertyFormModal from '../../components/PropertyFormModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { Plus, Trash2, Edit2, MapPin, Search, Building2, LayoutGrid, AlertCircle, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, Edit2, MapPin, Search, Building2, TrendingUp } from 'lucide-react';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
-import '../../styles/views/Dashboards.css';
-import '../../styles/views/ManageProperties.css';
 
 export default function ManageProperties() {
   const [properties, setProperties] = useState([]);
@@ -17,8 +17,8 @@ export default function ManageProperties() {
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
   const [deleting, setDeleting] = useState(false);
   
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const fetchProperties = async () => {
     try {
@@ -38,19 +38,17 @@ export default function ManageProperties() {
 
   // Handle auto-open for 'List New Asset' via Sidebar
   useEffect(() => {
-    if (location.pathname === '/owner/properties/new') {
+    if (pathname === '/owner/properties/new') {
       openAddModal();
     } else if (isModalOpen && !editingProperty) {
-      // If we navigate away from /new but modal is open for 'Add', close it
       setIsModalOpen(false);
     }
-  }, [location.pathname]);
+  }, [pathname]);
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    // If we were on the /new route, clean up URL after closing
-    if (location.pathname === '/owner/properties/new') {
-      navigate('/owner/properties', { replace: true });
+    if (pathname === '/owner/properties/new') {
+      router.push('/owner/properties');
     }
   };
 

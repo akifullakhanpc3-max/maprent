@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from 'zustand';
 import api from '../api/axios';
 
@@ -7,17 +9,19 @@ import api from '../api/axios';
  */
 export const useAuthStore = create((set, get) => ({
   user: null,
-  token: localStorage.getItem('token') || null,
-  isAuthenticated: !!localStorage.getItem('token'),
+  token: typeof window !== 'undefined' ? localStorage.getItem('token') || null : null,
+  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
   loading: true,
 
   /**
    * Load user details from backend using the stored JWT
    */
   loadUser: async () => {
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token || token === 'undefined') {
-      localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
       set({ loading: false, isAuthenticated: false, user: null });
       return;
     }
@@ -42,7 +46,9 @@ export const useAuthStore = create((set, get) => ({
       const res = await api.post('/auth/firebase-auth', { firebaseToken, role });
       
       const { token, user } = res.data;
-      localStorage.setItem('token', token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', token);
+      }
       
       set({ 
         user, 
@@ -65,7 +71,9 @@ export const useAuthStore = create((set, get) => ({
     try {
       set({ loading: true });
       const res = await api.post('/auth/register', userData);
-      localStorage.setItem('token', res.data.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', res.data.token);
+      }
       set({ 
         user: res.data.user, 
         token: res.data.token, 
@@ -86,7 +94,9 @@ export const useAuthStore = create((set, get) => ({
     try {
       set({ loading: true });
       const res = await api.post('/auth/login', { identifier, password });
-      localStorage.setItem('token', res.data.token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', res.data.token);
+      }
       set({ 
         user: res.data.user, 
         token: res.data.token, 
@@ -104,7 +114,9 @@ export const useAuthStore = create((set, get) => ({
    * Logout and purge all local state
    */
   logout: () => {
-    localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
     set({ user: null, token: null, isAuthenticated: false });
   },
 

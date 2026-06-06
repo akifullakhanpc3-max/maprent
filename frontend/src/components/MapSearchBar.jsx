@@ -1,9 +1,11 @@
+"use client";
+
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, MapPin, X, ArrowRight, Loader2, Sparkles, Landmark, Zap } from 'lucide-react';
 import { usePropertyStore } from '../store/usePropertyStore';
 import { findClosestIndianLocation, getCachedSearch, saveSearchToCache } from '../utils/indiaSearchAssistant';
-import '../styles/components/MapSearchBar.css';
+// import '../styles/components/MapSearchBar.css';
 
 export default function MapSearchBar({ onSearch, currentBounds }) {
   const [query, setQuery] = useState('');

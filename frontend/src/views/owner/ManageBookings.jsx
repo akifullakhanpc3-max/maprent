@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import { useBookingStore } from '../../store/useBookingStore';
 import { Calendar, CheckCircle2, XCircle, Clock, Search, ShieldCheck, Mail, Phone, MessageSquare, Home, User } from 'lucide-react';
 import { BASE_URL } from '../../api/axios';
 import ImageWithSkeleton from '../../components/ImageWithSkeleton';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 export default function ManageBookings() {
   const { incomingBookings, fetchIncoming, updateBookingStatus, loading, setProcessing } = useBookingStore();

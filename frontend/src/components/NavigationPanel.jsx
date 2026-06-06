@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Navigation, MapPin, Clock, RotateCcw, ChevronRight, Search, X, Loader2, LocateFixed, AlertCircle, Navigation2, Grid } from 'lucide-react';
 

@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
-import './MapCursor.css';
+// import './MapCursor.css';
 
 /**
  * Premium Map Cursor Component

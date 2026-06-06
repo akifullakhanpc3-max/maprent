@@ -1,8 +1,10 @@
+"use client";
+
 import { useState } from 'react';
 import api from '../../api/axios';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { ShieldCheck, Lock, AlertCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 export default function ChangePassword() {
   const [formData, setFormData] = useState({

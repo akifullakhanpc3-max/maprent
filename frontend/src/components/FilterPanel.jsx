@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { X, SlidersHorizontal, MapPin, Wifi, Car, Wind, Utensils, Tv, RotateCcw, User, Users, Heart, Dumbbell, WashingMachine } from 'lucide-react';
 import { usePropertyStore } from '../store/usePropertyStore';
-import '../styles/components/FilterPanel.css';
+// import '../styles/components/FilterPanel.css';
 
 export default function FilterPanel({ isOpen, onClose }) {
   const { filters, setFilters, setFilter } = usePropertyStore();

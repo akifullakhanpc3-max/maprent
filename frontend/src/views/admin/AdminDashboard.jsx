@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect } from 'react';
 import { Users, Clock, ShieldCheck, AlertCircle, Globe, Activity, Database, RefreshCw } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import '../../styles/views/Dashboards.css';
+// import '../../styles/views/Dashboards.css';
 
 export default function AdminDashboard() {
   const { stats, fetchDashboard, loading, error } = useAdminStore();

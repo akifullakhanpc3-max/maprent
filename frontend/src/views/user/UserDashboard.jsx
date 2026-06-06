@@ -1,10 +1,11 @@
+"use client";
+
 import { useAuthStore } from '../../store/useAuthStore';
-import { Calendar, Map, ShieldCheck, ArrowRight, Home, Zap, ExternalLink, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import '../../styles/views/Dashboards.css';
+import { Calendar, ArrowRight, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function UserDashboard() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuthStore();
 
   return (
@@ -27,7 +28,7 @@ export default function UserDashboard() {
             </div>
 
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => router.push('/')}
               className="btn btn-primary !px-12 shadow-2xl"
             >
               Discover Properties <ArrowRight size={16} className="ml-2" />
@@ -50,7 +51,7 @@ export default function UserDashboard() {
             </p>
           </div>
           <button 
-            onClick={() => navigate('/user/bookings')} 
+            onClick={() => router.push('/user/bookings')} 
             className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-wider hover:gap-3 transition-all"
           >
             Manage Requests <ArrowRight size={14} />
@@ -69,7 +70,7 @@ export default function UserDashboard() {
             </p>
           </div>
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => router.push('/')} 
             className="flex items-center gap-2 text-muted font-black text-[10px] uppercase tracking-wider hover:gap-3 transition-all"
           >
             Explore Map <ArrowRight size={14} />

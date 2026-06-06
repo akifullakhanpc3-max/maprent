@@ -1,110 +1,110 @@
 /* src/styles/pages/Auth.css */
 
+/* ══════════════════════════════════════════════════════════
+   AUTH PAGE LAYOUT
+   Fixed navbar = 60px. Page uses padding-top to clear it.
+   align-items on page is flex-start so tall forms never
+   clip under the navbar. Container owns vertical centering.
+   ══════════════════════════════════════════════════════════ */
+
 .auth-page {
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg-main);
+  /* Column so the container can take full height */
   display: flex;
+  flex-direction: column;
+  /* flex-start: never centre-clip tall register forms under navbar */
   align-items: center;
-  justify-content: center;
-  padding: var(--s-12) var(--s-6);
-  position: relative;
+  justify-content: flex-start;
+  /* 80px top = 60px navbar + 20px breathing room (no inline override needed) */
+  padding: 80px 20px 56px;
   overflow-y: auto;
 }
 
+/* ── Container ── */
 .auth-container {
   width: 100%;
-  max-width: 480px; /* Slightly wider for better form spacing */
+  max-width: 480px;
   min-width: 0;
-  margin: 0 auto;
+  /* flex:1 fills the page height so justify-content:center works below */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--s-8);
+  /* Centre content vertically when shorter than viewport */
+  justify-content: center;
+  /* DO NOT use align-items:center — it narrows children to fit-content width */
+  gap: 32px;
   position: relative;
   z-index: 10;
   animation: fadeIn 1.2s var(--trans-gravity) forwards;
-  padding: var(--s-6);
-}
-
-@media (min-width: 768px) {
-  .auth-container {
-    gap: var(--s-8);
-  }
 }
 
 @media (min-width: 1024px) {
   .auth-container {
-    max-width: 1200px;
-    flex-direction: column; /* Stacked and centered is often less "congested" if width is controlled */
-    align-items: center;
-    justify-content: center;
-    gap: var(--s-12);
-    padding: var(--s-16) var(--s-8);
-  }
-
-  .auth-header {
-    flex: none;
-    align-items: center !important;
-    text-align: center !important;
-    padding-bottom: 0;
-    max-width: 600px;
+    max-width: 520px;
+    gap: 40px;
   }
 
   .auth-card {
-    flex: none;
     width: 100%;
-    max-width: 520px; /* Slightly wider */
-    padding: var(--s-12) var(--s-10);
-  }
-
-  .logo-auth-hero {
-    width: 180px;
-    margin-bottom: var(--s-4);
+    padding: 48px 44px;
   }
 
   .auth-title {
-    font-size: 56px;
+    font-size: 44px;
     line-height: 1.1;
-    margin-bottom: var(--s-3);
   }
 
   .auth-subtitle {
-    font-size: 18px;
-    max-width: 500px;
-    line-height: 1.6;
+    font-size: 16px;
   }
 }
 
+/* ── Header: logo + title + subtitle ── */
 .auth-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-4);
+  gap: 16px;
   text-align: center;
+  width: 100%;
 }
 
 .auth-brand {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--trans-fast);
-  max-width: 100%;
-  margin-bottom: var(--s-2);
+  transition: opacity var(--trans-fast), transform var(--trans-fast);
+}
+
+.auth-brand:hover {
+  opacity: 0.82;
+  transform: translateY(-1px);
+}
+
+/* Wrapper for title + subtitle under the logo */
+.auth-header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  width: 100%;
 }
 
 .logo-auth-hero {
-  width: 140px;
+  width: 130px;
   max-width: 100%;
   height: auto;
   object-fit: contain;
+  display: block;
 }
 
-.auth-brand-text {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
+@media (min-width: 1024px) {
+  .logo-auth-hero {
+    width: 160px;
+  }
 }
 
 .auth-title {
@@ -112,91 +112,127 @@
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .auth-subtitle {
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 500;
+  margin: 0;
 }
 
+/* ── Card ── */
 .auth-card {
   background: var(--bg-card);
-  padding: var(--s-10) var(--s-6);
-  border-radius: 32px; /* Increased for a more modern, premium feel */
+  padding: 36px 28px;
+  border-radius: 28px;
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
-  gap: var(--s-8);
-  animation: antiGravityFloat 10s ease-in-out infinite;
-  animation-delay: 0.5s;
-  will-change: transform;
+  gap: 28px;
+  width: 100%;
+  /* No antiGravityFloat animation — causes misalignment */
+  animation: none;
+  will-change: auto;
 }
 
 @media (max-width: 480px) {
-  .auth-card {
-    padding: var(--s-10) var(--s-8);
-    border-radius: 32px;
-    gap: var(--s-8);
+  .auth-page {
+    padding: 80px 16px 40px;
   }
+
+  .auth-card {
+    padding: 28px 18px;
+    border-radius: 24px;
+    gap: 24px;
+  }
+
   .auth-title {
-    font-size: 32px;
+    font-size: 26px;
   }
 }
 
+/* ── Form ── */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: var(--s-8);
-  padding: var(--s-2) var(--s-4); /* Subtle inner padding for the form */
+  gap: 18px;
+  width: 100%;
 }
 
+/* Submit button */
 .auth-form button[type="submit"] {
-  height: 56px;
-  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
+  border: none;
+  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.3);
   transition: all var(--trans-base);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.auth-form button[type="submit"]:hover {
+.auth-form button[type="submit"]:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -10px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 14px 28px -8px rgba(37, 99, 235, 0.4);
 }
 
-.auth-form button[type="submit"]:active {
+.auth-form button[type="submit"]:active:not(:disabled) {
   transform: translateY(0);
 }
 
+.auth-form button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Error Banner ── */
 .auth-error {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.08);
   color: var(--error-color);
-  padding: var(--s-4);
+  padding: 12px 14px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.18);
   display: flex;
-  align-items: center;
-  gap: var(--s-3);
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  width: 100%;
 }
 
+.auth-error svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Form Group ── */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--s-3); /* Increased gap within form group */
+  gap: 8px;
+  width: 100%;
 }
 
+/* Forgot Password — right-aligned */
 .form-header-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 .link-muted {
@@ -205,6 +241,7 @@
   color: var(--primary-color);
 }
 
+/* ── Input with icon ── */
 .input-with-icon {
   position: relative;
   width: 100%;
@@ -214,66 +251,89 @@
 
 .input-icon {
   position: absolute;
-  left: 18px; /* Fixed value for better precision */
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
   color: var(--text-low);
   pointer-events: none;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  flex-shrink: 0;
 }
 
 .auth-input {
-  padding-left: 54px !important; /* Increased padding to accommodate 20px icon + margin */
-  height: 54px;
-  border-radius: 16px;
+  padding-left: 48px !important;
+  height: 50px;
+  border-radius: 14px;
   background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  border: 1.5px solid var(--border-subtle);
   width: 100%;
-  transition: all var(--trans-base);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-main);
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  outline: none;
 }
 
+.auth-input:focus {
+  border-color: var(--primary-color);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.auth-input::placeholder {
+  color: var(--text-low);
+  font-size: 13px;
+}
+
+/* ── Footer ── */
 .auth-footer {
-  padding-top: var(--s-6);
+  padding-top: 20px;
   border-top: 1px solid var(--border-subtle);
   text-align: center;
+  width: 100%;
 }
 
 .auth-footer-text {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
+  margin: 0;
 }
 
 .auth-link {
   color: var(--primary-color);
   font-weight: 700;
   margin-left: 4px;
+  transition: opacity var(--trans-fast);
 }
 
-/* Role Selector (Register Page) */
+.auth-link:hover {
+  opacity: 0.75;
+}
+
+/* ── Role Selector ── */
 .role-selector {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--s-6);
-  margin-bottom: var(--s-4);
+  gap: 12px;
+  width: 100%;
 }
 
 .role-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s-4);
-  padding: var(--s-6) var(--s-4);
+  gap: 12px;
+  padding: 20px 12px;
   border-radius: 16px;
-  border: 1px solid var(--border-subtle);
+  border: 1.5px solid var(--border-subtle);
   background: var(--bg-card);
   transition: all var(--trans-fast);
   cursor: pointer;
+  width: 100%;
 }
 
 .role-btn:hover {
@@ -283,14 +343,14 @@
 
 .role-btn.active {
   border-color: var(--primary-color);
-  background: var(--bg-hover);
+  background: rgba(37, 99, 235, 0.04);
   box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 .role-icon-box {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,26 +378,26 @@
   color: var(--primary-color);
 }
 
-/* Premium Google Auth Button */
+/* ── Google Auth Button ── */
 .google-auth-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--s-3);
+  gap: 10px;
   width: 100%;
-  height: 52px;
-  background: #FFFFFF;
-  border: 1px solid var(--border-medium);
+  height: 50px;
+  background: #ffffff;
+  border: 1.5px solid var(--border-medium);
   border-radius: 14px;
   color: var(--text-main);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all var(--trans-base);
   box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .google-auth-btn:hover:not(:disabled) {
@@ -351,30 +411,25 @@
   transform: translateY(0) scale(0.98);
 }
 
+.google-auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .google-logo-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
   flex-shrink: 0;
+  display: block;
 }
 
-.google-auth-btn span {
-  z-index: 2;
-}
-
-/* Fix for potential SVG overflow */
-.google-auth-btn svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* Auth Divider */
+/* ── Divider ── */
 .auth-divider {
   display: flex;
   align-items: center;
-  gap: var(--s-4);
-  margin: var(--s-2) 0;
+  gap: 12px;
+  width: 100%;
 }
 
 .divider-line {
@@ -389,19 +444,20 @@
   color: var(--text-low);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  flex-shrink: 0;
 }
 
-/* Password Strength Meter */
+/* ── Password Strength Meter ── */
 .password-strength-container {
-  margin-top: var(--s-2);
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
+  gap: 4px;
+  width: 100%;
 }
 
 .strength-meter {
   height: 4px;
-  background: var(--bg-surface);
+  background: var(--bg-soft);
   border-radius: 2px;
   overflow: hidden;
   width: 100%;
@@ -409,25 +465,26 @@
 
 .strength-bar {
   height: 100%;
-  transition: all 0.3s ease;
+  border-radius: 2px;
+  transition: width 0.35s ease, background-color 0.35s ease;
 }
 
 .strength-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-align: right;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
-/* Loading Progress Bar */
+/* ── Loading Progress Bar ── */
 .loading-progress-container {
   width: 100%;
   height: 4px;
   background: var(--bg-surface);
   border-radius: 2px;
   overflow: hidden;
-  margin: var(--s-4) 0;
+  margin: 16px 0;
 }
 
 .loading-progress-bar {
@@ -438,9 +495,9 @@
 }
 
 @keyframes progressAnimation {
-  0% { width: 0%; transform: translateX(-100%); }
-  50% { width: 70%; transform: translateX(0%); }
-  100% { width: 100%; transform: translateX(100%); }
+  0%   { width: 0%;   transform: translateX(-100%); }
+  50%  { width: 70%;  transform: translateX(0%);    }
+  100% { width: 100%; transform: translateX(100%);  }
 }
 
 .sending-status-text {
@@ -450,5 +507,5 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   text-align: center;
-  margin-top: var(--s-2);
+  margin-top: 8px;
 }
